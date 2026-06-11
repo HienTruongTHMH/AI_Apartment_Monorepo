@@ -1,0 +1,23 @@
+{
+  "name": "ai_apartment_monorepo",
+  "private": true,
+  "workspaces": [
+    "app/*",
+    "packages/*",
+    "apps/*"
+  ],
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently -c \"cyan,magenta,yellow\" -n \"FE,BE,AI\" \"npm run dev -w frontend\" \"npm run start:dev -w backend\" \"npm run dev -w ai-agent\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

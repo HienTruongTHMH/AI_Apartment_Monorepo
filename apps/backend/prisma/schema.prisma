@@ -1,0 +1,207 @@
+generator client {
+  provider     = "prisma-client-js"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  name                 String
+  email                String            @unique
+  hashedPassword       String
+  role                 Roles             @default(Viewer)
+  phone                String
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  ownedApartments      Apartment[]       @relation("OwnerApartments")
+  contractsAsOwner     Contract[]        @relation("OwnerContracts")
+  contractsAsTenant    Contract[]        @relation("TenantContracts")
+  reviewGivenApartment ReviewApartment[] @relation("ApartmentReviewer")
+  tenantReviewGiven    ReviewTenant[]    @relation("OwnerReviewer")
+  tenantReviewReceived ReviewTenant[]    @relation("TenantReviewed")
+}
+
+model Apartment {
+  id                 String             @id @default(uuid())
+  floor              Int
+  area               Decimal            @db.Decimal(6, 2)
+  type               ApartmentTypes     @default(Normal)
+  district           String             @default("Update_Later")             
+  fullAddress        String             @default("Update_Later")  
+  room_number        Int                @default(1)
+  note               String             @default("Unknown")
+  bedroom            Int                @db.Integer @default(1)
+  livingroom         Int                @db.Integer @default(1)
+  bathroom           Int                @db.Integer @default(1)
+  kitchen            Int                @db.Integer @default(1) 
+   
+  apartmentStatus    ApartmentStatus    @default(Available)
+
+  ownerId            String
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  owner              User               @relation("OwnerApartments", fields: [ownerId], references: [id])
+  apartmentAmenities ApartmentAmenity[]
+  contracts          Contract[]
+  apartmentListing   Listing?
+  reviews            ReviewApartment[]
+}
+
+model ApartmentAmenity {
+  apartmentAmenityStatus ApartmentAmenityStatus @default(Unavailable)
+  apartmentId            String
+  amenityId              String
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  amenity                Amenity                @relation(fields: [amenityId], references: [id])
+  apartment              Apartment              @relation(fields: [apartmentId], references: [id])
+
+  @@id([amenityId, apartmentId])
+}
+
+model Amenity {
+  id         String             @id @default(uuid())
+  name       String
+  category   AmenityCategory
+  value      AmenityValue
+  icon       String
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  apartments ApartmentAmenity[]
+}
+
+model Contract {
+  id              String           @id @default(uuid())
+  startDate       DateTime
+  endDate         DateTime
+  apartmentId     String
+  tenantId        String
+  ownerId         String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  apartment       Apartment        @relation(fields: [apartmentId], references: [id])
+  owner           User             @relation("OwnerContracts", fields: [ownerId], references: [id])
+  tenant          User             @relation("TenantContracts", fields: [tenantId], references: [id])
+  payments        Payment[]
+  reviewApartment ReviewApartment?
+  reviewTenant    ReviewTenant?
+
+  @@index([tenantId])
+  @@index([ownerId])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  paymentDate DateTime      @default(now())
+  amount      Decimal       @db.Decimal(12, 2)
+  status      PaymentStatus @default(Pending)
+  contractId  String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  contract    Contract      @relation(fields: [contractId], references: [id])
+}
+
+model Listing {
+  id            String          @id @default(uuid())
+  listingStatus ListingStatus   @default(Draft)
+  title         String
+  description   String
+  pricePerMonth Decimal         @db.Decimal(12, 2)
+  apartmentId   String          @unique
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  apartment     Apartment       @relation(fields: [apartmentId], references: [id])
+  images        ListingImages[]
+}
+
+model ListingImages {
+  id        String   @id @default(uuid())
+  imageUrl  String
+  isPrimary Boolean
+  listingId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  listing   Listing  @relation(fields: [listingId], references: [id])
+}
+
+model ReviewApartment {
+  id          String    @id @default(uuid())
+  contractId  String    @unique
+  apartmentId String
+  reviewerId  String
+  review      Json
+  comment     String?
+  createdAt   DateTime  @default(now())
+  apartment   Apartment @relation(fields: [apartmentId], references: [id])
+  contract    Contract  @relation(fields: [contractId], references: [id])
+  reviewer    User      @relation("ApartmentReviewer", fields: [reviewerId], references: [id])
+}
+
+model ReviewTenant {
+  id         String   @id @default(uuid())
+  contractId String   @unique
+  tenantId   String
+  reviewerId String
+  review     Json
+  comment    String?
+  createdAt  DateTime @default(now())
+  contract   Contract @relation(fields: [contractId], references: [id])
+  reviewer   User     @relation("OwnerReviewer", fields: [reviewerId], references: [id])
+  tenant     User     @relation("TenantReviewed", fields: [tenantId], references: [id])
+}
+
+enum Roles {
+  Viewer
+  Tenant
+  Owner
+}
+
+enum ApartmentStatus {
+  Rented
+  Available
+}
+
+enum ApartmentTypes {
+  Normal
+  Studio
+  Officetel
+  Shophouse
+  Penthouse
+  Duplex
+  SkyVilla
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  Faild
+}
+
+enum ApartmentAmenityStatus {
+  Working
+  Broken
+  Unavailable
+}
+
+enum AmenityCategory {
+  Furniture
+  Building
+  Policy
+}
+
+enum AmenityValue {
+  Boolean
+  Text
+}
+
+enum ListingStatus {
+  Draft
+  Published
+  Rented
+  HIDDEN
+}

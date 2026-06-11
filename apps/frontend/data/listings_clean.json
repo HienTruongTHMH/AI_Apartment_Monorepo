@@ -1,0 +1,105 @@
+[
+  {
+    "id": "132227602",
+    "title": "cho thuê phòng",
+    "price": "2.000.000 đ",
+    "priceNum": 2000000,
+    "area": "13 m²",
+    "district": "Thành phố Biên Hòa, Việt Nam",
+    "province": "Việt Nam",
+    "type": "Căn hộ",
+    "image": "https://cdn.chotot.com/p7071gO0u-Wgo5uE8yl3DM_zOD9nnEd1S6BEJf7RmCk/preset:listing/plain/c2e6cc9a00a7c4b3d489534b03697794-2983116904339665254.jpg",
+    "tags": [
+      "AI Verified",
+      "Việt Nam"
+    ],
+    "verified": true,
+    "rating": 4.1,
+    "description": "Bên mình là nhà nghỉ còn dư phòng k hoạt động. Ai ở tháng cho thuê",
+    "amenities": [
+      "Wifi",
+      "Máy lạnh"
+    ],
+    "postedAt": "hôm qua",
+    "sourceUrl": "https://www.chotot.com/132227602",
+    "lat": 10.972998,
+    "lng": 106.82374
+  },
+  {
+    "id": "110327654",
+    "title": "Cho thuê mặt bằng Club Q7 tổ chức sự kiện, tiệc...",
+    "price": "3.500.000 đ",
+    "priceNum": 3000000,
+    "area": "102 m²",
+    "district": "Quận 7, TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "type": "Căn hộ",
+    "image": "https://cdn.chotot.com/bEQoSnwRw4-ofkSDOmizCiyYvzHIfOmUUy6fgs9utUg/preset:listing/plain/307c0e9f115dc171543746cc5a67a9ef-2918249113692425218.jpg",
+    "tags": [
+      "AI Verified",
+      "Cho thuê"
+    ],
+    "verified": true,
+    "rating": 5.0,
+    "description": "Club Nam Long, Quận 7 với các tiện ích như coffee - billiard, hồ bơi ngoài trời, sân tennis, hệ thống sân vườn thoáng mát và sân khấu đèn chiếu hiện đại, bãi đỗ xe riêng, bảo vệ 24/24. Cho thuê mặt bằng tổ chức sự kiện, tiệc hồ bơi, sinh nhật, thôi n",
+    "amenities": [
+      "Hồ bơi",
+      "Bảo vệ 24/7"
+    ],
+    "postedAt": "3 giờ trước",
+    "sourceUrl": "https://www.chotot.com/110327654",
+    "lat": 10.757106,
+    "lng": 106.738205
+  },
+  {
+    "id": "130224280",
+    "title": "CHO THUÊ MẶT BẰNG 500M2 TRUNG TÂM QUẬN 3 TP.HCM",
+    "price": "80 triệu",
+    "priceNum": 80000000,
+    "area": "98 m²",
+    "district": "Quận 3, TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "type": "Căn hộ",
+    "image": "https://cdn.chotot.com/sx93xnDBisq9oYv3VCql8T6zOpC-ji3LaffP3bm5Fng/preset:listing/plain/c51beedd1b83aa4d4f9db2284f59ce6a-2966511475213106536.jpg",
+    "tags": [
+      "AI Verified",
+      "Cho thuê"
+    ],
+    "verified": true,
+    "rating": 4.7,
+    "description": "Mặt bằng 500m2 diện tích sử dụng quận 3 - Diện tích: 500m2 - Kết cấu: Trệt - lầu - Giá: 80tr/tháng - Thiết bị: PCCC, máy lạnh, máy phát điện, thang bộ,... - Thời hạn thuê: 5 - 10 năm (không giới hạn) - Bàn giao: nhận nhà ngay - Phù hợp: bank, showroo",
+    "amenities": [
+      "Máy lạnh"
+    ],
+    "postedAt": "5 ngày trước",
+    "sourceUrl": "https://www.chotot.com/130224280",
+    "lat": 10.778384,
+    "lng": 106.68261
+  },
+  {
+    "id": "131771444",
+    "title": "Dịch vụ cho thuê căn hộ Sunrise City View",
+    "price": "16.000.000 đ",
+    "priceNum": 16000000,
+    "area": "102 m²",
+    "district": "Quận 7, TP. Hồ Chí Minh",
+    "province": "TP. Hồ Chí Minh",
+    "type": "Căn hộ",
+    "image": "https://cdn.chotot.com/xItrZPIS2MiIUvXPLf7cocXeI0q7CXrE5qnYJAUDrbE/preset:listing/plain/d4d1d622d83ee8f5294f542d6ef77df7-2979557581276406310.jpg",
+    "tags": [
+      "AI Verified",
+      "Cho thuê"
+    ],
+    "verified": true,
+    "rating": 5.0,
+    "description": "cho thuê sunrise city view ngắn hạn và dài hạn",
+    "amenities": [
+      "Wifi",
+      "Máy lạnh"
+    ],
+    "postedAt": "4 tuần trước",
+    "sourceUrl": "https://www.chotot.com/131771444",
+    "lat": 10.743049,
+    "lng": 106.69693
+  }
+]

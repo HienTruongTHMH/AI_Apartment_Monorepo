@@ -1,0 +1,55 @@
+# ==========================================
+# NestaVietAI Monorepo Gitignore Configuration
+# ==========================================
+
+# --- OS Specific Files ---
+.DS_Store
+Thumbs.db
+
+# --- Node / JavaScript / TypeScript (Root, Frontend, Backend) ---
+node_modules/
+.npm
+npm-debug.log*
+
+# --- TypeScript Build & Cache ---
+*.tsbuildinfo
+.eslintcache
+
+# --- Frontend Specific (Vite / React) ---
+apps/frontend/dist/
+apps/frontend/build/
+
+# --- Mobile Specific (Expo / React Native) ---
+apps/frontend/mobile/.expo/
+apps/frontend/mobile/android/
+apps/frontend/mobile/ios/
+
+# --- Backend Specific (NestJS) ---
+apps/backend/dist/
+apps/backend/build/
+
+# --- Database & Prisma ---
+# (Chỉ bỏ qua thư mục build, giữ lại schema và file migration)
+*.db
+*.db-journal
+
+# --- AI Agent Specific (Python / FastAPI) ---
+apps/ai-agent/venv/
+apps/ai-agent/env/
+__pycache__/
+*.py[cod]
+apps/ai-agent/.pytest_cache/
+
+# --- Environment Variables & Secrets (CRITICAL) ---
+.env
+.env.local
+*.env
+apps/frontend/.env*
+apps/backend/.env*
+apps/ai-agent/.env*
+
+# --- IDEs and Text Editors ---
+.idea/
+.vscode/
+
+node_modules

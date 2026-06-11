@@ -1,0 +1,693 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/* ─── NestaVietAI theme variables ───────────────────────────── */
+:root {
+  --nv-bg: #07101C;
+  --nv-surface: #0C1A2E;
+  --nv-surface-alt: rgba(12,26,46,0.6);
+  --nv-border: rgba(255,255,255,0.06);
+  --nv-navbar-bg: rgba(7,16,28,0.88);
+  --nv-accent: #22d3ee;
+  --nv-accent2: #8b5cf6;
+  --nv-glow-r: 139; --nv-glow-g: 92; --nv-glow-b: 246;
+}
+[data-theme="light"] {
+  --nv-bg: #EEF3FF;
+  --nv-surface: #FFFFFF;
+  --nv-surface-alt: rgba(225,232,255,0.6);
+  --nv-border: rgba(7,16,32,0.07);
+  --nv-navbar-bg: rgba(238,243,255,0.88);
+}
+
+/* Light mode text / bg overrides */
+[data-theme="light"] .text-white { color: #07101C; }
+[data-theme="light"] .text-white\/90 { color: rgba(7,16,32,.9); }
+[data-theme="light"] .text-white\/80 { color: rgba(7,16,32,.8); }
+[data-theme="light"] .text-white\/70 { color: rgba(7,16,32,.7); }
+[data-theme="light"] .text-white\/65 { color: rgba(7,16,32,.65); }
+[data-theme="light"] .text-white\/60 { color: rgba(7,16,32,.6); }
+[data-theme="light"] .text-white\/55 { color: rgba(7,16,32,.55); }
+[data-theme="light"] .text-white\/50 { color: rgba(7,16,32,.5); }
+[data-theme="light"] .text-white\/45 { color: rgba(7,16,32,.45); }
+[data-theme="light"] .text-white\/40 { color: rgba(7,16,32,.4); }
+[data-theme="light"] .text-white\/35 { color: rgba(7,16,32,.35); }
+[data-theme="light"] .text-white\/30 { color: rgba(7,16,32,.3); }
+[data-theme="light"] .text-white\/28 { color: rgba(7,16,32,.28); }
+[data-theme="light"] .text-white\/25 { color: rgba(7,16,32,.25); }
+[data-theme="light"] .text-white\/22 { color: rgba(7,16,32,.22); }
+[data-theme="light"] .text-white\/20 { color: rgba(7,16,32,.2); }
+[data-theme="light"] .text-white\/18 { color: rgba(7,16,32,.18); }
+[data-theme="light"] .bg-white\/3  { background-color: rgba(7,16,32,.03); }
+[data-theme="light"] .bg-white\/4  { background-color: rgba(7,16,32,.04); }
+[data-theme="light"] .bg-white\/5  { background-color: rgba(7,16,32,.05); }
+[data-theme="light"] .bg-white\/6  { background-color: rgba(7,16,32,.06); }
+[data-theme="light"] .bg-white\/8  { background-color: rgba(7,16,32,.06); }
+[data-theme="light"] .bg-white\/10 { background-color: rgba(7,16,32,.08); }
+[data-theme="light"] .bg-white\/12 { background-color: rgba(7,16,32,.09); }
+[data-theme="light"] .bg-white\/15 { background-color: rgba(7,16,32,.11); }
+[data-theme="light"] .border-white\/5  { border-color: rgba(7,16,32,.05); }
+[data-theme="light"] .border-white\/6  { border-color: rgba(7,16,32,.06); }
+[data-theme="light"] .border-white\/8  { border-color: rgba(7,16,32,.08); }
+[data-theme="light"] .border-white\/10 { border-color: rgba(7,16,32,.10); }
+[data-theme="light"] .border-white\/12 { border-color: rgba(7,16,32,.12); }
+[data-theme="light"] .border-white\/14 { border-color: rgba(7,16,32,.14); }
+[data-theme="light"] .border-white\/15 { border-color: rgba(7,16,32,.15); }
+[data-theme="light"] .border-white\/18 { border-color: rgba(7,16,32,.18); }
+[data-theme="light"] .border-white\/20 { border-color: rgba(7,16,32,.20); }
+[data-theme="light"] .placeholder-white\/22::placeholder,
+[data-theme="light"] .placeholder-white\/25::placeholder,
+[data-theme="light"] .placeholder-white\/30::placeholder { color: rgba(7,16,32,.30); }
+
+/* ─── App dark mode (LandlordApp + TenantApp) ───────────────── */
+.app-dark .bg-white { background-color: #1e293b; }
+.app-dark .bg-gray-50 { background-color: #0f172a; }
+.app-dark .bg-gray-100 { background-color: #1e293b; }
+.app-dark .bg-gray-200 { background-color: #334155; }
+.app-dark .text-gray-900 { color: #f1f5f9; }
+.app-dark .text-gray-800 { color: #e2e8f0; }
+.app-dark .text-gray-700 { color: #cbd5e1; }
+.app-dark .text-gray-600 { color: #94a3b8; }
+.app-dark .text-gray-500 { color: #64748b; }
+.app-dark .text-gray-400 { color: #475569; }
+.app-dark .border-gray-50  { border-color: #1e293b; }
+.app-dark .border-gray-100 { border-color: #334155; }
+.app-dark .border-gray-200 { border-color: #475569; }
+.app-dark .divide-gray-50 > * + *  { border-color: #1e293b; }
+.app-dark .divide-gray-100 > * + * { border-color: #334155; }
+.app-dark .hover\:bg-gray-50:hover  { background-color: #1e293b; }
+.app-dark .hover\:bg-gray-100:hover { background-color: #1e293b; }
+.app-dark .hover\:bg-gray-200:hover { background-color: #334155; }
+.app-dark input, .app-dark textarea, .app-dark select {
+  background-color: #0f172a; color: #f1f5f9; border-color: #334155;
+}
+.app-dark input::placeholder, .app-dark textarea::placeholder { color: #475569; }
+.app-dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.4); }
+
+/* Scrollbar */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-dark::-webkit-scrollbar { width: 4px; }
+.scrollbar-dark::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-dark::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PROFESSIONAL ANIMATION SYSTEM v2
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. FLOATING ORBS — complex Lissajous paths ─────────────── */
+@keyframes nv-float-1 {
+  0%   { transform: translate(0,0) scale(1) rotate(0deg); }
+  20%  { transform: translate(22px,-38px) scale(1.08) rotate(3deg); }
+  45%  { transform: translate(-16px,-18px) scale(0.94) rotate(-2deg); }
+  70%  { transform: translate(28px,24px) scale(1.04) rotate(4deg); }
+  100% { transform: translate(0,0) scale(1) rotate(0deg); }
+}
+@keyframes nv-float-2 {
+  0%   { transform: translate(0,0) scale(1); }
+  30%  { transform: translate(-30px,20px) scale(1.1); }
+  60%  { transform: translate(18px,-30px) scale(0.92); }
+  80%  { transform: translate(-10px,14px) scale(1.05); }
+  100% { transform: translate(0,0) scale(1); }
+}
+@keyframes nv-float-3 {
+  0%   { transform: translate(0,0) rotate(0deg) scale(1); }
+  25%  { transform: translate(14px,-24px) rotate(6deg) scale(1.07); }
+  55%  { transform: translate(-22px,16px) rotate(-4deg) scale(0.95); }
+  80%  { transform: translate(10px,8px) rotate(2deg) scale(1.03); }
+  100% { transform: translate(0,0) rotate(0deg) scale(1); }
+}
+.nv-orb-1 { animation: nv-float-1  9s cubic-bezier(.45,.05,.55,.95) infinite; }
+.nv-orb-2 { animation: nv-float-2 13s cubic-bezier(.45,.05,.55,.95) infinite; }
+.nv-orb-3 { animation: nv-float-3 17s cubic-bezier(.45,.05,.55,.95) infinite; }
+.nv-orb-4 { animation: nv-float-2 11s cubic-bezier(.45,.05,.55,.95) infinite reverse; }
+
+/* ── 2. ANIMATED GRADIENT TEXT ──────────────────────────────── */
+@keyframes nv-gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.nv-text-gradient {
+  background: linear-gradient(135deg, #22d3ee, #3b82f6, #8b5cf6, #ec4899, #22d3ee);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nv-gradient-shift 5s ease infinite;
+}
+.nv-text-gradient-slow {
+  background: linear-gradient(135deg, #22d3ee, #8b5cf6, #10b981, #22d3ee);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nv-gradient-shift 8s ease infinite;
+}
+
+/* ── 3. SHIMMER SWEEP — card hover reveal ───────────────────── */
+@keyframes nv-shimmer {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+.nv-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.nv-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+  transform: translateX(-100%) skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+}
+.nv-shimmer:hover::after {
+  animation: nv-shimmer 0.65s ease-out forwards;
+}
+
+/* ── 4. BORDER SWEEP — animated border glow on hover ───────── */
+@keyframes nv-border-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.nv-border-glow {
+  position: relative;
+  isolation: isolate;
+}
+.nv-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--nv-border-angle, 0deg),
+    transparent 70%,
+    rgba(34,211,238,0.7) 85%,
+    rgba(139,92,246,0.9) 90%,
+    rgba(34,211,238,0.7) 95%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: inherit;
+}
+.nv-border-glow:hover::before { opacity: 1; animation: nv-border-spin 2.5s linear infinite; }
+
+/* ── 5. GLOW PULSE — multi-color variants ───────────────────── */
+@keyframes nv-glow-violet {
+  0%,100% { box-shadow: 0 0 0 0 rgba(139,92,246,.5), 0 4px 24px rgba(139,92,246,.15); }
+  50%     { box-shadow: 0 0 0 10px rgba(139,92,246,0), 0 4px 32px rgba(139,92,246,.3); }
+}
+@keyframes nv-glow-cyan {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,211,238,.5), 0 4px 20px rgba(34,211,238,.12); }
+  50%     { box-shadow: 0 0 0 10px rgba(34,211,238,0), 0 4px 28px rgba(34,211,238,.25); }
+}
+@keyframes nv-glow-emerald {
+  0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.5), 0 4px 20px rgba(16,185,129,.12); }
+  50%     { box-shadow: 0 0 0 10px rgba(16,185,129,0), 0 4px 28px rgba(16,185,129,.25); }
+}
+@keyframes nv-glow-blue {
+  0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,.5), 0 4px 20px rgba(59,130,246,.12); }
+  50%     { box-shadow: 0 0 0 10px rgba(59,130,246,0), 0 4px 28px rgba(59,130,246,.25); }
+}
+.nv-glow-pulse         { animation: nv-glow-violet  2.8s ease-in-out infinite; }
+.nv-glow-pulse-cyan    { animation: nv-glow-cyan    2.8s ease-in-out infinite; }
+.nv-glow-pulse-emerald { animation: nv-glow-emerald 2.8s ease-in-out infinite; }
+.nv-glow-pulse-blue    { animation: nv-glow-blue    2.8s ease-in-out infinite; }
+
+/* ── 6. RIPPLE BUTTON ───────────────────────────────────────── */
+@keyframes nv-ripple {
+  to { transform: scale(5); opacity: 0; }
+}
+.nv-ripple-btn { position: relative; overflow: hidden; }
+.nv-ripple-btn .nv-ripple-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.28);
+  pointer-events: none;
+  transform: scale(0);
+  animation: nv-ripple .55s ease-out forwards;
+}
+
+/* ── 7. 3D TILT CARD ────────────────────────────────────────── */
+.nv-tilt-card {
+  transform-style: preserve-3d;
+  transition: box-shadow .25s ease, transform .2s ease;
+  will-change: auto;
+}
+.nv-tilt-card:hover { will-change: transform; }
+.nv-tilt-card:hover {
+  box-shadow: 0 28px 72px rgba(0,0,0,.28), 0 0 0 1px rgba(255,255,255,.06);
+  transform: translateY(-2px);
+}
+
+/* ── 8. STAGGER FADE-UP — refined easing ───────────────────── */
+@keyframes nv-fade-up {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.nv-fade-up-1 { animation: nv-fade-up .5s cubic-bezier(.22,1,.36,1) .00s both; }
+.nv-fade-up-2 { animation: nv-fade-up .5s cubic-bezier(.22,1,.36,1) .09s both; }
+.nv-fade-up-3 { animation: nv-fade-up .5s cubic-bezier(.22,1,.36,1) .18s both; }
+.nv-fade-up-4 { animation: nv-fade-up .5s cubic-bezier(.22,1,.36,1) .27s both; }
+.nv-fade-up-5 { animation: nv-fade-up .5s cubic-bezier(.22,1,.36,1) .36s both; }
+.nv-fade-up-6 { animation: nv-fade-up .5s cubic-bezier(.22,1,.36,1) .45s both; }
+
+/* ── 9. ORBITAL RINGS ───────────────────────────────────────── */
+@keyframes nv-orbit-cw  { from { transform: rotate(0deg); }   to { transform: rotate(360deg); } }
+@keyframes nv-orbit-ccw { from { transform: rotate(0deg); }   to { transform: rotate(-360deg); } }
+.nv-orbit-ring-1 {
+  animation: nv-orbit-cw  8s linear infinite;
+  transform-origin: center center;
+}
+.nv-orbit-ring-2 {
+  animation: nv-orbit-ccw 14s linear infinite;
+  transform-origin: center center;
+}
+.nv-orbit-ring-3 {
+  animation: nv-orbit-cw  20s linear infinite;
+  transform-origin: center center;
+}
+
+/* ── 10. SCAN LINE — dev/admin portal ───────────────────────── */
+@keyframes nv-scan-down {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(1000%); opacity: 0; }
+}
+.nv-scan-line {
+  position: fixed;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(59,130,246,.4), rgba(34,211,238,.5), rgba(59,130,246,.4), transparent);
+  animation: nv-scan-down 6s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.5px);
+}
+
+/* ── 11. DATA STREAM DOTS ───────────────────────────────────── */
+@keyframes nv-stream {
+  0%   { opacity: 0; transform: translateX(-8px); }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(8px); }
+}
+.nv-stream-dot { animation: nv-stream 1.6s ease-in-out infinite; }
+.nv-stream-dot:nth-child(2) { animation-delay: .2s; }
+.nv-stream-dot:nth-child(3) { animation-delay: .4s; }
+.nv-stream-dot:nth-child(4) { animation-delay: .6s; }
+.nv-stream-dot:nth-child(5) { animation-delay: .8s; }
+
+/* ── 12. SKELETON SHIMMER ───────────────────────────────────── */
+@keyframes nv-skeleton {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.nv-skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,.04) 25%,
+    rgba(255,255,255,.1)  50%,
+    rgba(255,255,255,.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: nv-skeleton 1.6s ease infinite;
+  border-radius: 8px;
+}
+
+/* ── 13. COUNTER POP — number finished animating ────────────── */
+@keyframes nv-counter-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  70%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.nv-counter-pop { animation: nv-counter-pop .4s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+/* ── 14. HOLOGRAPHIC CARD SHEEN ─────────────────────────────── */
+@keyframes nv-holo {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.nv-holo-card {
+  position: relative;
+  overflow: hidden;
+}
+.nv-holo-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0) 0%,
+    rgba(139,92,246,.06) 25%,
+    rgba(34,211,238,.06) 50%,
+    rgba(16,185,129,.06) 75%,
+    rgba(255,255,255,0) 100%
+  );
+  background-size: 300% 300%;
+  opacity: 0;
+  transition: opacity .3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.nv-holo-card:hover::before {
+  opacity: 1;
+  animation: nv-holo 3s ease infinite;
+}
+
+/* ── 15. MAGNETIC BUTTON (JS augmented, CSS prep) ───────────── */
+.nv-magnetic {
+  transition: transform 0.18s cubic-bezier(.22,1,.36,1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 16. NOISE TEXTURE OVERLAY (for hero depth) ─────────────── */
+.nv-noise::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+}
+
+/* ── 17. SLIDE-IN SIDEBAR ITEMS ─────────────────────────────── */
+@keyframes nv-slide-in-left {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.nv-slide-left-1 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .05s both; }
+.nv-slide-left-2 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .1s  both; }
+.nv-slide-left-3 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .15s both; }
+.nv-slide-left-4 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .2s  both; }
+.nv-slide-left-5 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .25s both; }
+.nv-slide-left-6 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .3s  both; }
+.nv-slide-left-7 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .35s both; }
+.nv-slide-left-8 { animation: nv-slide-in-left .35s cubic-bezier(.22,1,.36,1) .4s  both; }
+
+/* ── 18. SCALE-IN SPRING ────────────────────────────────────── */
+@keyframes nv-scale-in {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.nv-scale-in { animation: nv-scale-in .45s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ── 19. TYPEWRITER CURSOR ───────────────────────────────────── */
+@keyframes nv-cursor-blink {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0; }
+}
+.nv-cursor { animation: nv-cursor-blink .9s step-end infinite; }
+
+/* ── 20. PROGRESS BAR SWEEP ─────────────────────────────────── */
+@keyframes nv-progress-fill {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+.nv-progress-fill { animation: nv-progress-fill .8s cubic-bezier(.22,1,.36,1) forwards; }
+
+/* ── 21. PARTICLE STAR FIELD (CSS only, for hero bg) ────────── */
+@keyframes nv-twinkle {
+  0%,100% { opacity: .2; transform: scale(1); }
+  50%     { opacity: .8; transform: scale(1.4); }
+}
+.nv-star { animation: nv-twinkle 3s ease-in-out infinite; border-radius: 50%; }
+.nv-star:nth-child(2n)   { animation-duration: 2.2s; animation-delay: .5s; }
+.nv-star:nth-child(3n)   { animation-duration: 4.1s; animation-delay: 1s; }
+.nv-star:nth-child(4n)   { animation-duration: 2.8s; animation-delay: 1.8s; }
+.nv-star:nth-child(5n)   { animation-duration: 3.5s; animation-delay: .2s; }
+.nv-star:nth-child(6n)   { animation-duration: 1.9s; animation-delay: 2.1s; }
+
+/* ── 22. STATUS INDICATOR PULSE ─────────────────────────────── */
+@keyframes nv-status-online {
+  0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.6); }
+  70%     { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+}
+@keyframes nv-status-warning {
+  0%,100% { box-shadow: 0 0 0 0 rgba(245,158,11,.6); }
+  70%     { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+}
+.nv-status-online  { animation: nv-status-online  1.8s ease-out infinite; }
+.nv-status-warning { animation: nv-status-warning 1.2s ease-out infinite; }
+
+/* ── 23. HERO HEADLINE — word reveal ───────────────────────── */
+@keyframes nv-word-reveal {
+  from { opacity: 0; transform: translateY(100%) rotateX(-20deg); clip-path: inset(0 0 100% 0); }
+  to   { opacity: 1; transform: translateY(0) rotateX(0deg); clip-path: inset(0 0 0% 0); }
+}
+.nv-word { display: inline-block; overflow: hidden; }
+.nv-word-inner {
+  display: inline-block;
+  animation: nv-word-reveal .6s cubic-bezier(.22,1,.36,1) both;
+  animation-play-state: paused;
+}
+
+/* ── 23b. SCROLL PROGRESS LINE ──────────────────────────── */
+.nv-scroll-line {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #22d3ee, #a78bfa);
+  z-index: 9999;
+  pointer-events: none;
+  transform-origin: left;
+}
+
+/* ── 23c. STEP CONNECTOR ─────────────────────────────────── */
+.nv-step-connector {
+  background: linear-gradient(90deg, transparent 0%, rgba(34,211,238,0.25) 30%, rgba(139,92,246,0.25) 70%, transparent 100%);
+}
+
+/* ── 24. TAB INDICATOR SLIDE ────────────────────────────────── */
+@keyframes nv-tab-underline {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+.nv-tab-active-line { animation: nv-tab-underline .25s cubic-bezier(.22,1,.36,1) both; }
+
+/* ── 25. FLOATING ACTION BUTTON ─────────────────────────────── */
+@keyframes nv-fab-bounce {
+  0%,100% { transform: translateY(0); }
+  30%     { transform: translateY(-6px); }
+  60%     { transform: translateY(-2px); }
+}
+.nv-fab { animation: nv-fab-bounce 3s ease-in-out 2s infinite; }
+
+/* ── 26. INPUT FOCUS GLOW ───────────────────────────────────── */
+.nv-input-focus {
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.nv-input-focus:focus {
+  box-shadow: 0 0 0 3px rgba(139,92,246,.2), 0 0 0 1px rgba(139,92,246,.4);
+  outline: none;
+}
+.nv-input-focus-cyan:focus {
+  box-shadow: 0 0 0 3px rgba(34,211,238,.15), 0 0 0 1px rgba(34,211,238,.35);
+  outline: none;
+}
+.nv-input-focus-emerald:focus {
+  box-shadow: 0 0 0 3px rgba(16,185,129,.15), 0 0 0 1px rgba(16,185,129,.35);
+  outline: none;
+}
+
+/* ── 27. CARD ENTRANCE VARIANTS ─────────────────────────────── */
+@keyframes nv-card-enter {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.nv-card-enter   { animation: nv-card-enter .5s cubic-bezier(.22,1,.36,1) both; }
+.nv-card-enter-1 { animation: nv-card-enter .5s cubic-bezier(.22,1,.36,1) .05s both; }
+.nv-card-enter-2 { animation: nv-card-enter .5s cubic-bezier(.22,1,.36,1) .12s both; }
+.nv-card-enter-3 { animation: nv-card-enter .5s cubic-bezier(.22,1,.36,1) .19s both; }
+.nv-card-enter-4 { animation: nv-card-enter .5s cubic-bezier(.22,1,.36,1) .26s both; }
+.nv-card-enter-5 { animation: nv-card-enter .5s cubic-bezier(.22,1,.36,1) .33s both; }
+
+/* ── 28. NOTIFICATION BADGE PULSE ───────────────────────────── */
+@keyframes nv-badge-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  65%  { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.nv-badge-pop { animation: nv-badge-pop .35s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ── 29. HOVER LIFT ─────────────────────────────────────────── */
+.nv-lift {
+  transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease;
+}
+.nv-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.22);
+}
+
+/* ── 30. MARQUEE / TICKER ───────────────────────────────────── */
+@keyframes nv-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.nv-marquee-track { animation: nv-marquee 28s linear infinite; }
+.nv-marquee-track:hover { animation-play-state: paused; }
+
+/* ── 31. SECTION DIVIDER — gradient accent line ─────────────── */
+.nv-section-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(34,211,238,0.15) 25%,
+    rgba(139,92,246,0.18) 50%,
+    rgba(52,211,153,0.12) 75%,
+    transparent 100%
+  );
+}
+
+/* ── 32. BENTO CARD GLOW on hover ───────────────────────────── */
+.nv-bento-card {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.nv-bento-card:hover {
+  box-shadow: 0 20px 64px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.09);
+}
+
+/* ── 33. HERO HEADLINE — split color shimmer ─────────────────── */
+@keyframes nv-hero-shimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.nv-hero-gradient {
+  background: linear-gradient(110deg, #22d3ee 0%, #818cf8 35%, #34d399 65%, #22d3ee 100%);
+  background-size: 250% 250%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: nv-hero-shimmer 6s ease infinite;
+}
+
+/* ── 34. GLASS BUTTON glow ring ─────────────────────────────── */
+.nv-btn-glass {
+  position: relative;
+  transition: box-shadow 0.2s ease, opacity 0.2s ease;
+}
+.nv-btn-glass:hover {
+  box-shadow: 0 0 32px rgba(34,211,238,0.22), 0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* ── 35. CARD INNER SHIMMER on hover ────────────────────────── */
+@keyframes nv-inner-shimmer {
+  0%   { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(220%) skewX(-18deg); }
+}
+.nv-inner-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.nv-inner-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.055) 50%, transparent 100%);
+  transform: translateX(-120%) skewX(-18deg);
+  pointer-events: none;
+  border-radius: inherit;
+}
+.nv-inner-shimmer:hover::after {
+  animation: nv-inner-shimmer 0.7s ease-out forwards;
+}
+
+/* ── 36. COMMAND PALETTE ────────────────────────────────────── */
+.nv-cmd-result {
+  transition: background 0.12s ease;
+}
+.nv-cmd-result:hover {
+  background: rgba(34,211,238,0.06);
+}
+
+/* ── 37. MOBILE BOTTOM NAV ──────────────────────────────────── */
+.nv-mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 0;
+  border-radius: 12px;
+  cursor: pointer;
+  flex: 1;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s ease;
+}
+.nv-mobile-nav-item:active { opacity: 0.6; }
+
+/* ── 38. HEATMAP CELL ───────────────────────────────────────── */
+.nv-heatmap-cell {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ── 39. RANGE INPUT styling ────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+/* ── 40. COMPARISON DRAWER — drag handle animation ──────────── */
+.nv-drawer-handle {
+  transition: background 0.2s ease, width 0.2s ease;
+}
+.nv-drawer-handle:hover {
+  background: rgba(255,255,255,0.3);
+  width: 48px;
+}
+
+/* ── 41. TOUR STEP RING ─────────────────────────────────────── */
+@keyframes nv-tour-ring {
+  0%,100% { box-shadow: 0 0 0 0 rgba(34,211,238,0.5); }
+  50%     { box-shadow: 0 0 0 12px rgba(34,211,238,0); }
+}
+.nv-tour-ring { animation: nv-tour-ring 1.6s ease-in-out infinite; }
+
+/* ── Smooth transitions for all interactive elements ────────── */
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,7 @@
+{
+  "name": "ai-agent",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "source venv/bin/activate && uvicorn app.main:app --reload --port 8000"
+  }
+}
