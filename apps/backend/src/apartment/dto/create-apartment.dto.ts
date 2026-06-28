@@ -1,19 +1,19 @@
-import { IsString, IsNotEmpty, ValidateNested, IsOptional, IsNumber, IsEnum, IsInt, IsUUID } from "class-validator";
+import { IsString, IsNotEmpty, ValidateNested, IsOptional, IsNumber, IsEnum, IsInt } from "class-validator";
 import { Type } from 'class-transformer';
 import { ApartmentStatus, ApartmentTypes, ListingStatus } from "@prisma/client";
 
 class ListingOptionalDto {
-    @IsString({message: "Title must use charater"})
-    @IsNotEmpty({message: "Title can not be empty"})
+    @IsString({ message: "Title must use characters" })
+    @IsNotEmpty({ message: "Title can not be empty" })
     title!: string;
 
     @IsString()
-    @IsNotEmpty({message: "Description can not be empty"})
+    @IsNotEmpty({ message: "Description can not be empty" })
     description!: string;
 
-    @IsNumber({}, {message: "Price must type in number"})
+    @IsNumber({}, { message: "Price must be a number" })
     pricePerMonth!: number;
-    
+
     @IsEnum(ListingStatus)
     listingStatus!: ListingStatus;
 }
@@ -31,19 +31,19 @@ export class CreateApartmentDto {
     apartmentStatus!: ApartmentStatus;
 
     @IsEnum(ApartmentTypes)
-    type!: ApartmentTypes
+    type!: ApartmentTypes;
 
     @IsNumber()
     bedroom!: number;
 
     @IsNumber()
-    livingroom!: number
-    
-    @IsNumber()
-    bathroom!: number
+    livingroom!: number;
 
     @IsNumber()
-    kitchen!: number
+    bathroom!: number;
+
+    @IsNumber()
+    kitchen!: number;
 
     @IsString()
     district!: string;
@@ -51,9 +51,9 @@ export class CreateApartmentDto {
     @IsString()
     fullAddress!: string;
 
-    @IsUUID()
-    @IsNotEmpty()
-    ownerId!: string;
+    // ownerId is intentionally NOT here.
+    // It is a server-side value injected from the authenticated user's JWT.
+    // Never trust the client to provide it.
 
     @IsOptional()
     @ValidateNested()
