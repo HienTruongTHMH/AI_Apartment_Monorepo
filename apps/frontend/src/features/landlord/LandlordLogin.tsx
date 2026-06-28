@@ -5,6 +5,7 @@ import {
   Building2, ChevronLeft, Mail, Lock, Eye, EyeOff,
   CheckCircle2, ArrowRight, AlertCircle, RefreshCw, Shield,
 } from "lucide-react";
+import { authService } from "@/services/auth.services";
 
 const STAFF_EMAILS = new Set([
   "admin@nestaviet.vn",
@@ -40,23 +41,15 @@ export function LandlordLogin() {
       return;
     }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    const tempSuffix = /^[A-Z2-9a-z]{10}$/.test(password);
-    if (tempSuffix) {
-      setIsFirstLogin(true);
-    } else {
-      try {
-        localStorage.setItem("nv-landlord-logged-in", "true");
-        localStorage.setItem("nv-landlord-email", email);
-        if (!localStorage.getItem("nv-landlord-user")) {
-          const prefix = email.split("@")[0];
-          const name = prefix.replace(/[._-]/g, " ").split(" ")
-            .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-          localStorage.setItem("nv-landlord-user", JSON.stringify({ name, email }));
-        }
-      } catch {}
+    try {
+      const { accessToken } = await authService.login(email, password);
+      authService.saveToken(accessToken);
       navigate("/landlord");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setError(Array.isArray(msg) ? msg[0] : (msg ?? "Đăng nhập thất bại. Vui lòng thử lại."));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,7 +68,7 @@ export function LandlordLogin() {
           .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
         localStorage.setItem("nv-landlord-user", JSON.stringify({ name, email }));
       }
-    } catch {}
+    } catch { }
     setSuccess(true);
     setTimeout(() => navigate("/landlord"), 1500);
   };
@@ -134,8 +127,8 @@ export function LandlordLogin() {
               {isFirstLogin
                 ? "Đặt mật khẩu mới để bảo vệ tài khoản quản lý của bạn"
                 : forgotMode
-                ? "Nhập email đăng ký — hệ thống sẽ gửi mật khẩu tạm thời"
-                : "CỔNG ĐĂNG NHẬP DÀNH CHO CHỦ NHÀ"}
+                  ? "Nhập email đăng ký — hệ thống sẽ gửi mật khẩu tạm thời"
+                  : "CỔNG ĐĂNG NHẬP DÀNH CHO CHỦ NHÀ"}
             </p>
           </div>
 
@@ -263,7 +256,7 @@ export function LandlordLogin() {
                     <p className="text-white/41 mb-3" style={{ fontSize: "0.77rem" }}>BẠN LÀ CHỦ NHÀ NHƯNG CHƯA CÓ TÀI KHOẢN?</p>
                     <button onClick={() => navigate("/landlord/register")}
                       className="w-full py-3 rounded-xl border border-violet-500/30 text-violet-400 hover:bg-violet-500/8 transition-all font-semibold" style={{ fontSize: "0.85rem" }}>
-                      ĐĂNG KÝ CHỦ NHÀ 
+                      ĐĂNG KÝ CHỦ NHÀ
                     </button>
                   </motion.div>
                 </motion.div>

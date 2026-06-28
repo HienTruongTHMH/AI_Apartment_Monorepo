@@ -8,8 +8,9 @@ import {
   AmenityValue, 
   ApartmentAmenityStatus,
   ApartmentTypes,
-  Roles,
-  User
+  TenantProfile,
+  OwnerProfile,
+  Account
 } from "@prisma/client";
 
 const prisma = new PrismaClient({
@@ -29,37 +30,50 @@ async function main() {
   await prisma.listing.deleteMany();
   await prisma.apartmentAmenity.deleteMany();
   await prisma.apartment.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.account.deleteMany();
   await prisma.amenity.deleteMany();
 
   console.log('Đang tạo 4 User Chủ Hộ (Owners)...');
-  const owners: User[] = [];
+  const owners: any[] = [];
   for (let i = 1; i <= 4; i++) {
-    const owner = await prisma.user.create({
+    const ownerAccount = await prisma.account.create({
       data: {
         email: `owner${i}@danang-apartments.com`,
-        name: `Chủ nhà ${i}`,
         hashedPassword: 'hashed_password_123', // Thực tế phải dùng bcrypt
         phone: `090512300${i}`,
-        role: Roles.Owner,
-      }
+        isActive: true,
+        ownerProfile: {
+          create: {
+            fullName: `Chủ nhà số ${i}`,
+            taxCode: `9000${i}1234`
+          }
+        }
+      },
+
+      include: { ownerProfile: true}
     });
-    owners.push(owner);
+    
+    owners.push(ownerAccount);
   }
 
   console.log('Đang tạo 10 User Người Thuê (Tenants)...');
-  const tenants: User[] = [];
+  const tenants: Account[] = [];
   for (let i = 1; i <= 10; i++) {
-    const tenant = await prisma.user.create({
+    const tenantAccount = await prisma.account.create({
       data: {
         email: `tenant${i}@gmail.com`,
-        name: `Khách thuê ${i}`,
         hashedPassword: 'hashed_password_123',
         phone: `093598700${i}`,
-        role: Roles.Tenant,
-      }
+        isActive: true,
+        tenantProfile: {
+          create: {
+            fullName: `Khách thuê số ${i}`
+          }
+        }
+      },
+      include: {tenantProfile: true}
     });
-    tenants.push(tenant);
+    tenants.push(tenantAccount);
   }
 
   console.log('Đang tạo Tiện ích chung (Amenities)...');
@@ -119,7 +133,7 @@ async function main() {
           livingroom: 1,
           kitchen: 1,
           apartmentStatus: ApartmentStatus.Available,
-          ownerId: buildingOwner.id,
+          ownerId: buildingOwner.ownerProfile.id ,
           apartmentListing: {
             create: {
               title: `[${building.name}] Căn hộ ${type} view đẹp tầng ${floor}`,

@@ -7,45 +7,88 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id                   String            @id @default(uuid())
-  name                 String
-  email                String            @unique
-  hashedPassword       String
-  role                 Roles             @default(Viewer)
-  phone                String
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  ownedApartments      Apartment[]       @relation("OwnerApartments")
-  contractsAsOwner     Contract[]        @relation("OwnerContracts")
-  contractsAsTenant    Contract[]        @relation("TenantContracts")
-  reviewGivenApartment ReviewApartment[] @relation("ApartmentReviewer")
-  tenantReviewGiven    ReviewTenant[]    @relation("OwnerReviewer")
-  tenantReviewReceived ReviewTenant[]    @relation("TenantReviewed")
+model Account {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  hashedPassword String
+  phone          String
+  fullName       String
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt()
+  tenantProfile  TenantProfile?
+  ownerProfile   OwnerProfile?
 }
 
+model TenantProfile {
+  id        String @id @default(uuid())
+  accountId String @unique
+  fullName  String
+
+  identityCard String? @unique
+  job          String?
+
+  account               Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contracts            Contract[]        @relation("TenantContracts")
+  reviewGivenApartment ReviewApartment[] @relation("TenantApartmentReviewer")
+  tenantReviewReceived  ReviewTenant[]    @relation("TenantReviewed")
+}
+
+model OwnerProfile {
+  id        String @id @default(uuid())
+  accountId String @unique
+  fullName  String
+
+  taxCode     String? // Mã số thuế
+  bankAccount String? // STK nhận tiền VietQR
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Quan hệ nghiệp vụ dời từ User sang đây
+  ownedApartments   Apartment[]    @relation("OwnerApartments")
+  contracts         Contract[]     @relation("OwnerContracts")
+  tenantReviewGiven ReviewTenant[] @relation("OwnerReviewer")
+}
+
+// model User {
+//   id                   String            @id @default(uuid())
+//   name                 String
+//   email                String            @unique
+//   hashedPassword       String
+//   role                 Roles             @default(Viewer)
+//   phone                String
+//   createdAt            DateTime          @default(now())
+//   updatedAt            DateTime          @updatedAt
+//   ownedApartments      Apartment[]       @relation("OwnerApartments")
+//   contractsAsOwner     Contract[]        @relation("OwnerContracts")
+//   contractsAsTenant    Contract[]        @relation("TenantContracts")
+//   reviewGivenApartment ReviewApartment[] @relation("ApartmentReviewer")
+//   tenantReviewGiven    ReviewTenant[]    @relation("OwnerReviewer")
+//   tenantReviewReceived ReviewTenant[]    @relation("TenantReviewed")
+// }
+
 model Apartment {
-  id                 String             @id @default(uuid())
-  floor              Int
-  area               Decimal            @db.Decimal(6, 2)
-  type               ApartmentTypes     @default(Normal)
-  district           String             @default("Update_Later")             
-  fullAddress        String             @default("Update_Later")  
-  room_number        Int                @default(1)
-  note               String             @default("Unknown")
-  bedroom            Int                @db.Integer @default(1)
-  livingroom         Int                @db.Integer @default(1)
-  bathroom           Int                @db.Integer @default(1)
-  kitchen            Int                @db.Integer @default(1) 
-   
-  apartmentStatus    ApartmentStatus    @default(Available)
+  id          String         @id @default(uuid())
+  floor       Int
+  area        Decimal        @db.Decimal(6, 2)
+  type        ApartmentTypes @default(Normal)
+  district    String         @default("Update_Later")
+  fullAddress String         @default("Update_Later")
+  room_number Int            @default(1)
+  note        String         @default("Unknown")
+  bedroom     Int            @default(1) @db.Integer
+  livingroom  Int            @default(1) @db.Integer
+  bathroom    Int            @default(1) @db.Integer
+  kitchen     Int            @default(1) @db.Integer
 
-  ownerId            String
+  apartmentStatus ApartmentStatus @default(Available)
 
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  ownerId String
 
-  owner              User               @relation("OwnerApartments", fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner              OwnerProfile               @relation("OwnerApartments", fields: [ownerId], references: [id])
   apartmentAmenities ApartmentAmenity[]
   contracts          Contract[]
   apartmentListing   Listing?
@@ -85,8 +128,8 @@ model Contract {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   apartment       Apartment        @relation(fields: [apartmentId], references: [id])
-  owner           User             @relation("OwnerContracts", fields: [ownerId], references: [id])
-  tenant          User             @relation("TenantContracts", fields: [tenantId], references: [id])
+  owner           OwnerProfile             @relation("OwnerContracts", fields: [ownerId], references: [id])
+  tenant          TenantProfile             @relation("TenantContracts", fields: [tenantId], references: [id])
   payments        Payment[]
   reviewApartment ReviewApartment?
   reviewTenant    ReviewTenant?
@@ -139,7 +182,7 @@ model ReviewApartment {
   createdAt   DateTime  @default(now())
   apartment   Apartment @relation(fields: [apartmentId], references: [id])
   contract    Contract  @relation(fields: [contractId], references: [id])
-  reviewer    User      @relation("ApartmentReviewer", fields: [reviewerId], references: [id])
+  reviewer    TenantProfile      @relation("TenantApartmentReviewer", fields: [reviewerId], references: [id])
 }
 
 model ReviewTenant {
@@ -151,15 +194,15 @@ model ReviewTenant {
   comment    String?
   createdAt  DateTime @default(now())
   contract   Contract @relation(fields: [contractId], references: [id])
-  reviewer   User     @relation("OwnerReviewer", fields: [reviewerId], references: [id])
-  tenant     User     @relation("TenantReviewed", fields: [tenantId], references: [id])
+  reviewer   OwnerProfile     @relation("OwnerReviewer", fields: [reviewerId], references: [id])
+  tenant     TenantProfile     @relation("TenantReviewed", fields: [tenantId], references: [id])
 }
 
-enum Roles {
-  Viewer
-  Tenant
-  Owner
-}
+// enum Roles {
+//   Viewer
+//   Tenant
+//   Owner
+// }
 
 enum ApartmentStatus {
   Rented
@@ -179,7 +222,7 @@ enum ApartmentTypes {
 enum PaymentStatus {
   Pending
   Paid
-  Faild
+  Failed
 }
 
 enum ApartmentAmenityStatus {

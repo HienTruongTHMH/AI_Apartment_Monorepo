@@ -10,19 +10,20 @@ import { AdminLogin, isAdminAuthenticated } from "@features/admin/AdminLogin";
 import { ManagerLogin, isManagerAuthenticated } from "@features/manager/ManagerLogin";
 import { DevLogin, isDevAuthenticated } from "@features/dev/DevLogin";
 import { PortalDirectory } from "@features/shared-pages/PortalDirectory";
+import { authService } from "@/services/auth.services";
 
-const TenantApp     = lazy(() => import("@features/tenant/TenantApp").then(m => ({ default: m.TenantApp })));
-const LandlordApp   = lazy(() => import("@features/landlord/LandlordApp").then(m => ({ default: m.LandlordApp })));
-const AdminPanel    = lazy(() => import("@features/admin/AdminPanel").then(m => ({ default: m.AdminPanel })));
-const ManagerApp    = lazy(() => import("@features/manager/ManagerApp").then(m => ({ default: m.ManagerApp })));
-const DevApp        = lazy(() => import("@features/dev/DevApp").then(m => ({ default: m.DevApp })));
+const TenantApp = lazy(() => import("@features/tenant/TenantApp").then(m => ({ default: m.TenantApp })));
+const LandlordApp = lazy(() => import("@features/landlord/LandlordApp").then(m => ({ default: m.LandlordApp })));
+const AdminPanel = lazy(() => import("@features/admin/AdminPanel").then(m => ({ default: m.AdminPanel })));
+const ManagerApp = lazy(() => import("@features/manager/ManagerApp").then(m => ({ default: m.ManagerApp })));
+const DevApp = lazy(() => import("@features/dev/DevApp").then(m => ({ default: m.DevApp })));
 const ContractsPage = lazy(() => import("@features/shared-pages/ContractsPage").then(m => ({ default: m.ContractsPage })));
-const PaymentsPage  = lazy(() => import("@features/shared-pages/PaymentsPage").then(m => ({ default: m.PaymentsPage })));
-const ReportsPage   = lazy(() => import("@features/shared-pages/ReportsPage").then(m => ({ default: m.ReportsPage })));
-const SecurityPage    = lazy(() => import("@features/shared-pages/SecurityPage").then(m => ({ default: m.SecurityPage })));
-const ChatPage           = lazy(() => import("@features/chat/ChatPage").then(m => ({ default: m.ChatPage })));
-const PostListingPage    = lazy(() => import("@features/post/PostListingPage").then(m => ({ default: m.PostListingPage })));
-const ListingDetailPage  = lazy(() => import("@features/listing/ListingDetailPage").then(m => ({ default: m.ListingDetailPage })));
+const PaymentsPage = lazy(() => import("@features/shared-pages/PaymentsPage").then(m => ({ default: m.PaymentsPage })));
+const ReportsPage = lazy(() => import("@features/shared-pages/ReportsPage").then(m => ({ default: m.ReportsPage })));
+const SecurityPage = lazy(() => import("@features/shared-pages/SecurityPage").then(m => ({ default: m.SecurityPage })));
+const ChatPage = lazy(() => import("@features/chat/ChatPage").then(m => ({ default: m.ChatPage })));
+const PostListingPage = lazy(() => import("@features/post/PostListingPage").then(m => ({ default: m.PostListingPage })));
+const ListingDetailPage = lazy(() => import("@features/listing/ListingDetailPage").then(m => ({ default: m.ListingDetailPage })));
 
 function isQuickAuthenticated() {
   try {
@@ -42,10 +43,12 @@ function PostGuard() {
 }
 
 function isLandlordAuthenticated() {
-  try { return localStorage.getItem("nv-landlord-logged-in") === "true"; } catch { return false; }
+  // try { return localStorage.getItem("nv-landlord-logged-in") === "true"; } catch { return false; }
+  return authService.isLoggedIn();
 }
 function isTenantAuthenticated() {
-  try { return localStorage.getItem("nv-tenant-logged-in") === "true"; } catch { return false; }
+  // try { return localStorage.getItem("nv-tenant-logged-in") === "true"; } catch { return false; }
+  return authService.isLoggedIn();
 }
 
 function TenantGuard() {
@@ -87,9 +90,9 @@ type RouteVariant = {
 function getRouteVariant(pathname: string): RouteVariant {
   // Landing — iris circle expand (Option 4)
   if (pathname === "/") return {
-    initial:    { clipPath: "circle(0% at 50% 50%)", opacity: 0 },
-    animate:    { clipPath: "circle(150% at 50% 50%)", opacity: 1 },
-    exit:       { opacity: 0, scale: 1.03, filter: "blur(10px)" },
+    initial: { clipPath: "circle(0% at 50% 50%)", opacity: 0 },
+    animate: { clipPath: "circle(150% at 50% 50%)", opacity: 1 },
+    exit: { opacity: 0, scale: 1.03, filter: "blur(10px)" },
     transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
   };
 
@@ -99,34 +102,34 @@ function getRouteVariant(pathname: string): RouteVariant {
     pathname.startsWith("/manager") ||
     pathname.startsWith("/dev")
   ) return {
-    initial:    { clipPath: "inset(0 0 100% 0)" },
-    animate:    { clipPath: "inset(0 0 0% 0)" },
-    exit:       { clipPath: "inset(100% 0 0% 0)" },
+    initial: { clipPath: "inset(0 0 100% 0)" },
+    animate: { clipPath: "inset(0 0 0% 0)" },
+    exit: { clipPath: "inset(100% 0 0% 0)" },
     transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
   };
 
   // Auth pages — page flip (Option 5)
   if (pathname.endsWith("/login") || pathname.endsWith("/register")) return {
-    initial:    { opacity: 0, rotateY: 9, scale: 0.97 },
-    animate:    { opacity: 1, rotateY: 0, scale: 1 },
-    exit:       { opacity: 0, rotateY: -6, scale: 0.97 },
+    initial: { opacity: 0, rotateY: 9, scale: 0.97 },
+    animate: { opacity: 1, rotateY: 0, scale: 1 },
+    exit: { opacity: 0, rotateY: -6, scale: 0.97 },
     transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
-    style:      { perspective: "1200px", transformStyle: "preserve-3d" },
+    style: { perspective: "1200px", transformStyle: "preserve-3d" },
   };
 
   // App routes — directional slide + scale (Option 1 + 2)
   if (pathname.startsWith("/tenant") || pathname.startsWith("/landlord")) return {
-    initial:    { opacity: 0, x: -30, scale: 0.985 },
-    animate:    { opacity: 1, x: 0,   scale: 1 },
-    exit:       { opacity: 0, x: 26,  scale: 0.99 },
+    initial: { opacity: 0, x: -30, scale: 0.985 },
+    animate: { opacity: 1, x: 0, scale: 1 },
+    exit: { opacity: 0, x: 26, scale: 0.99 },
     transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
   };
 
   // Sub-pages — enhanced morph scale + blur (Option 2 boosted)
   return {
-    initial:    { opacity: 0, scale: 0.96, y: 20, filter: "blur(10px)" },
-    animate:    { opacity: 1, scale: 1,    y: 0,  filter: "blur(0px)" },
-    exit:       { opacity: 0, scale: 1.03, y: -16, filter: "blur(8px)" },
+    initial: { opacity: 0, scale: 0.96, y: 20, filter: "blur(10px)" },
+    animate: { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" },
+    exit: { opacity: 0, scale: 1.03, y: -16, filter: "blur(8px)" },
     transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
   };
 }
@@ -160,33 +163,33 @@ export const router = createBrowserRouter([
   {
     element: <PageTransition />,
     children: [
-      { path: "/",                    Component: LandingPage },
-      { path: "/portals",             Component: PortalDirectory },
+      { path: "/", Component: LandingPage },
+      { path: "/portals", Component: PortalDirectory },
       // Tenant
-      { path: "/tenant/register",     Component: TenantRegister },
-      { path: "/tenant/login",        Component: TenantLogin },
-      { path: "/tenant/*",            Component: TenantGuard },
+      { path: "/tenant/register", Component: TenantRegister },
+      { path: "/tenant/login", Component: TenantLogin },
+      { path: "/tenant/*", Component: TenantGuard },
       // Landlord
-      { path: "/landlord/register",   Component: LandlordRegister },
-      { path: "/landlord/login",      Component: LandlordLogin },
-      { path: "/landlord/*",          Component: LandlordGuard },
+      { path: "/landlord/register", Component: LandlordRegister },
+      { path: "/landlord/login", Component: LandlordLogin },
+      { path: "/landlord/*", Component: LandlordGuard },
       // Admin (siêu quản trị)
-      { path: "/admin/login",         Component: AdminLogin },
-      { path: "/admin/*",             Component: AdminGuard },
+      { path: "/admin/login", Component: AdminLogin },
+      { path: "/admin/*", Component: AdminGuard },
       // Building Manager
-      { path: "/manager/login",       Component: ManagerLogin },
-      { path: "/manager/*",           Component: ManagerGuard },
+      { path: "/manager/login", Component: ManagerLogin },
+      { path: "/manager/*", Component: ManagerGuard },
       // Developer
-      { path: "/dev/login",           Component: DevLogin },
-      { path: "/dev/*",               Component: DevGuard },
+      { path: "/dev/login", Component: DevLogin },
+      { path: "/dev/*", Component: DevGuard },
       // Sub-pages
-      { path: "/security",            Component: SecurityGuard },
-      { path: "/contracts",           Component: ContractsGuard },
-      { path: "/payments",            Component: PaymentsGuard },
-      { path: "/reports",             Component: ReportsGuard },
-      { path: "/chat",                Component: ChatGuard },
-      { path: "/post",                Component: PostGuard },
-      { path: "/listing/:id",         Component: ListingDetailPage },
+      { path: "/security", Component: SecurityGuard },
+      { path: "/contracts", Component: ContractsGuard },
+      { path: "/payments", Component: PaymentsGuard },
+      { path: "/reports", Component: ReportsGuard },
+      { path: "/chat", Component: ChatGuard },
+      { path: "/post", Component: PostGuard },
+      { path: "/listing/:id", Component: ListingDetailPage },
     ],
   },
 ]);

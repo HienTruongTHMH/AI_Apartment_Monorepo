@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateApartmentDto } from './create-apartment.dto';
 
-import { IsNotEmpty, IsNumber, IsEnum, IsInt, IsUUID, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsEnum, IsInt, IsString } from "class-validator";
 import { ApartmentStatus, ApartmentTypes } from "@prisma/client";
 
 export class UpdateApartmentDto extends PartialType(CreateApartmentDto) {
@@ -17,16 +17,16 @@ export class UpdateApartmentDto extends PartialType(CreateApartmentDto) {
     apartmentStatus!: ApartmentStatus;
 
     @IsEnum(ApartmentTypes)
-    apartmentType!: ApartmentTypes
+    apartmentType!: ApartmentTypes;
 
     @IsNumber()
     bedroom!: number;
 
     @IsNumber()
-    livingroom!: number
+    livingroom!: number;
     
     @IsNumber()
-    bathroom!: number
+    bathroom!: number;
 
     @IsString()
     district!: string;
@@ -34,7 +34,6 @@ export class UpdateApartmentDto extends PartialType(CreateApartmentDto) {
     @IsString()
     fullAddress!: string;
 
-    @IsUUID()
-    @IsNotEmpty()
-    ownerId!: string;
+    // ownerId is intentionally NOT here.
+    // An apartment's owner must never change via a PATCH request.
 }

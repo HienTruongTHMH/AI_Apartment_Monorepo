@@ -9,16 +9,22 @@ const prisma = new PrismaClient({
 
 async function main() {
   // 1. Tạo một User chủ nhà (vì Apartment cần ownerId)
-  const owner = await prisma.user.upsert({
+  const ownerAccount = await prisma.account.upsert({
     where: { email: 'owner@example.com' },
     update: {},
     create: {
       email: 'owner@example.com',
-      name: 'Chủ nhà mẫu',
       hashedPassword: 'dummy_password',
-      phone: '0123456789'             
+      phone: '0123456789',      
+      ownerProfile: {
+        create: {
+          fullName: "Chủ nhà mẫu",
+          taxCode: '0911109990'
+        }        
+      }       
       // Giả sử model User của bạn có các trường này, hãy điều chỉnh theo model thực tế của bạn
     },
+    include: {ownerProfile: true}
   });
 
   // 2. Tạo một số tiện ích (Amenities) mẫu
@@ -40,13 +46,15 @@ async function main() {
     },
   });
 
+
+  const currentOwnerId = ownerAccount.ownerProfile!.id
   // --- CĂN HỘ 1: STUDIO HIỆN ĐẠI ---
   const apartment1 = await prisma.apartment.create({
     data: {
       floor: 12,
       area: 35.5,
       apartmentStatus: ApartmentStatus.Available,
-      ownerId: owner.id,
+      ownerId: currentOwnerId,
       apartmentListing: {
         create: {
           title: 'Studio hiện đại trung tâm quận 1 - Full nội thất',
@@ -75,7 +83,7 @@ async function main() {
       floor: 25,
       area: 120.0,
       apartmentStatus: ApartmentStatus.Available,
-      ownerId: owner.id,
+      ownerId: currentOwnerId,
       apartmentListing: {
         create: {
           title: 'Căn hộ 3 phòng ngủ cao cấp - View sông Sài Gòn',

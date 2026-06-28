@@ -5,6 +5,7 @@ import {
   Building2, ChevronLeft, Mail, Lock, Eye, EyeOff,
   CheckCircle2, ArrowRight, AlertCircle, KeyRound, RefreshCw,
 } from "lucide-react";
+import { authService } from "@/services/auth.services";
 
 const STAFF_EMAILS = new Set([
   "admin@nestaviet.vn",
@@ -40,15 +41,16 @@ export function TenantLogin() {
       return;
     }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    // Simulate first-login detection for temp passwords
-    const tempSuffix = /^[A-Z2-9a-z]{10}$/.test(password);
-    if (tempSuffix) {
-      setIsFirstLogin(true);
-    } else {
-      try { localStorage.setItem("nv-tenant-logged-in", "true"); localStorage.setItem("nv-tenant-email", email); } catch {}
+    try {
+      const { accessToken } = await authService.login(email, password);
+      authService.saveToken(accessToken);
       navigate("/tenant");
+    } catch (err: any) {
+      // Axios puts the backend error response in err.response.data
+      const msg = err?.response?.data?.message;
+      setError(Array.isArray(msg) ? msg[0] : (msg ?? "Đăng nhập thất bại. Vui lòng thử lại."));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +60,7 @@ export function TenantLogin() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
-    try { localStorage.setItem("nv-tenant-logged-in", "true"); localStorage.setItem("nv-tenant-email", email); } catch {}
+    try { localStorage.setItem("nv-tenant-logged-in", "true"); localStorage.setItem("nv-tenant-email", email); } catch { }
     setSuccess(true);
     setTimeout(() => navigate("/tenant"), 1500);
   };
@@ -117,8 +119,8 @@ export function TenantLogin() {
               {isFirstLogin
                 ? "Vui lòng đặt mật khẩu mới để bảo vệ tài khoản của bạn"
                 : forgotMode
-                ? "Nhập email — hệ thống sẽ gửi mật khẩu tạm thời mới"
-                : "Chào mừng trở lại NestaVietAI"}
+                  ? "Nhập email — hệ thống sẽ gửi mật khẩu tạm thời mới"
+                  : "Chào mừng trở lại NestaVietAI"}
             </p>
           </div>
 
