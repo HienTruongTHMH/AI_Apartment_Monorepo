@@ -55,7 +55,7 @@ def build_instructor_client() -> instructor.Instructor:
     )
 
 
-def image_url_for_api(img: rawListingImageInput) -> str:
+def imageUrl_for_api(img: rawListingImageInput) -> str:
     b64_val = (img.base64_data or "").strip()
     url_val = (img.url or "").strip()
 
@@ -68,12 +68,6 @@ def image_url_for_api(img: rawListingImageInput) -> str:
     if url_val and url_val.lower() != "string" and url_val.startswith("http"):
         try:
             start_t = time.time()
-            # Tắt nếu muốn// Hiển:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
-            }
-
             with httpx.Client() as client:
                 response = client.get(url_val, timeout=10.0)
                 response.raise_for_status()
@@ -92,7 +86,7 @@ def build_user_content_parts(
     text_block: str,
     images: list[rawListingImageInput],
 ) -> str | list[dict[str, Any]]:
-    """OpenAI-compatible multimodal: text + image_url parts for Gemini."""
+    """OpenAI-compatible multimodal: text + imageUrl parts for Gemini."""
     slice_ = images[:_MAX_IMAGES]
     if not slice_:
         return text_block
@@ -101,9 +95,9 @@ def build_user_content_parts(
     for img in slice_:
         parts.append(
             {
-                "type": "image_url",
-                "image_url": {"url": image_url_for_api(img)},
-            }
+            "type": "image_url",
+            "image_url": {"url": imageUrl_for_api(img)}, 
+        }
         )
     return parts
 
@@ -173,7 +167,7 @@ DỮ LIỆU TỪ DATABASE (để đối soát):
 ID: {payload.db_apartment_data.get('id')}
 Diện tích: {payload.db_apartment_data.get('area')} m²
 Tầng: {payload.db_apartment_data.get('floor')}
-Số phòng: {payload.db_apartment_data.get('room_number')}
+Số phòng: {payload.db_apartment_data.get('roomNumber')}
 Ghi chú: {payload.db_apartment_data.get('note')}
 ---
 
