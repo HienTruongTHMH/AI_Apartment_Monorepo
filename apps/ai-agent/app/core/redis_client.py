@@ -8,7 +8,12 @@ logger = logging.getLogger(__name__)
 
 # Initialize a global Redis connection pool to avoid reconnecting constantly
 try:
-    redis_pool = redis.ConnectionPool.from_url(settings.redis_url, decode_responses=True)
+    redis_pool = redis.ConnectionPool.from_url(
+        settings.redis_url, 
+        decode_responses=True,
+        socket_timeout=15.0,
+        socket_connect_timeout=5.0
+    )
     redis_client = redis.Redis(connection_pool=redis_pool)
 except Exception as e:
     logger.error(f"Failed to initialize Redis pool: {e}")
