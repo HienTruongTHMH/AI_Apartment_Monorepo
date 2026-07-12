@@ -13,11 +13,13 @@ import { AiAgentsModule } from './ai-agents/ai-agents.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [ 
-    ConfigModule.forRoot(), PrismaModule, ListingModule, ApartmentModule, 
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true
+    }), PrismaModule, ListingModule, ApartmentModule,
     ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
-export class AppModule {}
+export class AppModule { }

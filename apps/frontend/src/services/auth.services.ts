@@ -7,8 +7,8 @@ export const authService = {
         return res.data; // { accessToken, message }
     },
 
-    async register(email: string, password: string, fullName: string, phone: string) {
-        const res = await api.post('/auth/register', { email, password, fullName, phone });
+    async register(email: string, password: string, passwordTwo: string, fullName: string, identityCard: string, phone: string, roles: string) {
+        const res = await api.post('/auth/register', { email, password, passwordTwo, fullName, identityCard, phone, roles });
         return res.data;
     },
 

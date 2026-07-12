@@ -15,16 +15,17 @@ async function main() {
     create: {
       email: 'owner@example.com',
       hashedPassword: 'dummy_password',
-      phone: '0123456789',      
+      phone: '0123456789',
+      fullName: 'Chủ nhà mẫu',     // ← required after schema update
       ownerProfile: {
         create: {
           fullName: "Chủ nhà mẫu",
           taxCode: '0911109990'
-        }        
-      }       
+        }
+      }
       // Giả sử model User của bạn có các trường này, hãy điều chỉnh theo model thực tế của bạn
     },
-    include: {ownerProfile: true}
+    include: { ownerProfile: true }
   });
 
   // 2. Tạo một số tiện ích (Amenities) mẫu
