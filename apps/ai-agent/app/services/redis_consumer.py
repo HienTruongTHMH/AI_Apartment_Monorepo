@@ -15,6 +15,7 @@ import threading
 import time
 from typing import Optional
 
+import redis
 from app.core.redis_client import redis_client
 from app.services.qdrant_service import upsert_apartment_vector
 
@@ -235,6 +236,9 @@ def _consumer_loop(stop_event: threading.Event):
                 processed = _process_messages(messages)
                 if processed > 0:
                     logger.debug(f"[Consumer] Processed {processed} new messages.")
+        except redis.exceptions.TimeoutError:
+            # Đây là hành vi bình thường khi block timeout hết hạn mà không có message mới
+            logger.debug("[Consumer] Timeout reading from socket (no new messages), retrying...")
         except Exception as e:
             logger.error(f"[Consumer] Phase 2 polling error: {e}", exc_info=True)
             stop_event.wait(timeout=_RETRY_SLEEP)

@@ -21,7 +21,11 @@ EMBEDDING_DIMENSION = 3072  # Dimension for gemini-embedding-001 (gemini-embeddi
 # ─────────────────────────────────────────────────────────────────────────────
 
 try:
-    qdrant_client = QdrantClient(url=settings.qdrant_url)
+    qdrant_client = QdrantClient(
+        url=settings.qdrant_url,
+        api_key=settings.qdrant_api_key,
+        check_compatibility=False
+    )
     logger.info(f"Connected to Qdrant at {settings.qdrant_url}")
 except Exception as e:
     logger.error(f"Failed to connect to Qdrant: {e}")
