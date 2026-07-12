@@ -19,6 +19,7 @@ import ServicesTab from "@features/tenant/components/ServicesTab";
 import InvoicesTab from "@features/tenant/components/InvoicesTab";
 import ProfileTab from "@features/tenant/components/ProfileTab";
 import { NotificationCenter } from "@features/tenant/components/NotificationCenter";
+import { authService } from "@/services/auth.services";
 
 type Tab = "home" | "chat" | "explore" | "services" | "invoices" | "profile" | "inbox" | "map" | "price";
 
@@ -38,7 +39,7 @@ export function TenantApp() {
   const toggleDark = () => {
     setIsDark((d) => {
       const next = !d;
-      try { localStorage.setItem("nv-dark-tenant", String(next)); } catch {}
+      try { localStorage.setItem("nv-dark-tenant", String(next)); } catch { }
       return next;
     });
   };
@@ -58,7 +59,7 @@ export function TenantApp() {
   const tenantName = tenantUser.name || "Cư dân";
 
   const handleLogout = () => {
-    try { localStorage.removeItem("nv-tenant-logged-in"); } catch {}
+    authService.logout();
     navigate("/");
   };
 
@@ -67,7 +68,7 @@ export function TenantApp() {
   });
   const toggleLang = () => setLang((l) => {
     const next = l === "vi" ? "en" : "vi";
-    try { localStorage.setItem("nv-lang-tenant", next); } catch {}
+    try { localStorage.setItem("nv-lang-tenant", next); } catch { }
     return next;
   });
 
@@ -79,15 +80,15 @@ export function TenantApp() {
   const T = (vi: string, en: string) => lang === "vi" ? vi : en;
 
   const navItems: { id: Tab; icon: React.ElementType; label: string; badge?: number }[] = [
-    { id: "home",     icon: Home,          label: T("Trang chủ", "Home") },
-    { id: "chat",     icon: Bot,           label: T("AI Chat", "AI Chat") },
-    { id: "explore",  icon: MapPin,        label: T("Khám phá", "Explore") },
-    { id: "inbox",    icon: MessageSquare, label: T("Hộp thư", "Inbox"), badge: 3 },
-    { id: "map",      icon: Map,           label: T("Bản đồ", "Map") },
-    { id: "price",    icon: DollarSign,    label: T("Ước giá AI", "Price AI") },
-    { id: "services", icon: Wrench,        label: T("Dịch vụ", "Services"), badge: 2 },
-    { id: "invoices", icon: Receipt,       label: T("Hóa đơn", "Invoices"), badge: 1 },
-    { id: "profile",  icon: User,          label: T("Hồ sơ", "Profile") },
+    { id: "home", icon: Home, label: T("Trang chủ", "Home") },
+    { id: "chat", icon: Bot, label: T("AI Chat", "AI Chat") },
+    { id: "explore", icon: MapPin, label: T("Khám phá", "Explore") },
+    { id: "inbox", icon: MessageSquare, label: T("Hộp thư", "Inbox"), badge: 3 },
+    { id: "map", icon: Map, label: T("Bản đồ", "Map") },
+    { id: "price", icon: DollarSign, label: T("Ước giá AI", "Price AI") },
+    { id: "services", icon: Wrench, label: T("Dịch vụ", "Services"), badge: 2 },
+    { id: "invoices", icon: Receipt, label: T("Hóa đơn", "Invoices"), badge: 1 },
+    { id: "profile", icon: User, label: T("Hồ sơ", "Profile") },
   ];
 
   return (
@@ -127,11 +128,10 @@ export function TenantApp() {
           {navItems.map((item) => (
             <motion.button key={item.id} whileHover={{ x: 2 }} whileTap={{ scale: 0.97 }}
               onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
-                activeTab === item.id
-                  ? isDark ? "bg-emerald-900/40 text-emerald-300 border border-emerald-700/50" : "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
-                  : isDark ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200" : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-              }`}>
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${activeTab === item.id
+                ? isDark ? "bg-emerald-900/40 text-emerald-300 border border-emerald-700/50" : "bg-emerald-50 text-emerald-700 border border-emerald-200/70"
+                : isDark ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200" : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                }`}>
               <item.icon size={16} strokeWidth={activeTab === item.id ? 2.5 : 1.8} />
               <span className="flex-1 text-left" style={{ fontSize: "0.85rem", fontWeight: activeTab === item.id ? 600 : 400 }}>{item.label}</span>
               {item.badge ? (
@@ -168,15 +168,15 @@ export function TenantApp() {
               <ChevronDown size={16} className="text-gray-600" />
             </button>
             <h1 className="font-bold" style={{ fontSize: "1rem", color: isDark ? "#f1f5f9" : "#111827" }}>
-              {activeTab === "home"     && T("Trang chủ", "Home")}
-              {activeTab === "chat"     && T("Super Broker AI", "Super Broker AI")}
-              {activeTab === "explore"  && T("Khám phá căn hộ", "Explore Listings")}
-              {activeTab === "inbox"    && T("Hộp thư", "Inbox")}
-              {activeTab === "map"      && T("Bản đồ TP.HCM", "HCM City Map")}
-              {activeTab === "price"    && T("AI Ước giá thuê", "AI Price Estimator")}
+              {activeTab === "home" && T("Trang chủ", "Home")}
+              {activeTab === "chat" && T("Super Broker AI", "Super Broker AI")}
+              {activeTab === "explore" && T("Khám phá căn hộ", "Explore Listings")}
+              {activeTab === "inbox" && T("Hộp thư", "Inbox")}
+              {activeTab === "map" && T("Bản đồ TP.HCM", "HCM City Map")}
+              {activeTab === "price" && T("AI Ước giá thuê", "AI Price Estimator")}
               {activeTab === "services" && T("Yêu cầu dịch vụ", "Services")}
               {activeTab === "invoices" && T("Hóa đơn & Thanh toán", "Invoices & Payments")}
-              {activeTab === "profile"  && T("Hồ sơ cư dân", "Resident Profile")}
+              {activeTab === "profile" && T("Hồ sơ cư dân", "Resident Profile")}
             </h1>
           </div>
           <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export function TenantApp() {
       {showOnboarding && (
         <OnboardingTour role="tenant" onComplete={() => {
           setShowOnboarding(false);
-          try { localStorage.setItem("nv-onboarding-tenant-done", "1"); } catch {}
+          try { localStorage.setItem("nv-onboarding-tenant-done", "1"); } catch { }
         }} />
       )}
 

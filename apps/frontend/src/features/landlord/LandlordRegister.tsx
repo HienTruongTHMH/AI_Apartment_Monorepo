@@ -3,8 +3,9 @@ import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Building2, ChevronLeft, ChevronRight, CheckCircle2,
-  Shield, AlertTriangle, Mail, ArrowRight,
+  Shield, AlertTriangle, Mail, ArrowRight, RefreshCw, Zap,
 } from "lucide-react";
+import { authService } from "@/services/auth.services";
 import {
   type Section, type LandlordFormData,
   initialFormData,
@@ -35,7 +36,7 @@ export function LandlordRegister() {
       const t = localStorage.getItem("nv-theme");
       if (t === "light") document.documentElement.setAttribute("data-theme", "light");
       else document.documentElement.removeAttribute("data-theme");
-    } catch {}
+    } catch { }
   }, []);
 
   const set = (key: keyof LandlordFormData, val: string) => setForm((f) => ({ ...f, [key]: val }));
@@ -70,12 +71,53 @@ export function LandlordRegister() {
     return true;
   };
 
-  const handleNext = () => {
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleNext = async () => {
     if (!canNext()) { setAttempted(true); return; }
     if (section < 4) { setSection((s) => (s + 1) as Section); setAttempted(false); }
     else {
-      try { localStorage.setItem("nv-landlord-user", JSON.stringify({ name: form.fullName, email: form.email, buildingName: form.buildingName, totalUnits: form.totalUnits })); } catch {}
+      // Final step → call the real API
+      setSubmitting(true);
+      setSubmitError("");
+      try {
+        const roles = "OWNER";
+        const passwordTwo = form.confirmPassword;
+        await authService.register(form.email, form.password, passwordTwo, form.fullName, form.idNumber, form.phone, roles);
+        setDone(true);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message;
+        setSubmitError(Array.isArray(msg) ? msg[0] : (msg ?? "Đăng ký thất bại. Vui lòng thử lại."));
+      } finally {
+        setSubmitting(false);
+      }
+    }
+  };
+
+  // Bypass: submit only Section 1 identity data, skip building/legal/services steps.
+  // Used during development when FE wizard is ahead of BE apartment creation flow.
+  const handleQuickRegister = async () => {
+    if (sec1Errors.length > 0) { setAttempted(true); return; }
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const passwordTwo = form.confirmPassword;
+      await authService.register(
+        form.email,
+        form.password,
+        passwordTwo,
+        form.fullName,
+        form.idNumber,   // maps to identityCard in RegisterDto
+        form.phone,
+        "OWNER"
+      );
       setDone(true);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      setSubmitError(Array.isArray(msg) ? msg[0] : (msg ?? "Đăng ký thất bại. Vui lòng thử lại."));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -204,9 +246,8 @@ export function LandlordRegister() {
             const active = section === n;
             const completed = section > n;
             return (
-              <div key={n} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${
-                active ? "bg-violet-500/15 border-violet-500/40" : completed ? "bg-white/5 border-emerald-500/30" : "bg-white/3 border-white/8"
-              }`}>
+              <div key={n} className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${active ? "bg-violet-500/15 border-violet-500/40" : completed ? "bg-white/5 border-emerald-500/30" : "bg-white/3 border-white/8"
+                }`}>
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center ${completed ? "bg-emerald-500" : active ? "bg-violet-500" : "bg-white/10"}`}>
                   {completed ? <CheckCircle2 size={14} className="text-white" /> : <Icon size={13} className={active ? "text-white" : "text-white/40"} />}
                 </div>
@@ -240,24 +281,63 @@ export function LandlordRegister() {
           </motion.div>
         </AnimatePresence>
 
-        <div className="flex items-center justify-between mt-8">
+        {submitError && (
+          <p className="text-red-400 text-center mt-4" style={{ fontSize: "0.82rem" }}>
+            {submitError}
+          </p>
+        )}
+
+        <div className="flex items-center justify-between mt-4">
           <button
             onClick={() => section > 1 ? setSection((s) => (s - 1) as Section) : navigate("/")}
-            className="flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors px-4 py-2 rounded-xl hover:bg-white/5"
+            disabled={submitting}
+            className="flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors px-4 py-2 rounded-xl hover:bg-white/5 disabled:opacity-40"
             style={{ fontSize: "0.875rem" }}>
             <ChevronLeft size={16} />{section > 1 ? "Quay lại" : "Trang chủ"}
           </button>
           <div className="flex items-center gap-2 text-white/30" style={{ fontSize: "0.75rem" }}>{section}/4</div>
-          <button
-            onClick={handleNext}
-            className={`flex items-center gap-2 px-7 py-3 rounded-full font-semibold transition-all shadow-lg shadow-violet-500/20 ${
-              canNext()
-                ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:opacity-90"
-                : "bg-gradient-to-r from-violet-500/40 to-purple-600/40 text-white/60 cursor-not-allowed"
-            }`}
-            style={{ fontSize: "0.9rem" }}>
-            {section === 4 ? "Gửi hồ sơ đăng ký" : "Tiếp theo"}<ChevronRight size={16} />
-          </button>
+
+          {/* Right side: bypass button (Section 1 only) + main Next/Submit button */}
+          <div className="flex flex-col items-end gap-1.5">
+            <div className="flex items-center gap-2">
+
+              {/* ── BYPASS BUTTON: visible only on Section 1 when identity fields are valid ── */}
+              {section === 1 && sec1Errors.length === 0 && (
+                <button
+                  onClick={handleQuickRegister}
+                  disabled={submitting}
+                  title="Đăng ký hồ sơ cơ bản ngay, bổ sung thông tin tòa nhà sau"
+                  className="flex items-center gap-1.5 px-5 py-3 rounded-full font-semibold transition-all border border-violet-500/40 text-violet-300 hover:bg-violet-500/10 hover:border-violet-400/60 disabled:opacity-40"
+                  style={{ fontSize: "0.85rem" }}>
+                  {submitting
+                    ? <RefreshCw size={13} className="animate-spin" />
+                    : <Zap size={13} />}
+                  Đăng ký
+                </button>
+              )}
+
+              {/* ── MAIN BUTTON: Next / Submit full wizard ── */}
+              <button
+                onClick={handleNext}
+                disabled={submitting}
+                className={`flex items-center gap-2 px-7 py-3 rounded-full font-semibold transition-all shadow-lg shadow-violet-500/20 ${canNext() && !submitting
+                  ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white hover:opacity-90"
+                  : "bg-gradient-to-r from-violet-500/40 to-purple-600/40 text-white/60 cursor-not-allowed"
+                  }`}
+                style={{ fontSize: "0.9rem" }}>
+                {submitting
+                  ? <><RefreshCw size={15} className="animate-spin" />Đang gửi...</>
+                  : <>{section === 4 ? "Gửi hồ sơ đăng ký" : "Tiếp theo"}<ChevronRight size={16} /></>}
+              </button>
+            </div>
+
+            {/* Helper text — only shown on Section 1 when identity is valid */}
+            {section === 1 && sec1Errors.length === 0 && (
+              <p className="text-white/30" style={{ fontSize: "0.68rem", textAlign: "right", maxWidth: "260px" }}>
+                ⚡ "Đăng ký" tạo hồ sơ cơ bản ngay — thông tin tòa nhà có thể bổ sung sau khi đăng nhập.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

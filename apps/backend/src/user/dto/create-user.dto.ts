@@ -1,4 +1,4 @@
-import { 
+import {
     IsString,
     IsEmail,
     IsNumber,
@@ -9,11 +9,11 @@ export class CreateUserDto {
     @IsString()
     userName!: string;
 
-    @IsEmail({}, {message: 'Email empty'})
+    @IsEmail({}, { message: 'Email empty' })
     email!: string;
 
     @IsString()
-    @MinLength(12, {message: 'Min for passwrord are 12 charaters'})
+    @MinLength(12, { message: 'Min for passwrord are 12 charaters' })
     password!: string
 
 

@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
 import * as bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt'
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,9 +8,11 @@ import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
+    private readonly logger = new Logger(AuthService.name);
+
     constructor(
         private prisma: PrismaService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
     ) { }
 
     async register(dto: RegisterDto) {
@@ -34,7 +36,9 @@ export class AuthService {
                 data: {
                     email: dto.email,
                     hashedPassword: hashedPassword,
-                    phone: dto.phone
+                    fullName: dto.fullName,
+                    phone: dto.phone,
+                    identityCard: dto.identityCard
                 }
             })
 
@@ -45,6 +49,20 @@ export class AuthService {
                         fullName: dto.fullName
                     }
                 })
+
+                this.logger.log(`Tài khoản người thuê được tạo thành công, tài khoản id người thuê: ${account.id}`)
+            }
+
+            if (dto.roles === RegisterRoles.OWNER) {
+                await tx.ownerProfile.create({
+                    data: {
+                        accountId: account.id,
+                        fullName: dto.fullName
+                    }
+                })
+
+                this.logger.log(`Tài khoản người thuê được tạo thành công, tài khoản id chủ thuê: ${account.id}`)
+
             }
 
             return account;
@@ -90,6 +108,8 @@ export class AuthService {
             hasOwnerProfile: !!account.ownerProfile,
         }
 
+        this.logger.log(`User ${account.email} đã đăng nhập thành công `);
+
         return {
             message: "Đăng nhập thành công!",
             accessToken: this.jwtService.sign(payload),
@@ -123,9 +143,8 @@ export class AuthService {
             }
         });
 
-        // console.log(userProfile);
         return {
-            message: "Tạo tài khoản thành công, Vui lòng đăng nhập lại"
+            message: "Thiết lập tài khoản chủ hộ thành công, Vui lòng đăng nhập lại"
         }
     }
 

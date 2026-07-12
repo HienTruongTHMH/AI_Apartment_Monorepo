@@ -10,12 +10,12 @@ import { RolesGuard } from './guards/roles.guard';
   imports: [
     JwtModule.register({
       global: true,
-      secret: "NestaVietVNUK",
-      signOptions: {expiresIn: '1d'},
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1d' },
     }),
-  ],  
+  ],
   controllers: [AuthController],
   providers: [AuthService, PrismaService, JwtStrategy, RolesGuard],
   exports: [RolesGuard, JwtStrategy]
 })
-export class AuthModule {}
+export class AuthModule { }

@@ -41,6 +41,7 @@ async function main() {
         email: `owner${i}@danang-apartments.com`,
         hashedPassword: 'hashed_password_123', // Thực tế phải dùng bcrypt
         phone: `090512300${i}`,
+        fullName: `Chủ nhà số ${i}`, // ← required after schema update
         isActive: true,
         ownerProfile: {
           create: {
@@ -49,8 +50,7 @@ async function main() {
           }
         }
       },
-
-      include: { ownerProfile: true}
+      include: { ownerProfile: true }
     });
     
     owners.push(ownerAccount);
@@ -64,6 +64,7 @@ async function main() {
         email: `tenant${i}@gmail.com`,
         hashedPassword: 'hashed_password_123',
         phone: `093598700${i}`,
+        fullName: `Khách thuê số ${i}`, // ← required after schema update
         isActive: true,
         tenantProfile: {
           create: {
@@ -71,7 +72,7 @@ async function main() {
           }
         }
       },
-      include: {tenantProfile: true}
+      include: { tenantProfile: true }
     });
     tenants.push(tenantAccount);
   }

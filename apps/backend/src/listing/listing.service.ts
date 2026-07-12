@@ -166,8 +166,8 @@ export class ListingService {
       where: { id: id },
       data: updatedData,
       include: {
-          apartment: true,
-          images: true
+        apartment: true,
+        images: true
       }
     });
   }
