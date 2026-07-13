@@ -45,11 +45,23 @@ export class AiAgentsService {
     const payload = {
       owner_id: dto.ownerId,
       rawText: constructedRawText, // Đưa chuỗi vừa ghép vào đây
-      images: (dto.imageUrls || []).map((url, index) => ({
-        image_id: `img_${index}`,
-        url: url,
-        media_type: 'image/jpeg'
-      })),
+      images: (dto.imageUrls || []).map((url, index) => {
+        if (url.startsWith('data:')) {
+          const match = url.match(/^data:([^;]+);base64,(.+)$/);
+          if (match) {
+            return {
+              image_id: `img_${index}`,
+              media_type: match[1],
+              base64_data: match[2],
+            };
+          }
+        }
+        return {
+          image_id: `img_${index}`,
+          url: url,
+          media_type: 'image/jpeg',
+        };
+      }),
       db_apartment_data: dbApartment ? {
         id: dbApartment.id,
         area: Number(dbApartment.area),

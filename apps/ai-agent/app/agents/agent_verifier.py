@@ -63,8 +63,12 @@ def imageUrl_for_api(img: rawListingImageInput) -> str:
     if b64_val and b64_val.lower() != "string":
         mt = (img.media_type or "image/jpg").strip()
         return f"data:{mt};base64,{b64_val}"
+
+    # 2. Nếu url đã là chuỗi Data URL (data:image/...)
+    if url_val.startswith("data:image/"):
+        return url_val
         
-    # 2. Tiếp theo là URL (nếu không phải chuỗi "string" và bắt đầu bằng http)
+    # 3. Tiếp theo là HTTP URL
     if url_val and url_val.lower() != "string" and url_val.startswith("http"):
         try:
             start_t = time.time()
