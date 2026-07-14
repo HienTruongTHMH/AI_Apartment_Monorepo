@@ -33,6 +33,9 @@ router = APIRouter(prefix="/api", tags=["Agent 1 - Listing Verifier"])
 )
 async def verify_listing_endpoint(payload: rawListingInput) -> verifyListingResponse:
     try:
+        logger.info(f"FastAPI /verify-listing received payload. Images count: {len(payload.images)}")
+        if payload.images:
+            logger.info(f"First image keys: {payload.images[0].model_dump().keys()} | ID: {payload.images[0].image_id} | Has base64: {payload.images[0].base64_data is not None} | Base64 length: {len(payload.images[0].base64_data or '')}")
         result = verify_listing(payload)
 
         # Emit listing.approved if published

@@ -6,7 +6,7 @@ export interface UserAccount {
   fullName: string;
   phone?: string;
   identityCard?: string;
-  isActive: boolean; // Crucial requirement: false initially upon register, true after rental confirmation
+  isActive: boolean;
   role: 'GUEST' | 'TENANT' | 'OWNER';
   tenantProfileId?: string;
   ownerProfileId?: string;

@@ -20,6 +20,7 @@ function SearchContent() {
   const [type, setType] = useState(initialType);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [page, setPage] = useState(1);
   const { toggleAiPanel } = useAuthStore();
 
   const fetchFilteredListings = async () => {
@@ -29,7 +30,9 @@ function SearchContent() {
         district: district || undefined,
         bedroom: bedroom ? Number(bedroom) : undefined,
         minPrice: minPrice ? Number(minPrice) : undefined,
-        maxPrice: maxPrice ? Number(maxPrice) : undefined
+        maxPrice: maxPrice ? Number(maxPrice) : undefined,
+        page: page,
+        limit: 9
       });
 
       let results = data;
@@ -45,8 +48,12 @@ function SearchContent() {
   };
 
   useEffect(() => {
-    fetchFilteredListings();
+    setPage(1);
   }, [district, bedroom, type, minPrice, maxPrice]);
+
+  useEffect(() => {
+    fetchFilteredListings();
+  }, [district, bedroom, type, minPrice, maxPrice, page]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -113,9 +120,12 @@ function SearchContent() {
               className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none"
             >
               <option value="" className="bg-slate-900">Tất cả phân loại</option>
+              <option value="Normal" className="bg-slate-900">Căn hộ thường (Normal)</option>
               <option value="Studio" className="bg-slate-900">Studio</option>
-              <option value="Normal" className="bg-slate-900">Normal</option>
+              <option value="Officetel" className="bg-slate-900">Officetel</option>
+              <option value="Shophouse" className="bg-slate-900">Shophouse</option>
               <option value="Penthouse" className="bg-slate-900">Penthouse</option>
+              <option value="Duplex" className="bg-slate-900">Duplex</option>
               <option value="SkyVilla" className="bg-slate-900">Sky Villa</option>
             </select>
           </div>
@@ -155,10 +165,33 @@ function SearchContent() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {listings.map((item) => (
-            <PropertyCard key={item.id} listing={item} />
-          ))}
+        <div className="space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {listings.map((item) => (
+              <PropertyCard key={item.id} listing={item} />
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-center gap-4 pt-6 border-t border-white/10">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 rounded-xl bg-slate-900 border border-white/10 hover:border-emerald-500/40 text-gray-300 hover:text-white disabled:opacity-50 disabled:hover:border-white/10 text-xs font-semibold transition-all"
+            >
+              Trang trước
+            </button>
+            <span className="text-xs text-gray-400">
+              Trang {page}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={listings.length < 9}
+              className="px-4 py-2 rounded-xl bg-slate-900 border border-white/10 hover:border-emerald-500/40 text-gray-300 hover:text-white disabled:opacity-50 disabled:hover:border-white/10 text-xs font-semibold transition-all"
+            >
+              Trang sau
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -170,7 +170,7 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
             </div>
             <p className="text-xs text-gray-300 leading-relaxed">
               * **Không ký hợp đồng online:** Hợp đồng pháp lý thực tế sẽ được bàn giao và ký bằng giấy bản cứng giữa bạn và Chủ nhà ngoài hệ thống. <br />
-              * Sau khi hoàn tất ký giấy bản cứng, nút **&quot;Xác nhận đã ký bản cứng&quot;** trong Dashboard sẽ chuyển trạng thái tài khoản của bạn sang <span className="text-emerald-400 font-bold font-mono">isActive = true</span> và kích hoạt hợp đồng chính thức sang <span className="text-emerald-400 font-bold font-mono">Active</span>.
+              * Sau khi hoàn tất ký giấy bản cứng, nút **&quot;Xác nhận đã ký bản cứng&quot;** trong Dashboard sẽ chuyển trạng thái tài khoản của bạn sang **Đã kích hoạt** và kích hoạt hợp đồng chính thức.**
             </p>
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
                 <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
                   <li>Bước 1: Nhấn &quot;Gửi Yêu Cầu Thuê&quot; để thông báo cho Chủ nhà {listing.apartment.owner?.fullName}.</li>
                   <li>Bước 2: Hai bên gặp mặt, bàn giao căn hộ và ký kết **giấy hợp đồng bản cứng**.</li>
-                  <li>Bước 3: Sau khi ký xong, truy cập Dashboard Tenant / trang Kích hoạt bấm &quot;Xác nhận đã ký bản cứng&quot; để tài khoản chuyển sang <span className="text-emerald-400 font-bold font-mono">isActive = true</span> và Hợp đồng chuyển thành <span className="text-emerald-400 font-bold font-mono">Active</span>!</li>
+                  <li>Bước 3: Sau khi ký xong, truy cập Dashboard Khách Hàng / trang Kích hoạt bấm &quot;Xác nhận đã ký bản cứng&quot; để tài khoản chuyển sang **Đã kích hoạt** và Hợp đồng được kích hoạt chính thức!</li>
                 </ol>
               </div>
             </div>

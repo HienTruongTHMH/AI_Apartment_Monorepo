@@ -29,12 +29,12 @@ export default function LoginPage() {
         throw new Error('Không nhận được token xác thực từ backend.');
       }
       
-      let profileData: { id: string; email: string; fullName: string; phone: string; isActive: boolean; role: 'TENANT' | 'OWNER' | 'GUEST' } = {
+      let profileData: { id: string; email: string; fullName: string; phone: string; isActive: boolean; role: 'TENANT' | 'OWNER' | 'GUEST'; ownerProfileId?: string } = {
         id: 'usr-' + Date.now(),
         email: email,
         fullName: 'Người Dùng AI Apartment',
         phone: '0901234567',
-        isActive: false, // Initial state specification
+        isActive: false,
         role: 'TENANT'
       };
 
@@ -49,8 +49,9 @@ export default function LoginPage() {
             email: u.email || email,
             fullName: u.fullName || profileData.fullName,
             phone: profileData.phone,
-            isActive: false,
-            role: u.hasOwnerProfile ? 'OWNER' : 'TENANT'
+            isActive: typeof u.isActive === 'boolean' ? u.isActive : false,
+            role: u.hasOwnerProfile ? 'OWNER' : 'TENANT',
+            ownerProfileId: u.ownerProfileId || undefined,
           };
         }
       } catch {
@@ -138,7 +139,7 @@ export default function LoginPage() {
         <div className="text-center text-xs text-gray-400 pt-2 border-t border-white/5">
           Chưa có tài khoản?{' '}
           <Link href="/register" className="text-emerald-400 font-bold hover:underline">
-            Tạo tài khoản mới (`isActive = false`)
+            Tạo tài khoản mới
           </Link>
         </div>
       </div>

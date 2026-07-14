@@ -194,12 +194,14 @@ export const MOCK_CONTRACTS: ContractItem[] = [
 // Helper wrapper for resilient API calls with exact NestJS & FastAPI payload support
 export const apiService = {
   // Listings Search (Backend expects SearchListingDto: { keyword, minPrice, maxPrice })
-  async getListings(params?: { district?: string; keyword?: string; minPrice?: number; maxPrice?: number; bedroom?: number }) {
+  async getListings(params?: { district?: string; keyword?: string; minPrice?: number; maxPrice?: number; bedroom?: number; page?: number; limit?: number }) {
     try {
       const searchDto = {
         keyword: params?.keyword || params?.district,
         minPrice: params?.minPrice,
-        maxPrice: params?.maxPrice
+        maxPrice: params?.maxPrice,
+        page: params?.page,
+        limit: params?.limit
       };
       const res = await apiClient.get<any[]>('/listing/search', { params: searchDto });
       // Normalize response from NestJS ListingService.search()
@@ -251,14 +253,30 @@ export const apiService = {
 
   async getListingById(id: string) {
     try {
-      const res = await apiClient.get<ListingItem>(`/listing/${id}`);
-      return res.data;
+      const res = await apiClient.get<any>(`/listing/${id}`);
+      const data = res.data;
+      if (data) {
+        return {
+          ...data,
+          pricePerMonth: Number(data.pricePerMonth),
+          apartment: data.apartment ? {
+            ...data.apartment,
+            area: Number(data.apartment.area),
+          } : undefined
+        } as ListingItem;
+      }
+      return MOCK_LISTINGS.find(l => l.id === id || l.apartmentId === id) || MOCK_LISTINGS[0];
     } catch {
       return MOCK_LISTINGS.find(l => l.id === id || l.apartmentId === id) || MOCK_LISTINGS[0];
     }
   },
 
   // Owner Apartments
+  async createListing(payload: any) {
+    const res = await apiClient.post('/listing', payload);
+    return res.data;
+  },
+
   async getMyApartments() {
     try {
       const res = await apiClient.get('/apartment/my-apartments');
@@ -332,6 +350,22 @@ export const apiService = {
         imageTagsSuggested: ['phong_khach', 'phong_ngu', 'view_thanh_pho']
       };
     }
+  },
+  // AI Verification Engine (Direct FastAPI Payload submission)
+  async verifyListingDirect(payload: {
+    rawText: string;
+    images: {
+      image_id: string;
+      url?: string;
+      media_type?: string;
+      base64_data?: string;
+    }[];
+    owner_id: string;
+    db_apartment_data?: any;
+  }) {
+    const aiAgentUrl = process.env.NEXT_PUBLIC_AI_AGENT_URL || 'http://localhost:8000';
+    const res = await apiClient.post(`${aiAgentUrl}/api/verify-listing`, payload);
+    return res.data;
   },
 
   // AI Broker Agent (Calls POST /api/ai-agents/search matching SearchBrokerDto)

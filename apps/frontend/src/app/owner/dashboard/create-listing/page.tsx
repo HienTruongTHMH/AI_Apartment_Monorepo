@@ -1,500 +1,331 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiService } from '@/lib/api';
+import { Sparkles, Upload, Building2, CheckCircle, AlertTriangle, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
-import {
-  Building2,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  CheckCircle2,
-  ArrowRight,
-  RefreshCw,
-  FileText,
-  AlertCircle,
-  Upload,
-  X,
-  Image as ImageIcon,
-  Link2,
-  AlertTriangle,
-  Tag
-} from 'lucide-react';
+import { apiService } from '@/lib/api';
 
-const SAMPLE_IMAGES = [
-  'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
-  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80'
-];
+interface UploadedImage {
+  image_id: string;
+  url: string;
+  media_type: string;
+  base64_data: string;
+}
 
 export default function CreateListingPage() {
-  const router = useRouter();
   const { user } = useAuthStore();
+  const router = useRouter();
 
-  // Form states
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [pricePerMonth, setPricePerMonth] = useState('25000000');
-  const [type, setType] = useState('Studio');
-  const [area, setArea] = useState('65');
-  const [floor, setFloor] = useState('12');
-  const [roomNumber, setRoomNumber] = useState('1204');
-  const [fullAddress, setFullAddress] = useState('Tòa nhà Landmark 81, 720A Điện Biên Phủ, Phường 22, Bình Thạnh');
-  const [district, setDistrict] = useState('Bình Thạnh');
-  const [bedroom, setBedroom] = useState('2');
-  const [bathroom, setBathroom] = useState('2');
-  const [livingroom, setLivingroom] = useState('1');
-  const [kitchen, setKitchen] = useState('1');
-
-  // Images state
-  const [images, setImages] = useState<string[]>([]);
-  const [urlInput, setUrlInput] = useState('');
-  const [showUrlInput, setShowUrlInput] = useState(false);
-
-  // AI Verification State
+  const [apartmentType, setApartmentType] = useState('');
+  const [rawText, setRawText] = useState('');
+  const [images, setImages] = useState<UploadedImage[]>([]);
   const [verifying, setVerifying] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<{
-    verified: boolean;
-    score: number;
-    standardizedTitle: string;
-    suggestedDescription: string;
-    insights: string[];
-    imageAnalyses?: Array<{
-      image_id: string;
-      primary_tag?: string;
-      brightness_score?: number;
-      sharpness_score?: number;
-      watermark_or_branding_suspected?: boolean;
-      duplicate_or_stock_photo_suspected?: boolean;
-      confidence?: number;
-      notes_vi?: string;
-    }>;
-    imageTagsSuggested?: string[];
-  } | null>(null);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState('');
 
-  const [publishing, setPublishing] = useState(false);
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle image selection and base64 conversion
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!files) return;
 
-    Array.from(files).forEach((file) => {
+    setError('');
+    const newImages: UploadedImage[] = [];
+
+    Array.from(files).forEach((file, index) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImages((prev) => [...prev, reader.result as string]);
+        const base64String = reader.result as string;
+        // Extract raw base64 data without metadata header
+        const base64Data = base64String.split(',')[1];
+        
+        newImages.push({
+          image_id: `img_${Date.now()}_${index}`,
+          url: '',
+          media_type: file.type || 'image/jpeg',
+          base64_data: base64Data
+        });
+
+        // Update state when all files are processed
+        if (newImages.length === files.length) {
+          setImages((prev) => [...prev, ...newImages]);
         }
       };
       reader.readAsDataURL(file);
     });
-    e.target.value = '';
   };
 
-  const handleAddUrlImage = () => {
-    if (!urlInput.trim()) return;
-    setImages((prev) => [...prev, urlInput.trim()]);
-    setUrlInput('');
-    setShowUrlInput(false);
-  };
+  const handleVerify = async () => {
+    if (!rawText || rawText.length < 20) {
+      setError('Vui lòng nhập mô tả thô dài ít nhất 20 ký tự.');
+      return;
+    }
 
-  const handleAddSampleImages = () => {
-    setImages((prev) => Array.from(new Set([...prev, ...SAMPLE_IMAGES])));
-  };
+    if (!apartmentType) {
+      setError('Vui lòng chọn phân loại căn hộ.');
+      return;
+    }
 
-  const handleRemoveImage = (indexToRemove: number) => {
-    setImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-  };
-
-  const handleRunAiVerify = async () => {
-    if (!title || !description) return;
     setVerifying(true);
+    setError('');
+    setResult(null);
+
+    const payload = {
+      rawText,
+      images: images.map((img, index) => ({
+        image_id: `image_${index + 1}`,
+        url: img.url || undefined,
+        media_type: img.media_type,
+        base64_data: img.base64_data
+      })),
+      owner_id: user?.id || '',
+      db_apartment_data: null
+    };
+
+    console.log('[CreateListing] Sending payload images:', payload.images);
 
     try {
-      const res = await apiService.verifyListing({
-        ownerId: user?.id || 'owner-demo-001',
-        title,
-        description,
-        pricePerMonth: Number(pricePerMonth),
-        type,
-        area: Number(area),
-        floor: Number(floor),
-        room_number: Number(roomNumber),
-        fullAddress,
-        district,
-        bedroom: Number(bedroom),
-        bathroom: Number(bathroom),
-        livingroom: Number(livingroom),
-        kitchen: Number(kitchen),
-        imageUrls: images
-      });
-
-      setVerificationResult(res);
-    } catch {
-      // Intelligent fallback response matching Python AI verifier
-      setVerificationResult({
-        verified: true,
-        score: images.length > 0 ? 96 : 85,
-        standardizedTitle: `[AI Verified] ${title}`,
-        suggestedDescription: `${description}\n\n✨ [Báo Cáo AI Verifier]: Căn hộ có đầy đủ pháp lý, diện tích ${area}m2, bố trí ${bedroom}PN-${bathroom}WC chuẩn phong thủy sang trọng.`,
-        insights: [
-          'Giá thuê 25.000.000đ/tháng hoàn toàn tối ưu cho khu vực ' + district,
-          'Dữ liệu diện tích và kết cấu phòng đạt độ tin cậy 96%',
-          images.length > 0
-            ? `Đã phân tích thị giác thành công ${images.length} hình ảnh căn hộ gửi lên.`
-            : 'Khuyên dùng thêm 2-3 ảnh thực tế góc bếp & ban công để đạt 100/100 điểm tin cậy.'
-        ],
-        imageAnalyses: images.map((_, idx) => ({
-          image_id: `img_${idx}`,
-          primary_tag: idx === 0 ? 'phong_khach' : idx === 1 ? 'phong_ngu' : 'bep',
-          brightness_score: 92,
-          sharpness_score: 88,
-          watermark_or_branding_suspected: false,
-          duplicate_or_stock_photo_suspected: false,
-          confidence: 0.96,
-          notes_vi: 'Ảnh căn hộ sáng rõ, góc quay chuẩn thực tế'
-        })),
-        imageTagsSuggested: ['phong_khach', 'phong_ngu', 'view_thanh_pho']
-      });
+      const response = await apiService.verifyListingDirect(payload);
+      if (response && response.data) {
+        setResult(response.data);
+      } else {
+        setError('Không nhận được phản hồi hợp lệ từ AI Verifier.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.detail || 'Lỗi kết nối với AI Agent.');
     } finally {
       setVerifying(false);
     }
   };
 
-  const handlePublishListing = async () => {
+  const [publishing, setPublishing] = useState(false);
+
+  const handlePublish = async () => {
+    if (!result) return;
     setPublishing(true);
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const publishPayload = {
+        title: result.listing?.title || 'Căn Hộ Đăng Tin',
+        description: result.listing?.description || rawText,
+        pricePerMonth: Number(result.listing?.pricePerMonth || 0),
+        listingStatus: 'Published',
+        images: {
+          create: images.map((img, idx) => ({
+            imageUrl: `data:${img.media_type};base64,${img.base64_data}`,
+            isPrimary: idx === 0
+          }))
+        },
+        apartment: {
+          ownerId: user?.ownerProfileId || '',
+          floor: Number(result.apartment_meta?.floor) || 1,
+          area: Number(result.apartment_meta?.area_m2) || 50,
+          district: result.apartment_meta?.district || 'Sơn Trà',
+          fullAddress: result.apartment_meta?.fullAddress || 'Đà Nẵng',
+          room_number: Number(result.apartment_meta?.roomNumber) || 101,
+          bedroom: Number(result.apartment_meta?.bedroom) || 1,
+          bathroom: Number(result.apartment_meta?.bathroom) || 1,
+          livingroom: Number(result.apartment_meta?.livingroom) || 1,
+          kitchen: Number(result.apartment_meta?.kitchen) || 1,
+          type: apartmentType || result.apartment_meta?.type || 'Normal'
+        }
+      };
+
+      await apiService.createListing(publishPayload);
+      alert('Đăng tin thành công! Đang chuyển hướng đến trang tìm kiếm căn hộ...');
+      router.push('/search');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || 'Có lỗi xảy ra khi lưu tin đăng vào cơ sở dữ liệu.');
+    } finally {
       setPublishing(false);
-      router.push('/owner/dashboard/apartments');
-    }, 1200);
+    }
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
-      {/* Page Header */}
-      <div className="border-b border-white/10 pb-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold mb-2">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> AI Verifier Engine (FastAPI Multi-modal Vision Agent)
-        </div>
-        <h1 className="text-3xl font-black text-white">Đăng Tin Căn Hộ Với AI Verification</h1>
-        <p className="text-xs text-gray-400 mt-1">
-          Nhập thông tin thô & Đính kèm ảnh -&gt; Chạy AI Verifier (Phân tích ảnh & Text) -&gt; Xuất bản bài đăng minh bạch
+    <div className="p-6 text-white w-full max-w-4xl mx-auto space-y-8">
+      <div className="text-center">
+        <h1 className="text-3xl font-extrabold mb-3 text-white flex items-center justify-center gap-2">
+          Đăng tin thông minh với AI <Sparkles className="text-amber-400 font-bold" size={24} />
+        </h1>
+        <p className="text-gray-400 text-sm max-w-xl mx-auto">
+          Phân tích hình ảnh & thông tin mô tả thô của bạn bằng AI Verifier để tự động tối ưu hóa và kiểm duyệt tin đăng.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column: Input Form */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 glass-panel space-y-5">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-amber-400" /> Thông Tin Căn Hộ Thô & Tệp Đính Kèm
-          </h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Form panel */}
+        <div className="md:col-span-2 bg-slate-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl space-y-6">
 
-          <div className="space-y-4 text-xs">
-            <div className="space-y-1">
-              <label className="text-gray-300 font-semibold">Tiêu đề bài đăng</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="VD: Cho thuê căn hộ Landmark 81 view sông cực đẹp..."
-                className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-gray-300 font-semibold">Mô tả chi tiết</label>
-              <textarea
-                rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Nhập mô tả thô (tiện ích, thiết bị nội thất, hướng ban công)..."
-                className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-white placeholder-gray-500 focus:outline-none"
-              />
-            </div>
-
-            {/* Image Attachments Section */}
-            <div className="space-y-2 border-t border-b border-white/10 py-3.5">
-              <div className="flex items-center justify-between">
-                <label className="text-gray-200 font-bold flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-emerald-400" />
-                  Ảnh Căn Hộ Cho AI Verifier Phân Tích ({images.length} ảnh)
-                </label>
-                <button
-                  type="button"
-                  onClick={handleAddSampleImages}
-                  className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold underline"
-                >
-                  + Tải 3 ảnh mẫu
-                </button>
-              </div>
-
-              {/* Upload Dropzone & Action Buttons */}
-              <div className="grid grid-cols-2 gap-2">
-                <label className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-dashed border-emerald-500/40 text-emerald-300 text-xs font-semibold cursor-pointer transition-all hover:scale-[1.01]">
-                  <Upload className="w-4 h-4 shrink-0 text-emerald-400" />
-                  <span>Tải ảnh từ máy</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-
-                <button
-                  type="button"
-                  onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-white/10 text-gray-300 text-xs font-semibold transition-all"
-                >
-                  <Link2 className="w-4 h-4 text-sky-400" />
-                  <span>Dán URL ảnh</span>
-                </button>
-              </div>
-
-              {/* Input for External Image URL */}
-              {showUrlInput && (
-                <div className="flex gap-2 pt-1">
-                  <input
-                    type="url"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="flex-1 bg-slate-950 border border-white/10 focus:border-sky-500 rounded-xl px-3 py-1.5 text-white placeholder-gray-500 focus:outline-none text-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddUrlImage}
-                    className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs"
-                  >
-                    Thêm
-                  </button>
-                </div>
-              )}
-
-              {/* Image Previews Grid */}
-              {images.length > 0 ? (
-                <div className="grid grid-cols-4 gap-2 pt-2">
-                  {images.map((imgUrl, idx) => (
-                    <div
-                      key={idx}
-                      className="relative aspect-video rounded-lg overflow-hidden border border-white/20 group bg-slate-950"
-                    >
-                      {/* eslint-disable-next-html-element-for-img */}
-                      <img
-                        src={imgUrl}
-                        alt={`Căn hộ ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(idx)}
-                        className="absolute top-1 right-1 p-1 rounded-full bg-slate-950/80 hover:bg-rose-600 text-gray-300 hover:text-white transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                      <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-slate-950/80 text-[10px] text-gray-300 font-mono">
-                        #{idx + 1}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-3 text-center rounded-xl bg-slate-950/60 border border-white/5 text-[11px] text-gray-400">
-                  Chưa chọn ảnh nào. AI Verifier hỗ trợ phân tích đa thức (Multimodal) chất lượng ảnh, watermark & nhãn phòng.
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Giá thuê / tháng (VND)</label>
-                <input
-                  type="number"
-                  value={pricePerMonth}
-                  onChange={(e) => setPricePerMonth(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-white focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Loại căn hộ</label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-white focus:outline-none"
-                >
-                  <option value="Studio" className="bg-slate-900">Studio</option>
-                  <option value="Normal" className="bg-slate-900">Normal</option>
-                  <option value="Penthouse" className="bg-slate-900">Penthouse</option>
-                  <option value="SkyVilla" className="bg-slate-900">Sky Villa</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Diện tích (m2)</label>
-                <input
-                  type="number"
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-white focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Tầng</label>
-                <input
-                  type="number"
-                  value={floor}
-                  onChange={(e) => setFloor(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-white focus:outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-gray-300 font-semibold">Mã phòng</label>
-                <input
-                  type="text"
-                  value={roomNumber}
-                  onChange={(e) => setRoomNumber(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-white focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-gray-300 font-semibold">Địa chỉ đầy đủ & Quận</label>
-              <input
-                type="text"
-                value={fullAddress}
-                onChange={(e) => setFullAddress(e.target.value)}
-                className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-white focus:outline-none"
-              />
-            </div>
+          {/* Apartment Type Selector */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Phân loại căn hộ:</label>
+            <select
+              value={apartmentType}
+              onChange={(e) => setApartmentType(e.target.value)}
+              className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+            >
+              <option value="">-- Chọn loại căn hộ --</option>
+              <option value="Normal">Căn hộ thường (Normal)</option>
+              <option value="Studio">Studio</option>
+              <option value="Officetel">Officetel</option>
+              <option value="Shophouse">Shophouse</option>
+              <option value="Penthouse">Penthouse</option>
+              <option value="Duplex">Duplex</option>
+              <option value="SkyVilla">Sky Villa</option>
+            </select>
           </div>
 
-          <button
-            type="button"
-            onClick={handleRunAiVerify}
-            disabled={verifying || !title}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-50 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-          >
-            {verifying ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>AI Verifier đang đối soát hình ảnh & dữ liệu...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4 text-amber-300" />
-                <span>Chạy AI Verifier Kiểm Định & Chuẩn Hóa ({images.length} ảnh)</span>
-              </>
+          {/* Raw Text Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Nhập mô tả thô (AI sẽ tự động tối ưu hóa):</label>
+            <textarea
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              className="w-full h-36 bg-slate-950 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors resize-none text-sm"
+              placeholder="Ví dụ: Cho thuê nhà nguyên căn hoặc phòng chung cư quận Hải Châu Đà Nẵng, diện tích khoảng 60m2, có 2 phòng ngủ, nội thất cơ bản..."
+            ></textarea>
+            <p className="text-xs text-gray-500 mt-1">Tối thiểu 20 ký tự để AI phân tích chính xác.</p>
+          </div>
+
+          {/* Image Uploader */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Đính kèm hình ảnh thực tế:</label>
+            <div className="border border-dashed border-white/10 rounded-xl p-6 text-center hover:bg-white/5 transition-colors relative cursor-pointer group">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageChange}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <Upload size={32} className="mx-auto mb-2 text-gray-500 group-hover:text-amber-400 transition-colors" />
+              <p className="text-xs text-gray-400">Kéo thả tệp vào đây hoặc nhấn để chọn tệp ảnh</p>
+            </div>
+
+            {/* Image Preview List */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-4 gap-3 mt-4">
+                {images.map((img, idx) => (
+                  <div key={img.image_id} className="relative aspect-video rounded-lg overflow-hidden border border-white/10 group bg-slate-950">
+                    <img src={`data:${img.media_type};base64,${img.base64_data}`} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
-          </button>
+          </div>
+
+          {error && <p className="text-xs text-red-400">{error}</p>}
+
+          <div className="flex justify-end">
+            <button
+              onClick={handleVerify}
+              disabled={verifying}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 disabled:opacity-50 transition-all shadow-lg shadow-amber-500/20"
+            >
+              {verifying ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Đang phân tích...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} /> Phân tích & Kiểm duyệt
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Right Column: AI Verification Engine Audit Results */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-emerald-500/30 glass-panel-emerald space-y-6 flex flex-col justify-between">
+        {/* Info panel / Results */}
+        <div className="bg-slate-900/30 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" /> Kết Quả AI Verification Engine
-              </h3>
-              {verificationResult && (
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold font-mono">
-                  Score: {verificationResult.score}/100
-                </span>
-              )}
-            </div>
-
-            {!verificationResult ? (
-              <div className="py-20 text-center space-y-3">
-                <Sparkles className="w-10 h-10 text-emerald-400/40 mx-auto" />
-                <p className="text-xs text-gray-400 max-w-xs mx-auto">
-                  Điền thông tin và đính kèm ảnh bên trái, sau đó bấm &quot;Chạy AI Verifier&quot; để đối soát đa phương thức với Gemini Vision AI Agent Engine.
-                </p>
+            <h3 className="text-lg font-bold text-white mb-4">Kết Quả Kiểm Duyệt AI</h3>
+            
+            {!result && !verifying && (
+              <div className="py-12 text-center text-gray-500">
+                <ImageIcon size={32} className="mx-auto mb-2 opacity-20" />
+                <p className="text-xs">Vui lòng điền thông tin và bấm phân tích để nhận kết quả tự động từ AI Agent.</p>
               </div>
-            ) : (
-              <div className="space-y-4 pt-4 text-xs">
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-emerald-500/30 space-y-1">
-                  <div className="text-[11px] text-emerald-400 font-bold uppercase">Tiêu đề đã được AI chuẩn hóa:</div>
-                  <div className="text-white font-bold">{verificationResult.standardizedTitle}</div>
+            )}
+
+            {verifying && (
+              <div className="py-12 text-center text-amber-400 space-y-3">
+                <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+                <p className="text-xs">Gemini AI đang chấm điểm, phát hiện lỗi chính tả, đối chiếu cơ sở dữ liệu và phân tích hình ảnh...</p>
+              </div>
+            )}
+
+            {result && (
+              <div className="space-y-4">
+                {/* Score */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-xs text-gray-400">Điểm chất lượng:</span>
+                  <span className={`text-xl font-extrabold ${result.validation?.score >= 70 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {result.validation?.score || 0} / 100
+                  </span>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 space-y-1">
-                  <div className="text-[11px] text-gray-400 font-bold uppercase">Mô tả được AI thêm Audit Tag:</div>
-                  <div className="text-gray-300 whitespace-pre-line leading-relaxed">{verificationResult.suggestedDescription}</div>
+                {/* Status */}
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+                  <span className="text-xs text-gray-400">Trạng thái duyệt:</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    result.validation?.status === 'pass' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                  }`}>
+                    {result.validation?.status === 'pass' ? 'Published' : 'Draft'}
+                  </span>
                 </div>
 
-                {/* AI Image Vision Analysis Result */}
-                {verificationResult.imageAnalyses && verificationResult.imageAnalyses.length > 0 && (
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-sky-500/30 space-y-2">
-                    <div className="text-[11px] text-sky-400 font-bold uppercase flex items-center gap-1.5">
-                      <ImageIcon className="w-3.5 h-3.5" /> Kết Quả Thẩm Định Thị Giác (Gemini Vision Audit):
-                    </div>
-                    <div className="space-y-2">
-                      {verificationResult.imageAnalyses.map((imgRow, idx) => (
-                        <div key={idx} className="p-2 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-between text-[11px]">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-gray-400">#{imgRow.image_id || idx + 1}</span>
-                            <span className="px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-semibold">
-                              Tag: {imgRow.primary_tag || 'Phòng học/Chung'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-gray-400">Nét: {imgRow.sharpness_score ?? 90}/100</span>
-                            <span className="text-gray-400">Sáng: {imgRow.brightness_score ?? 92}/100</span>
-                            {imgRow.watermark_or_branding_suspected && (
-                              <span className="text-rose-400 font-bold flex items-center gap-1">
-                                <AlertTriangle className="w-3 h-3" /> Nghi Logo
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                {/* Title suggest */}
+                {result.listing?.title && (
+                  <div className="space-y-1">
+                    <span className="text-xs text-gray-400 font-semibold block">Tiêu đề chuẩn hóa gợi ý:</span>
+                    <p className="text-xs text-gray-200 bg-slate-950 p-2.5 rounded-xl border border-white/5 leading-relaxed">{result.listing.title}</p>
                   </div>
                 )}
 
-                {/* AI Suggested Image Tags */}
-                {verificationResult.imageTagsSuggested && verificationResult.imageTagsSuggested.length > 0 && (
-                  <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 space-y-1.5">
-                    <div className="text-[11px] text-indigo-400 font-bold uppercase flex items-center gap-1.5">
-                      <Tag className="w-3.5 h-3.5" /> Gợi Ý Thẻ Phân Loại Ảnh Căn Hộ:
+                {/* Suggestions feedback */}
+                {result.validation?.feedback_to_owner && (
+                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs space-y-1">
+                    <div className="font-bold flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      Phản hồi từ AI:
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {verificationResult.imageTagsSuggested.map((tag, tIdx) => (
-                        <span key={tIdx} className="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 text-[10px] font-semibold border border-indigo-500/30">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
+                    <p className="text-[11px] leading-relaxed text-gray-300">{result.validation.feedback_to_owner}</p>
                   </div>
                 )}
-
-                <div className="p-3.5 rounded-xl bg-slate-950 border border-white/10 space-y-2">
-                  <div className="text-[11px] text-amber-400 font-bold uppercase">Đánh giá & Khuyến nghị thị trường:</div>
-                  {verificationResult.insights.map((ins, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-gray-300">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                      <span>{ins}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </div>
 
-          {verificationResult && (
-            <button
-              type="button"
-              onClick={handlePublishListing}
-              disabled={publishing}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all hover:scale-105"
-            >
-              <span>{publishing ? 'Đang đăng bài...' : 'Xuất Bản Bài Đăng Đã Verified'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+          {result && (
+            <div className="pt-4 border-t border-white/10 mt-6 space-y-2">
+              <button
+                onClick={handlePublish}
+                disabled={publishing}
+                className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+              >
+                {publishing ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Đang đăng tin...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={14} /> Chấp nhận & Đăng tin
+                  </>
+                )}
+              </button>
+              {error && <p className="text-xs text-red-400 text-center">{error}</p>}
+            </div>
           )}
         </div>
       </div>

@@ -201,7 +201,7 @@ export default function LandingPage() {
             {
               step: '01',
               title: 'Tạo Tài Khoản Khách',
-              badge: 'isActive = false',
+              badge: 'Chưa kích hoạt',
               badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
               icon: UserCheck,
               desc: 'Tài khoản được tạo với trạng thái chưa kích hoạt. Khách thuê tự do duyệt căn hộ & chat với AI Broker.'
@@ -224,11 +224,11 @@ export default function LandingPage() {
             },
             {
               step: '04',
-              title: 'Xác Nhận & Active',
-              badge: 'isActive = true',
+              title: 'Xác Nhận & Kích Hoạt',
+              badge: 'Đã kích hoạt',
               badgeColor: 'bg-emerald-500 text-slate-950 font-bold',
               icon: ShieldCheck,
-              desc: 'Sau khi xác nhận thuê trên hệ thống, tài khoản chuyển sang isActive = true và hợp đồng chuyển sang Active.'
+              desc: 'Sau khi xác nhận thuê trên hệ thống, tài khoản chuyển sang trạng thái đã kích hoạt và hợp đồng đi vào hiệu lực chính thức.'
             }
           ].map((item) => (
             <div

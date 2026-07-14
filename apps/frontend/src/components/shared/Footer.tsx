@@ -44,7 +44,7 @@ export default function Footer() {
           <ul className="space-y-2 text-xs">
             <li className="flex items-center gap-2 text-gray-300">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              1. Đăng ký (isActive = false)
+              1. Đăng ký (Chưa kích hoạt)
             </li>
             <li className="flex items-center gap-2 text-gray-300">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -56,7 +56,7 @@ export default function Footer() {
             </li>
             <li className="flex items-center gap-2 text-gray-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              4. Xác nhận hệ thống -&gt; isActive = true
+              4. Xác nhận hệ thống -&gt; Đã kích hoạt
             </li>
           </ul>
         </div>

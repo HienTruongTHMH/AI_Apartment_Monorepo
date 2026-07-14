@@ -2,18 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldAlert, ArrowRight } from 'lucide-react';
 
 export default function UserActivationBanner() {
   const { user, isLoggedIn } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted || !isLoggedIn || !user || user.isActive) {
+  const isOwnerPath = pathname.startsWith('/owner');
+  const isOwner = user?.role === 'OWNER';
+
+  if (!mounted || !isLoggedIn || !user || user.isActive || isOwnerPath || isOwner) {
     return null;
   }
 
@@ -26,10 +31,10 @@ export default function UserActivationBanner() {
           </div>
           <div>
             <div className="font-bold text-amber-300 flex items-center gap-2">
-              Trạng Thái Tài Khoản: Chưa Kích Hoạt (`isActive = false`)
+              Trạng Thái Tài Khoản: Chưa Kích Hoạt
             </div>
             <p className="text-gray-300 mt-0.5">
-              Bạn có thể tìm kiếm căn hộ và dùng AI Broker. Sau khi ký kết **hợp đồng bản cứng ngoài hệ thống** & xác nhận thuê, tài khoản sẽ tự động chuyển sang <span className="text-emerald-400 font-semibold font-mono">isActive = true</span>.
+              Bạn có thể tìm kiếm căn hộ và dùng AI Broker. Sau khi ký kết **hợp đồng bản cứng ngoài hệ thống** & xác nhận thuê, tài khoản của bạn sẽ được kích hoạt chính thức.
             </p>
           </div>
         </div>

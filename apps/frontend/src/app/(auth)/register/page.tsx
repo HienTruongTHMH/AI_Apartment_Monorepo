@@ -73,10 +73,10 @@ export default function RegisterPage() {
         <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-1">
           <div className="font-bold flex items-center gap-1.5 text-amber-400">
             <ShieldAlert className="w-4 h-4" />
-            Lưu Ý Về Trạng Thái Tài Khoản (`isActive = false`)
+            Lưu Ý Về Trạng Thái Tài Khoản
           </div>
           <p className="text-gray-300 leading-relaxed text-[11px]">
-            Tài khoản mới sẽ lưu vào Database với trạng thái <span className="font-semibold text-amber-300">chưa kích hoạt (isActive = false)</span>. Sau khi chọn nhà & xác nhận ký hợp đồng bản cứng ngoài thực tế, tài khoản sẽ chuyển thành <span className="font-semibold text-emerald-400">isActive = true</span>.
+            Tài khoản mới sẽ ở trạng thái <span className="font-semibold text-amber-300">chưa kích hoạt</span>. Sau khi chọn nhà & xác nhận ký hợp đồng bản cứng ngoài thực tế, tài khoản sẽ được chính thức kích hoạt.
           </p>
         </div>
 
@@ -97,7 +97,7 @@ export default function RegisterPage() {
             <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 space-y-1 text-[11px] font-mono">
               <div>• Account ID: <span className="text-white">{successInfo.accountId}</span></div>
               <div>• Email: <span className="text-white">{successInfo.email}</span></div>
-              <div>• Trạng thái ban đầu: <span className="text-amber-400 font-bold">isActive = false</span></div>
+              <div>• Trạng thái ban đầu: <span className="text-amber-400 font-bold font-sans">Chưa kích hoạt</span></div>
               <div>• Vai trò: <span className="text-emerald-400 font-bold">{role}</span></div>
             </div>
             <p className="text-[11px] text-gray-300">
@@ -126,7 +126,7 @@ export default function RegisterPage() {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Khách Thuê (Tenant)
+                Khách Hàng
               </button>
               <button
                 type="button"
@@ -137,7 +137,7 @@ export default function RegisterPage() {
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
-                Chủ Nhà (Owner)
+                Chủ hộ
               </button>
             </div>
 
@@ -208,7 +208,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-50 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 mt-4 hover:scale-[1.01]"
             >
-              <span>{loading ? 'Đang gửi thông tin vào Database...' : 'Đăng Ký Tài Khoản (Lưu DB & isActive = false)'}</span>
+              <span>{loading ? 'Đang gửi thông tin vào Database...' : 'Đăng Ký Tài Khoản'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

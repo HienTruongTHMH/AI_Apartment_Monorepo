@@ -1,20 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldCheck, ShieldAlert, FileText, ArrowRight, Sparkles, Home, Clock } from 'lucide-react';
 
 export default function TenantDashboardOverview() {
   const { user } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header Profile Summary */}
       <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-white/10 glass-panel flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Tenant Dashboard</div>
-          <h1 className="text-3xl font-black text-white">Xin chào, {user?.fullName || 'Khách Thuê'}</h1>
+          <div className="text-xs text-emerald-400 font-bold uppercase tracking-wider">Dashboard Khách Hàng</div>
+          <h1 className="text-3xl font-black text-white">Xin chào, {mounted ? (user?.fullName || 'Khách Hàng') : 'Khách Hàng'}</h1>
           <p className="text-xs text-gray-400">
             Quản lý hồ sơ thuê căn hộ, theo dõi hợp đồng bản cứng & kích hoạt tài khoản
           </p>
@@ -23,22 +28,22 @@ export default function TenantDashboardOverview() {
         {/* Account Activation Badge Status */}
         <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 shrink-0 space-y-2">
           <div className="text-[11px] text-gray-400">Trạng Thái Kích Hoạt Tài Khoản</div>
-          {user?.isActive ? (
+          {mounted && user?.isActive ? (
             <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>isActive = true (Đã Kích Hoạt)</span>
+              <span>Đã Kích Hoạt</span>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="text-xs font-bold text-amber-400 flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl animate-pulse">
                 <ShieldAlert className="w-4 h-4 text-amber-400" />
-                <span>isActive = false (Chưa Kích Hoạt)</span>
+                <span>Chưa Kích Hoạt</span>
               </div>
               <Link
                 href="/tenant/dashboard/activate"
                 className="text-[11px] text-emerald-400 hover:underline flex items-center gap-1 font-semibold"
               >
-                <span>Xác nhận đã ký bản cứng để Active</span>
+                <span>Xác nhận đã ký bản cứng để kích hoạt</span>
                 <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
@@ -74,7 +79,7 @@ export default function TenantDashboardOverview() {
           </div>
           <div>
             <h3 className="text-base font-bold text-white group-hover:text-amber-300">Kích Hoạt Tài Khoản</h3>
-            <p className="text-xs text-gray-400 mt-1">Xác nhận đã ký bản cứng để chuyển cờ `isActive = true`</p>
+            <p className="text-xs text-gray-400 mt-1">Xác nhận đã ký bản cứng để kích hoạt tài khoản sử dụng dịch vụ</p>
           </div>
           <div className="text-xs font-bold text-amber-400 flex items-center gap-1 pt-2">
             <span>Kích hoạt ngay</span>

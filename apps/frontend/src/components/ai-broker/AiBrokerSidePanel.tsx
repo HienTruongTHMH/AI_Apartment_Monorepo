@@ -270,7 +270,7 @@ export default function AiBrokerSidePanel() {
                 {loading && (
                   <div className="flex items-center gap-2 text-emerald-400 text-xs bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl max-w-xs">
                     <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" />
-                    <span>AI Broker đang tìm kiếm căn hộ tối ưu...</span>
+                    <span>........</span>
                   </div>
                 )}
                 <div ref={messagesEndRef} />

@@ -23,19 +23,17 @@ export default function Navbar() {
     setMounted(true);
   }, []);
 
-  const handleRoleSwitch = (role: 'GUEST' | 'TENANT' | 'OWNER') => {
-    if (!user) {
-      useAuthStore.getState().setAuth('demo-token-123', {
-        id: 'user-demo-id',
-        email: 'demo@aiapartment.vn',
-        fullName: role === 'OWNER' ? 'Chủ Nhà Demo' : 'Người Thuê Demo',
-        isActive: false,
-        role: role
-      });
-    } else {
-      updateUser({ role });
-    }
+  const isOwnerPath = pathname.startsWith('/owner');
+  const isTenantPath = pathname.startsWith('/tenant');
+  const currentRole = isOwnerPath ? 'OWNER' : (isTenantPath ? 'TENANT' : user?.role);
+
+  const getRoleLabel = (role?: string) => {
+    if (role === 'OWNER') return 'Chủ hộ';
+    if (role === 'TENANT') return 'Khách Hàng';
+    return role || '';
   };
+
+
 
   const isUserLoggedIn = mounted && isLoggedIn && !!user;
 
@@ -72,7 +70,7 @@ export default function Navbar() {
             <Search className="w-4 h-4" /> Tìm Căn Hộ
           </Link>
 
-          {isUserLoggedIn && user?.role === 'TENANT' && (
+          {isUserLoggedIn && currentRole === 'TENANT' && (
             <Link
               href="/tenant/dashboard"
               className={`transition-colors ${pathname.startsWith('/tenant') ? 'text-emerald-400 font-semibold' : 'text-gray-300 hover:text-white'}`}
@@ -81,7 +79,7 @@ export default function Navbar() {
             </Link>
           )}
 
-          {isUserLoggedIn && user?.role === 'OWNER' && (
+          {isUserLoggedIn && currentRole === 'OWNER' && (
             <Link
               href="/owner/dashboard"
               className={`transition-colors ${pathname.startsWith('/owner') ? 'text-emerald-400 font-semibold' : 'text-gray-300 hover:text-white'}`}
@@ -93,28 +91,7 @@ export default function Navbar() {
 
         {/* Action Controls & User Account Pill */}
         <div className="flex items-center gap-3">
-          {/* Quick Demo Persona Switcher Tooltip */}
-          <div className="hidden lg:flex items-center gap-1 bg-slate-900 border border-white/10 p-1 rounded-xl text-xs">
-            <span className="text-[10px] text-gray-400 px-2 flex items-center gap-1">
-              <Sliders className="w-3 h-3 text-emerald-400" /> Vai trò:
-            </span>
-            <button
-              onClick={() => handleRoleSwitch('TENANT')}
-              className={`px-2.5 py-1 rounded-lg transition-all text-xs font-medium ${
-                mounted && user?.role === 'TENANT' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Tenant
-            </button>
-            <button
-              onClick={() => handleRoleSwitch('OWNER')}
-              className={`px-2.5 py-1 rounded-lg transition-all text-xs font-medium ${
-                mounted && user?.role === 'OWNER' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Owner
-            </button>
-          </div>
+
 
           {/* AI Broker Quick Launch Trigger */}
           <button
@@ -130,33 +107,35 @@ export default function Navbar() {
             isUserLoggedIn ? (
               <div className="flex items-center gap-2">
                 {/* Account Activation Status Badge */}
-                <Link
-                  href="/tenant/dashboard/activate"
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                    user.isActive
-                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                      : 'bg-amber-500/10 border-amber-500/40 text-amber-400 animate-pulse'
-                  }`}
-                  title={user.isActive ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
-                >
-                  {user.isActive ? (
-                    <>
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Active</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShieldAlert className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">isActive=false</span>
-                    </>
-                  )}
-                </Link>
+                {currentRole === 'TENANT' && (
+                  <Link
+                    href="/tenant/dashboard/activate"
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                      user.isActive
+                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
+                        : 'bg-amber-500/10 border-amber-500/40 text-amber-400 animate-pulse'
+                    }`}
+                    title={user.isActive ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
+                  >
+                    {user.isActive ? (
+                      <>
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Đã kích hoạt</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Chưa kích hoạt</span>
+                      </>
+                    )}
+                  </Link>
+                )}
 
                 {/* User Dropdown / Profile */}
                 <div className="flex items-center gap-2 pl-2 border-l border-white/10">
                   <div className="text-right hidden xl:block">
                     <div className="text-xs font-semibold text-white">{user.fullName}</div>
-                    <div className="text-[10px] text-gray-400">{user.role}</div>
+                    <div className="text-[10px] text-gray-400">{getRoleLabel(currentRole)}</div>
                   </div>
                   <button
                     onClick={logout}

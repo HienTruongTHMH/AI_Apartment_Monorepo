@@ -63,14 +63,30 @@ export class ListingService {
       }
     }
 
+    const page = searchDto.page || 1;
+    const limit = searchDto.limit || 9;
+    const skip = (page - 1) * limit;
+
     const rawListings = await this.prisma.listing.findMany({
       where: whereCondition,
+      skip,
+      take: limit,
       include: {
-        apartment: true,
+        images: true,
+        apartment: {
+          include: {
+            owner: true,
+            apartmentAmenities: {
+              include: {
+                amenity: true
+              }
+            }
+          }
+        },
       }
     });
 
-    // Lọc dữ liệu cho Agent
+    // Lọc dữ liệu cho Agent & UI
     return rawListings.map(listing => ({
       id: listing.id,
       title: listing.title,
@@ -84,6 +100,14 @@ export class ListingService {
       floor: listing.apartment.floor,
       area: Number(listing.apartment.area),
       apartmentStatus: listing.apartment.apartmentStatus,
+
+      // Bổ sung đầy đủ cho UI
+      images: listing.images,
+      apartment: {
+        ...listing.apartment,
+        area: Number(listing.apartment.area),
+        pricePerMonth: Number(listing.pricePerMonth),
+      }
     }))
   }
 
@@ -108,7 +132,16 @@ export class ListingService {
       where: { listingStatus: 'Published' }, // Chỉ lấy bài đã đăng
       include: {
         images: true, // Join bảng lấy ảnh
-        apartment: true,
+        apartment: {
+          include: {
+            owner: true,
+            apartmentAmenities: {
+              include: {
+                amenity: true
+              }
+            }
+          }
+        },
       }
     })
   }
@@ -127,8 +160,17 @@ export class ListingService {
     return this.prisma.listing.findUnique({
       where: { id },
       include: {
-        apartment: true,
-        images: true
+        images: true,
+        apartment: {
+          include: {
+            owner: true,
+            apartmentAmenities: {
+              include: {
+                amenity: true
+              }
+            }
+          }
+        },
       }
     });
   }
