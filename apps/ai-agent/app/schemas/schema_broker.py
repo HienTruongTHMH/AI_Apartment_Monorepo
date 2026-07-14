@@ -33,6 +33,10 @@ class SearchQueryInput(BaseModel):
         max_length=2048,
         description="URL audio nếu khách gửi tin nhắn thoại (mp3/wav/ogg)",
     )
+    listings: Optional[List[dict]] = Field(
+        None,
+        description="Danh sách căn hộ thực tế từ Supabase PostgreSQL truyền qua NestJS",
+    )
 
 
 # ─────────────────────────────────────────────

@@ -5,7 +5,14 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [PrismaModule, HttpModule],
+  imports: [
+    PrismaModule,
+    HttpModule.register({
+      // Cho phép chuyển tiếp payload ảnh base64 lớn sang FastAPI
+      maxBodyLength: 20 * 1024 * 1024, // 20MB
+      maxContentLength: 20 * 1024 * 1024,
+    }),
+  ],
   providers: [AiAgentsService],
   controllers: [AiAgentsController]
 })

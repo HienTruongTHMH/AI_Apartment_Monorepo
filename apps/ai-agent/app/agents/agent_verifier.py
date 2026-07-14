@@ -63,8 +63,12 @@ def imageUrl_for_api(img: rawListingImageInput) -> str:
     if b64_val and b64_val.lower() != "string":
         mt = (img.media_type or "image/jpg").strip()
         return f"data:{mt};base64,{b64_val}"
+
+    # 2. Nếu url đã là chuỗi Data URL (data:image/...)
+    if url_val.startswith("data:image/"):
+        return url_val
         
-    # 2. Tiếp theo là URL (nếu không phải chuỗi "string" và bắt đầu bằng http)
+    # 3. Tiếp theo là HTTP URL
     if url_val and url_val.lower() != "string" and url_val.startswith("http"):
         try:
             start_t = time.time()
@@ -106,15 +110,54 @@ def apply_image_post_processing(
     result: listingVerifiedOutput,
     images_in_request: list[rawListingImageInput],
 ) -> None:
-    """Chuẩn hoá output ảnh + hậu kiểm nghiêm (watermark / chất lượng thấp)."""
-    if not images_in_request:
-        result.image_analyses = []
-        return
+    import re
+    
+    def norm(s: str) -> str:
+        s = s.lower().strip()
+        s = s.replace("img", "image")
+        s = re.sub(r'[^a-z0-9]', '', s)
+        s = re.sub(r'0+(\d+)', r'\1', s)
+        return s
 
-    allowed_ids = {im.image_id for im in images_in_request}
-    result.image_analyses = [
-        row for row in result.image_analyses if row.image_id in allowed_ids
-    ]
+    request_ids = [im.image_id for im in images_in_request]
+    norm_request_ids = [norm(rid) for rid in request_ids]
+    
+    mapped_analyses = []
+    matched_req_indices = set()
+    
+    # 1. Exact & Normalized matching
+    for row in result.image_analyses:
+        row_id_norm = norm(row.image_id)
+        
+        # Exact match
+        if row.image_id in request_ids:
+            idx = request_ids.index(row.image_id)
+            if idx not in matched_req_indices:
+                matched_req_indices.add(idx)
+                mapped_analyses.append(row)
+                continue
+                
+        # Normalized match
+        if row_id_norm in norm_request_ids:
+            idx = norm_request_ids.index(row_id_norm)
+            if idx not in matched_req_indices:
+                matched_req_indices.add(idx)
+                row.image_id = request_ids[idx]  # Chuẩn hóa ID trùng khớp với request
+                mapped_analyses.append(row)
+                continue
+
+    # 2. Sequential fallback for remaining unmatched rows
+    for row in result.image_analyses:
+        if row in mapped_analyses:
+            continue
+        for idx in range(len(request_ids)):
+            if idx not in matched_req_indices:
+                matched_req_indices.add(idx)
+                row.image_id = request_ids[idx]
+                mapped_analyses.append(row)
+                break
+                
+    result.image_analyses = mapped_analyses
 
     v = result.validation
     for row in result.image_analyses:
@@ -246,7 +289,11 @@ Nhiệm vụ: Tập trung trích xuất thông số, tiện ích (amenities), ph
         
         t1 = time.time()
 
+        logger.info(f"[Agent1] Before post-processing: image_analyses count={len(result.image_analyses)} | IDs={[r.image_id for r in result.image_analyses]} | allowed_ids={[{im.image_id for im in images}]}")
+
         apply_image_post_processing(result, images)
+
+        logger.info(f"[Agent1] After post-processing: image_analyses count={len(result.image_analyses)} | IDs={[r.image_id for r in result.image_analyses]}")
 
         logger.info(
             f"[Agent1] Hoàn tất dùng model {MODEL_NAME} (Parallel) trong {t1 - t0:.2f}s — "

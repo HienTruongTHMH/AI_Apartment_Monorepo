@@ -104,8 +104,11 @@ export class AuthService {
         const payload = {
             sub: account.id,
             email: account.email,
+            fullName: account.fullName,
+            isActive: account.isActive,
             hasTenantProfile: !!account.tenantProfile,
             hasOwnerProfile: !!account.ownerProfile,
+            ownerProfileId: account.ownerProfile?.id || null,
         }
 
         this.logger.log(`User ${account.email} đã đăng nhập thành công `);

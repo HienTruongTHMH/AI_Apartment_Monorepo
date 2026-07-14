@@ -69,6 +69,20 @@ def init_qdrant_collections():
                 ),
             )
             logger.info(f"Collection '{COLLECTION_NAME}' created successfully.")
+            
+            # Create payload indexes required for range filters
+            logger.info("Creating payload indexes for 'pricePerMonth' and 'area'...")
+            qdrant_client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="pricePerMonth",
+                field_schema=models.PayloadSchemaType.FLOAT,
+            )
+            qdrant_client.create_payload_index(
+                collection_name=COLLECTION_NAME,
+                field_name="area",
+                field_schema=models.PayloadSchemaType.FLOAT,
+            )
+            logger.info("Payload indexes created successfully.")
     except Exception as e:
         logger.error(f"Error initializing Qdrant collection: {e}")
 
@@ -255,18 +269,44 @@ def search_apartments(
     query_filter = models.Filter(must=must_conditions) if must_conditions else None
 
     try:
-        results = qdrant_client.search(
+        results = qdrant_client.query_points(
             collection_name=COLLECTION_NAME,
-            query_vector=vector,
+            query=vector,
             query_filter=query_filter,
             limit=top_k,
             with_payload=True,
         )
         logger.info(
-            f"Qdrant search returned {len(results)} results "
+            f"Qdrant search returned {len(results.points)} results "
             f"(max_price={max_price}, min_area={min_area})"
         )
-        return [hit.payload for hit in results]
+        return [hit.payload for hit in results.points]
     except Exception as e:
         logger.error(f"Qdrant search failed: {e}")
         return []
+
+
+def get_apartment_by_id(listing_id: str) -> Optional[dict]:
+    """
+    Truy xuất thông tin căn hộ từ Qdrant theo listing_id sử dụng UUID deterministic.
+    """
+    if not qdrant_client:
+        logger.error("Qdrant client not available — cannot retrieve by ID.")
+        return None
+    try:
+        point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"apartment-{listing_id}"))
+        results = qdrant_client.retrieve(
+            collection_name=COLLECTION_NAME,
+            ids=[point_id],
+            with_payload=True,
+        )
+        if results:
+            logger.info(f"Retrieved listing {listing_id} from Qdrant.")
+            return results[0].payload
+        logger.warning(f"Listing {listing_id} not found in Qdrant.")
+        return None
+    except Exception as e:
+        logger.error(f"Failed to retrieve apartment {listing_id}: {e}")
+        return None
+
+

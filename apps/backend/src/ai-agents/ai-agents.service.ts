@@ -3,13 +3,14 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { VerifyListingDto } from './dto/verify-listing.dto';
+import { SearchBrokerDto } from './dto/search-broker.dto';
 import { Apartment } from '@prisma/client';
 
 
 @Injectable()
 export class AiAgentsService {
   private readonly logger = new Logger(AiAgentsService.name);
-  private readonly aiBaseUrl = 'http://0.0.0.0:8000'; // Cổng chạy FastAPI
+  private readonly aiBaseUrl = 'http://127.0.0.1:8000'; // Cổng chạy FastAPI
 
   constructor(
     private readonly httpService: HttpService,
@@ -44,11 +45,23 @@ export class AiAgentsService {
     const payload = {
       owner_id: dto.ownerId,
       rawText: constructedRawText, // Đưa chuỗi vừa ghép vào đây
-      images: (dto.imageUrls || []).map((url, index) => ({
-        image_id: `img_${index}`,
-        url: url,
-        media_type: 'image/jpeg'
-      })),
+      images: (dto.imageUrls || []).map((url, index) => {
+        if (url.startsWith('data:')) {
+          const match = url.match(/^data:([^;]+);base64,(.+)$/);
+          if (match) {
+            return {
+              image_id: `img_${index}`,
+              media_type: match[1],
+              base64_data: match[2],
+            };
+          }
+        }
+        return {
+          image_id: `img_${index}`,
+          url: url,
+          media_type: 'image/jpeg',
+        };
+      }),
       db_apartment_data: dbApartment ? {
         id: dbApartment.id,
         area: Number(dbApartment.area),
@@ -79,5 +92,68 @@ export class AiAgentsService {
 
     // 4. Trả kết quả JSON chuẩn từ Pydantic về cho NestJS xử lý tiếp
     return data; 
+  }
+
+  async searchBroker(dto: SearchBrokerDto) {
+    this.logger.log(`Truy vấn danh sách căn hộ từ Supabase để gửi cho Agent Broker...`);
+
+    // 1. Lấy tất cả bài đăng đã duyệt từ Postgres / Supabase
+    const dbListings = await this.prisma.listing.findMany({
+      where: { listingStatus: 'Published' },
+      include: {
+        apartment: {
+          include: {
+            apartmentAmenities: {
+              include: {
+                amenity: true
+              }
+            }
+          }
+        },
+        images: true
+      }
+    });
+
+    this.logger.log(`Đã tìm thấy ${dbListings.length} căn hộ. Đang chuẩn bị dữ liệu gửi sang Python Broker...`);
+
+    // 2. Định dạng cấu trúc danh sách khớp với Python RAG
+    const listings = dbListings.map(listing => {
+      const amenities = (listing.apartment.apartmentAmenities || []).map(aa => aa.amenity.name);
+      const primaryImage = listing.images.find(img => img.isPrimary)?.imageUrl || listing.images[0]?.imageUrl || null;
+      return {
+        listing_id: listing.id,
+        title: listing.title,
+        description: listing.description,
+        pricePerMonth: Number(listing.pricePerMonth),
+        roomNumber: String(listing.apartment.room_number),
+        floor: listing.apartment.floor,
+        area: Number(listing.apartment.area),
+        district: listing.apartment.district,
+        fullAddress: listing.apartment.fullAddress,
+        amenities,
+        imageUrl: primaryImage,
+      };
+    });
+
+    // 3. Chuẩn bị payload gửi sang FastAPI
+    const payload = {
+      query: dto.query,
+      tenant_id: dto.tenant_id,
+      conversation_history: dto.conversation_history || [],
+      audio_url: dto.audio_url || null,
+      listings,
+    };
+
+    // 4. Gọi sang FastAPI Broker endpoint
+    const { data } = await firstValueFrom(
+      this.httpService.post(`${this.aiBaseUrl}/api/search`, payload).pipe(
+        catchError((error) => {
+          this.logger.error(`AI Broker Agent Error: ${error.message}`);
+          throw new InternalServerErrorException('AI Broker Engine đang bận.');
+        }),
+      ),
+    );
+
+    return data;
   }
 }
