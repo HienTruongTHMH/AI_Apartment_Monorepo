@@ -3,9 +3,11 @@
 import React from 'react';
 import { Building2, Plus, Edit2 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApartments } from '@/lib/api-hooks';
 
 export default function OwnerApartmentsPage() {
+  const router = useRouter();
   const { data: apartments, isLoading, error } = useApartments();
 
   return (
@@ -41,7 +43,11 @@ export default function OwnerApartmentsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {apartments.map((apt: any) => (
-              <div key={apt.id} className="bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all cursor-pointer group">
+              <Link 
+                key={apt.id} 
+                href={`/apartment/${apt.id}`}
+                className="block bg-slate-950 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all cursor-pointer group"
+              >
                 <div className="aspect-video bg-slate-900 relative">
                   {apt.apartmentListing?.images?.[0] ? (
                     <img src={apt.apartmentListing.images[0].imageUrl} alt="Căn hộ" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -74,16 +80,19 @@ export default function OwnerApartmentsPage() {
                   </div>
 
                   {apt.apartmentListing && (
-                    <Link
-                      href={`/owner/dashboard/apartments/${apt.apartmentListing.id}/edit`}
+                    <button
                       className="w-full flex items-center justify-center gap-2 py-2 mt-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors font-semibold text-sm border border-emerald-500/20 hover:border-emerald-500/40"
-                      onClick={(e) => e.stopPropagation()} // Prevent card click event if any
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation(); // Prevent card click event
+                        router.push(`/owner/dashboard/apartments/${apt.apartmentListing.id}/edit`);
+                      }}
                     >
                       <Edit2 size={16} /> Chỉnh sửa tin
-                    </Link>
+                    </button>
                   )}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

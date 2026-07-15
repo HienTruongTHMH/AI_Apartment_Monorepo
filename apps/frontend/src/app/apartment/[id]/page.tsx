@@ -95,13 +95,24 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
           <div className="text-3xl font-black text-amber-400">
             {listing.pricePerMonth.toLocaleString('vi-VN')} <span className="text-sm font-normal text-gray-300">đ/tháng</span>
           </div>
-          <button
-            onClick={() => setShowRentalModal(true)}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/20 transition-all hover:scale-105 flex items-center justify-center gap-2"
-          >
-            <FileCheck className="w-4.5 h-4.5" />
-            <span>Yêu Cầu Thuê & Hợp Đồng Nháp</span>
-          </button>
+          {user?.role === 'OWNER' ? (
+            <div className="w-full py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-center font-bold text-sm text-gray-300 flex items-center justify-center gap-2">
+              <span>
+                {listing.apartment.apartmentStatus === 'Available' 
+                  ? 'Trống' 
+                  : `Khách Thuê : ${listing.apartment.contracts?.[0]?.tenant?.fullName || 'Đã Thuê'}`
+                }
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowRentalModal(true)}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/20 transition-all hover:scale-105 flex items-center justify-center gap-2"
+            >
+              <FileCheck className="w-4.5 h-4.5" />
+              <span>Yêu Cầu Thuê & Hợp Đồng Nháp</span>
+            </button>
+          )}
         </div>
       </div>
 
