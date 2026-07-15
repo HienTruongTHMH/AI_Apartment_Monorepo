@@ -110,8 +110,40 @@ export default function OwnerDashboardOverview() {
             <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white group-hover:text-amber-300">Soạn Bài Đăng AI Verification</h3>
-            <p className="text-xs text-gray-400 mt-1">Sử dụng FastAPI AI Verifier Agent tự động phân tích và tối ưu tin đăng</p>
+            <h3 className="text-base font-bold text-white group-hover:text-amber-300">Soạn Bài Đăng AI</h3>
+            <p className="text-xs text-gray-400 mt-1">Sử dụng AI Verifier để phân tích tin đăng</p>
+          </div>
+        </Link>
+        
+        <Link
+          href="/owner/dashboard/rental-requests"
+          className="group p-6 rounded-2xl bg-slate-900/60 border border-white/10 glass-panel hover:border-cyan-500/40 transition-all space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 flex items-center justify-center">
+              <Users className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white group-hover:text-cyan-300">Yêu Cầu Thuê</h3>
+            <p className="text-xs text-gray-400 mt-1">Xem, duyệt hoặc từ chối các yêu cầu thuê gửi đến</p>
+          </div>
+        </Link>
+        
+        <Link
+          href="/owner/dashboard/contracts"
+          className="group p-6 rounded-2xl bg-slate-900/60 border border-white/10 glass-panel hover:border-indigo-500/40 transition-all space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center">
+              <FileText className="w-5 h-5" />
+            </div>
+            <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white group-hover:text-indigo-300">Quản Lý Hợp Đồng</h3>
+            <p className="text-xs text-gray-400 mt-1">Gửi hợp đồng cho khách và theo dõi trạng thái</p>
           </div>
         </Link>
       </div>

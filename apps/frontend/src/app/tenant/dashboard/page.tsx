@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ShieldCheck, ShieldAlert, FileText, ArrowRight, Sparkles, Home, Clock } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, FileText, ArrowRight, Sparkles, Home, Clock, Users } from 'lucide-react';
 
 export default function TenantDashboardOverview() {
   const { user } = useAuthStore();
@@ -66,6 +66,23 @@ export default function TenantDashboardOverview() {
           </div>
           <div className="text-xs font-bold text-emerald-400 flex items-center gap-1 pt-2">
             <span>Chi tiết hợp đồng</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+        
+        <Link
+          href="/tenant/dashboard/rental-requests"
+          className="group p-6 rounded-2xl bg-slate-900/60 border border-white/10 glass-panel hover:border-indigo-500/40 transition-all space-y-4"
+        >
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-white group-hover:text-indigo-300">Yêu Cầu Thuê</h3>
+            <p className="text-xs text-gray-400 mt-1">Theo dõi danh sách yêu cầu thuê bạn đã gửi cho các chủ nhà</p>
+          </div>
+          <div className="text-xs font-bold text-indigo-400 flex items-center gap-1 pt-2">
+            <span>Quản lý yêu cầu</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>

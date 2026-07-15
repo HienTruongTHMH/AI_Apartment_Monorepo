@@ -44,6 +44,15 @@ export class ContractController {
     return this.contractService.tenantSign(contractId, tenantId);
   }
 
+  @Post("tenant-reject")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireProfile('TENANT')
+  tenantReject(@Req() req) {
+    const { contractId } = req.body;
+    const tenantId = req.user.accountId
+    return this.contractService.tenantReject(contractId, tenantId);
+  }
+
   @Post("terminate-early")
   @UseGuards(JwtAuthGuard)
   terminateEarly(@Req() req) {
@@ -63,8 +72,8 @@ export class ContractController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.contractService.findAll();
+  findAll(@Req() req) {
+    return this.contractService.findAll(req.user.accountId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
