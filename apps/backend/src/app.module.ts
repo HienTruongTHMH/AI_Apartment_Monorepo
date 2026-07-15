@@ -14,13 +14,14 @@ import { AuthModule } from './auth/auth.module';
 import { RedisController } from './redis/redis.controller';
 import { RedisService } from './redis/redis.service';
 import { RedisModule } from './redis/redis.module';
+import { RentalRequestModule } from './rental-request/rental-request.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true
     }), PrismaModule, ListingModule, ApartmentModule,
-    ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule, RedisModule
+    ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule, RedisModule, RentalRequestModule
   ],
   controllers: [AppController, RedisController],
   providers: [AppService, PrismaService],

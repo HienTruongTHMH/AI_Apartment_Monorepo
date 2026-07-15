@@ -164,6 +164,35 @@ export class ContractService {
     return 'This action signs contract';
   }
 
+  async tenantReject(contractId: string, tenantId: string) {
+    const tenantProfile = await this.prismaService.tenantProfile.findUnique({
+      where: { accountId: tenantId }
+    });
+
+    if (!tenantProfile) {
+      throw new ForbiddenException("Bạn chưa có quyền cư dân");
+    }
+
+    const contract = await this.prismaService.contract.findUnique({
+      where: { id: contractId }
+    });
+
+    if (contract?.tenantId !== tenantProfile?.id) {
+      throw new ForbiddenException("Bạn không có quyền thực hiện hành động này");
+    }
+
+    if (contract?.contractStatus !== "PendingTenantSignature") {
+      throw new BadRequestException("Hợp đồng không trong trạng thái chờ ký");
+    }
+
+    await this.prismaService.contract.update({
+      where: { id: contractId },
+      data: { contractStatus: "RejectedByTenant" }
+    });
+
+    return { message: "Đã từ chối bản nháp hợp đồng" };
+  }
+
   async terminateEarly(contractId: string, reason: string, tenantAccountId: string) {
     const tenantProfile = await this.prismaService.tenantProfile.findUnique({
       where: {
@@ -257,10 +286,42 @@ export class ContractService {
     ])
   }
 
-  findAll() {
-    return `This action returns all contract`;
-  }
+  async findAll(accountId: string) {
+    // Determine if the account is an owner or a tenant
+    const ownerProfile = await this.prismaService.ownerProfile.findUnique({
+      where: { accountId }
+    });
+    
+    const tenantProfile = await this.prismaService.tenantProfile.findUnique({
+      where: { accountId }
+    });
 
+    return this.prismaService.contract.findMany({
+      where: {
+        OR: [
+          ownerProfile ? { ownerId: ownerProfile.id } : {},
+          tenantProfile ? { tenantId: tenantProfile.id } : {}
+        ]
+      },
+      include: {
+        apartment: {
+          include: {
+            apartmentListing: {
+              include: {
+                images: {
+                  where: { isPrimary: true },
+                  take: 1
+                }
+              }
+            }
+          }
+        },
+        tenant: { include: { account: true } },
+        owner: { include: { account: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
   findOne(id: string) {
     return `This action returns a #${id} contract`;
   }

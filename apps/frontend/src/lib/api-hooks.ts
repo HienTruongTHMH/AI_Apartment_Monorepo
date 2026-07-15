@@ -121,3 +121,28 @@ export function useApartments() {
 
   return { data, isLoading, error };
 }
+
+export function useRentalRequests(role: 'tenant' | 'owner') {
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchRequests = async () => {
+    try {
+      setIsLoading(true);
+      const url = role === 'owner' ? '/rental-request/owner-requests' : '/rental-request/my-requests';
+      const res = await api.get(url);
+      setData(Array.isArray(res.data) ? res.data : (res.data.data || []));
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, [role]);
+
+  return { data, isLoading, error, refetch: fetchRequests };
+}
