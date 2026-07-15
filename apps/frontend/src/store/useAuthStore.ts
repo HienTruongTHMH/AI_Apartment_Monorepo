@@ -11,6 +11,7 @@ export interface UserAccount {
   role: 'GUEST' | 'TENANT' | 'OWNER';
   tenantProfileId?: string;
   ownerProfileId?: string;
+  isTenancyActivated?: boolean;
 }
 
 interface AuthState {
@@ -78,7 +79,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAccountActive: (isActive: boolean) => {
     set((state) => {
       if (!state.user) return state;
-      const updatedUser = { ...state.user, isActive };
+      const updatedUser = { ...state.user, isActive, isTenancyActivated: isActive };
       if (typeof window !== 'undefined') {
         localStorage.setItem('ai_apt_user', JSON.stringify(updatedUser));
       }

@@ -138,7 +138,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-3.5 rounded-xl bg-[#E03C3D] hover:bg-[#C92F30] disabled:opacity-50 text-white font-extrabold text-sm transition-all flex items-center justify-center gap-2 mt-4 shadow-sm"
           >
-            <span>{loading ? 'Đang xác thực với Database...' : 'Đăng Nhập'}</span>
+            <span>{loading ? 'Đang Xử Lý xác thực...' : 'Đăng Nhập'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>

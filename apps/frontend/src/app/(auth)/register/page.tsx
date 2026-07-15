@@ -66,7 +66,7 @@ export default function RegisterPage() {
             <Building2 className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold text-[#2C2C2C]">Đăng Ký Tài Khoản</h1>
-          <p className="text-xs text-[#5A5A5A]">Tham gia hệ thống căn hộ cao cấp tích hợp AI</p>
+          <p className="text-xs text-[#5A5A5A]">Đồng hành cùng NestaVIET</p>
         </div>
 
         {/* Business Rule Banner Notice */}
@@ -208,7 +208,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-3.5 rounded-xl bg-[#E03C3D] hover:bg-[#C92F30] disabled:opacity-50 text-white font-extrabold text-sm transition-all flex items-center justify-center gap-2 mt-4 shadow-sm"
             >
-              <span>{loading ? 'Đang gửi thông tin vào Database...' : 'Đăng Ký Tài Khoản'}</span>
+              <span>{loading ? 'Đang Nhập Dữ Liệu...' : 'Đăng Ký Tài Khoản'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
