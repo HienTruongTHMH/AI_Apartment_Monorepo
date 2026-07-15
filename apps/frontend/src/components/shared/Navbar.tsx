@@ -111,13 +111,13 @@ export default function Navbar() {
                   <Link
                     href="/tenant/dashboard/activate"
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                      user.isActive
+                      user.isTenancyActivated
                         ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
                         : 'bg-amber-500/10 border-amber-500/40 text-amber-400 animate-pulse'
                     }`}
-                    title={user.isActive ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
+                    title={user.isTenancyActivated ? 'Hợp đồng đã kích hoạt' : 'Hợp đồng chưa kích hoạt (Chờ xác nhận thuê)'}
                   >
-                    {user.isActive ? (
+                    {user.isTenancyActivated ? (
                       <>
                         <ShieldCheck className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Đã kích hoạt</span>

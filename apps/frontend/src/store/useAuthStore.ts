@@ -10,6 +10,7 @@ export interface UserAccount {
   role: 'GUEST' | 'TENANT' | 'OWNER';
   tenantProfileId?: string;
   ownerProfileId?: string;
+  isTenancyActivated?: boolean;
 }
 
 interface AuthState {
@@ -22,9 +23,11 @@ interface AuthState {
   setAuth: (token: string, user: UserAccount) => void;
   updateUser: (fields: Partial<UserAccount>) => void;
   setAccountActive: (isActive: boolean) => void;
+  setTenancyActive: (isTenancyActivated: boolean) => void;
   logout: () => void;
   toggleAiPanel: () => void;
   setAiPanelOpen: (isOpen: boolean) => void;
+  refreshUser: () => Promise<void>;
 }
 
 // Initial state loader from localStorage if running in client
@@ -85,6 +88,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
+  setTenancyActive: (isTenancyActivated: boolean) => {
+    set((state) => {
+      if (!state.user) return state;
+      const updatedUser = { ...state.user, isTenancyActivated };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('ai_apt_user', JSON.stringify(updatedUser));
+      }
+      return { user: updatedUser };
+    });
+  },
+
   logout: () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('ai_apt_token');
@@ -95,4 +109,37 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   toggleAiPanel: () => set((state) => ({ aiPanelOpen: !state.aiPanelOpen })),
   setAiPanelOpen: (isOpen: boolean) => set({ aiPanelOpen: isOpen }),
+
+  refreshUser: async () => {
+    const { token, user } = useAuthStore.getState();
+    if (!token) return;
+    try {
+      const API_BASE_URL = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:3000/api';
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.user) {
+          const u = data.user;
+          const updatedUser = {
+            ...user,
+            id: u.accountId || user?.id,
+            email: u.email || user?.email,
+            fullName: u.fullName || user?.fullName,
+            isActive: typeof u.isActive === 'boolean' ? u.isActive : false,
+            role: u.hasOwnerProfile ? 'OWNER' : 'TENANT',
+            ownerProfileId: u.ownerProfileId || undefined,
+            isTenancyActivated: typeof u.isTenancyActivated === 'boolean' ? u.isTenancyActivated : false
+          };
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('ai_apt_user', JSON.stringify(updatedUser));
+          }
+          set({ user: updatedUser as UserAccount });
+        }
+      }
+    } catch (err) {
+      console.error('Lỗi khi tải lại thông tin tài khoản:', err);
+    }
+  }
 }));

@@ -11,10 +11,16 @@ interface AuthGuardProps {
 }
 
 export default function AuthGuard({ children, allowedRoles, requireActive = false }: AuthGuardProps) {
-  const { user, isLoggedIn } = useAuthStore();
+  const { user, isLoggedIn, refreshUser } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      refreshUser();
+    }
+  }, [isLoggedIn, refreshUser]);
 
   useEffect(() => {
     // If not logged in and requires a role, redirect to login
@@ -38,7 +44,8 @@ export default function AuthGuard({ children, allowedRoles, requireActive = fals
     }
 
     // Active status check
-    if (requireActive && !user.isActive) {
+    const isTenancyActive = user.role !== 'TENANT' || user.isTenancyActivated;
+    if (requireActive && !isTenancyActive) {
       // If inactive tenant tries to access restricted routes, redirect them
       router.push('/tenant/dashboard/activate');
       return;

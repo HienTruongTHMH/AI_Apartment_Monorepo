@@ -7,23 +7,48 @@ import { apiService } from '@/lib/api';
 import { ShieldCheck, ShieldAlert, FileCheck, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function AccountActivationHub() {
-  const { user, setAccountActive } = useAuthStore();
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [mounted, setMounted] = useState(false);
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [contractsLoading, setContractsLoading] = useState(true);
 
   useEffect(() => {
     setMounted(true);
+    const fetchContracts = async () => {
+      try {
+        const data = await apiService.getContracts();
+        setContracts(data);
+      } catch (err) {
+        console.error('Lỗi khi lấy danh sách hợp đồng:', err);
+      } finally {
+        setContractsLoading(false);
+      }
+    };
+    fetchContracts();
   }, []);
 
+  const pendingContract = Array.isArray(contracts)
+    ? contracts.find((c) => c.contractStatus === 'PendingTenantSignature' || c.status === 'pending')
+    : undefined;
+  const hasPendingContract = !!pendingContract;
+
   const handleActivateAccount = async () => {
+    if (!pendingContract) {
+      setErrorMsg('Không tìm thấy hợp đồng nào đang ở trạng thái chờ ký.');
+      return;
+    }
     setLoading(true);
+    setErrorMsg('');
     try {
-      await apiService.confirmOfflineRentalAndActivateAccount('ctr-101');
-      setSuccessMsg('Tài khoản của bạn đã được kích hoạt thành công và Hợp đồng đã cập nhật trạng thái hoạt động!');
-    } catch {
-      setAccountActive(true);
-      setSuccessMsg('Đã kích hoạt thành công tài khoản demo!');
+      const res = await apiService.confirmOfflineRentalAndActivateAccount(pendingContract.id);
+      setSuccessMsg(res.message || 'Hợp đồng của bạn đã được kích hoạt thành công và tài khoản đã cập nhật trạng thái hoạt động!');
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.response?.data?.message || 'Có lỗi xảy ra khi xác nhận kích hoạt tài khoản.';
+      setErrorMsg(msg);
     } finally {
       setLoading(false);
     }
@@ -51,7 +76,7 @@ export default function AccountActivationHub() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-gray-400">Trạng thái hiện tại:</span>
-            {mounted && user?.isActive ? (
+            {mounted && user?.isTenancyActivated ? (
               <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4" /> Đã kích hoạt
               </span>
@@ -85,6 +110,13 @@ export default function AccountActivationHub() {
           </div>
         </div>
 
+        {errorMsg && (
+          <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-bold flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
         {/* Action Controls */}
         {successMsg ? (
           <div className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold text-center space-y-3">
@@ -102,19 +134,41 @@ export default function AccountActivationHub() {
           </div>
         ) : (
           <div className="pt-2">
-            {mounted && user?.isActive ? (
+            {mounted && user?.isTenancyActivated ? (
               <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-bold text-center">
                 Tài khoản của bạn đang ở trạng thái HOẠT ĐỘNG (Đã kích hoạt). Quyền truy cập các tính năng thuê nhà đã được mở đầy đủ!
               </div>
             ) : (
-              <button
-                onClick={handleActivateAccount}
-                disabled={loading || !mounted}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01]"
-              >
-                <Sparkles className="w-5 h-5" />
-                <span>{loading ? 'Đang xác nhận...' : 'Xác Nhận Đã Ký Bản Cứng & Kích Hoạt Tài Khoản'}</span>
-              </button>
+              <div className="space-y-4">
+                {contractsLoading ? (
+                  <div className="p-4 rounded-2xl bg-slate-950 border border-white/5 flex items-center justify-center gap-2 text-xs text-gray-400">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-500"></div>
+                    <span>Đang kiểm tra danh sách hợp đồng...</span>
+                  </div>
+                ) : !hasPendingContract ? (
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-medium leading-relaxed">
+                      ⚠️ **Chưa tìm thấy hợp đồng đang chờ ký**: Hệ thống yêu cầu Chủ nhà phải thực hiện bước gửi hợp đồng nháp (`POST /contract/send-to-tenant`) trước. Sau khi hợp đồng chuyển sang trạng thái **Chờ ký**, bạn mới có thể thực hiện xác nhận kích hoạt tài khoản tại đây.
+                    </div>
+                    <button
+                      disabled={true}
+                      className="w-full py-4 rounded-2xl bg-slate-800 text-gray-500 font-black text-sm cursor-not-allowed border border-white/5 transition-all flex items-center justify-center gap-2"
+                    >
+                      <ShieldAlert className="w-5 h-5" />
+                      <span>Không có hợp đồng chờ ký (Nút Bị Vô Hiệu Hóa)</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleActivateAccount}
+                    disabled={loading || !mounted}
+                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/25 transition-all flex items-center justify-center gap-2 hover:scale-[1.01]"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    <span>{loading ? 'Đang xác nhận...' : 'Xác Nhận Đã Ký Bản Cứng & Kích Hoạt Tài Khoản'}</span>
+                  </button>
+                )}
+              </div>
             )}
           </div>
         )}

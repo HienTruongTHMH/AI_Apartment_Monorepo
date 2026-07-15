@@ -123,11 +123,15 @@ export class ContractService {
       }
     })
 
-    if (contract?.tenantId !== tenantProfile?.id) {
+    if (!contract) {
+      throw new NotFoundException("Hợp đồng không tồn tại")
+    }
+
+    if (contract.tenantId !== tenantProfile.id) {
       throw new ForbiddenException("Bạn không có quyền ký hợp đồng")
     }
 
-    if (contract?.contractStatus !== "PendingTenantSignature") {
+    if (contract.contractStatus !== "PendingTenantSignature") {
       throw new BadRequestException("Hợp đồng không trong trạng thái PendingTenantSignature");
     }
 
@@ -161,7 +165,12 @@ export class ContractService {
       })
     ])
 
-    return 'This action signs contract';
+    return {
+      success: true,
+      message: 'Hợp đồng đã được ký và kích hoạt tài khoản thành công!',
+      contractStatus: 'Active',
+      isTenancyActivated: true
+    };
   }
 
   async terminateEarly(contractId: string, reason: string, tenantAccountId: string) {
@@ -257,8 +266,40 @@ export class ContractService {
     ])
   }
 
-  findAll() {
-    return `This action returns all contract`;
+  async findAll(accountId: string) {
+    // Check if owner
+    const ownerProfile = await this.prismaService.ownerProfile.findUnique({
+      where: { accountId }
+    });
+
+    if (ownerProfile) {
+      return this.prismaService.contract.findMany({
+        where: { ownerId: ownerProfile.id },
+        include: {
+          apartment: true,
+          tenant: true,
+          owner: true
+        }
+      });
+    }
+
+    // Check if tenant
+    const tenantProfile = await this.prismaService.tenantProfile.findUnique({
+      where: { accountId }
+    });
+
+    if (tenantProfile) {
+      return this.prismaService.contract.findMany({
+        where: { tenantId: tenantProfile.id },
+        include: {
+          apartment: true,
+          tenant: true,
+          owner: true
+        }
+      });
+    }
+
+    return [];
   }
 
   findOne(id: string) {

@@ -29,13 +29,14 @@ export default function LoginPage() {
         throw new Error('Không nhận được token xác thực từ backend.');
       }
       
-      let profileData: { id: string; email: string; fullName: string; phone: string; isActive: boolean; role: 'TENANT' | 'OWNER' | 'GUEST'; ownerProfileId?: string } = {
+      let profileData: { id: string; email: string; fullName: string; phone: string; isActive: boolean; role: 'TENANT' | 'OWNER' | 'GUEST'; ownerProfileId?: string; isTenancyActivated?: boolean } = {
         id: 'usr-' + Date.now(),
         email: email,
         fullName: 'Người Dùng AI Apartment',
         phone: '0901234567',
         isActive: false,
-        role: 'TENANT'
+        role: 'TENANT',
+        isTenancyActivated: false
       };
 
       try {
@@ -44,6 +45,19 @@ export default function LoginPage() {
         });
         if (meRes.data && meRes.data.user) {
           const u = meRes.data.user;
+          let previouslyActivated = false;
+          if (typeof window !== 'undefined') {
+            try {
+              const prevUser = localStorage.getItem('ai_apt_user');
+              if (prevUser) {
+                const parsed = JSON.parse(prevUser);
+                if (parsed && parsed.email === u.email && parsed.isTenancyActivated) {
+                  previouslyActivated = true;
+                }
+              }
+            } catch {}
+          }
+
           profileData = {
             id: u.accountId || profileData.id,
             email: u.email || email,
@@ -52,6 +66,7 @@ export default function LoginPage() {
             isActive: typeof u.isActive === 'boolean' ? u.isActive : false,
             role: u.hasOwnerProfile ? 'OWNER' : 'TENANT',
             ownerProfileId: u.ownerProfileId || undefined,
+            isTenancyActivated: typeof u.isTenancyActivated === 'boolean' ? u.isTenancyActivated : false
           };
         }
       } catch {

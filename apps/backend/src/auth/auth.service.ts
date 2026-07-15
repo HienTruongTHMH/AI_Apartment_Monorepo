@@ -151,6 +151,16 @@ export class AuthService {
         }
     }
 
+    async getFreshAccount(accountId: string) {
+        return await this.prisma.account.findUnique({
+            where: { id: accountId },
+            include: {
+                tenantProfile: true,
+                ownerProfile: true
+            }
+        });
+    }
+
     async forgotPassword(dto: RegisterDto) {
     }
 

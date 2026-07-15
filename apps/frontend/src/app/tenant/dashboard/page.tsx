@@ -28,7 +28,7 @@ export default function TenantDashboardOverview() {
         {/* Account Activation Badge Status */}
         <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 shrink-0 space-y-2">
           <div className="text-[11px] text-gray-400">Trạng Thái Kích Hoạt Tài Khoản</div>
-          {mounted && user?.isActive ? (
+          {mounted && user?.isTenancyActivated ? (
             <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Đã Kích Hoạt</span>

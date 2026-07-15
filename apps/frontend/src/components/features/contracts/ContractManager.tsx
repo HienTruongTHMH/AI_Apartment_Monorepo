@@ -24,12 +24,32 @@ export default function ContractManager({ role }: ContractManagerProps) {
   
   const { data: contracts, isLoading, error } = useContracts(role);
 
-  const filtered = contracts.filter((c) =>
-    (filterStatus === 'all' || c.status === filterStatus) &&
-    (c.tenant.toLowerCase().includes(search.toLowerCase()) ||
-     c.property.toLowerCase().includes(search.toLowerCase()) ||
-     c.id.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = contracts.filter((c) => {
+    const tenantName = typeof c.tenant === 'string' 
+      ? c.tenant 
+      : (c.tenant?.fullName || '');
+
+    const propertyAddress = typeof c.property === 'string' 
+      ? c.property 
+      : (c.apartment?.fullAddress || '');
+
+    const contractId = c.id || '';
+    const status = c.contractStatus || c.status || '';
+    
+    const matchStatus = 
+      filterStatus === 'all' || 
+      status.toLowerCase() === filterStatus.toLowerCase() ||
+      (filterStatus === 'pending' && status === 'PendingTenantSignature') ||
+      (filterStatus === 'active' && status === 'Active') ||
+      (filterStatus === 'expired' && status === 'Expired');
+
+    const matchSearch =
+      tenantName.toLowerCase().includes(search.toLowerCase()) ||
+      propertyAddress.toLowerCase().includes(search.toLowerCase()) ||
+      contractId.toLowerCase().includes(search.toLowerCase());
+
+    return matchStatus && matchSearch;
+  });
 
   return (
     <div className="w-full text-white">

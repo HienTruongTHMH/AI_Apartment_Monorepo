@@ -63,8 +63,8 @@ export class ContractController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.contractService.findAll();
+  findAll(@Req() req) {
+    return this.contractService.findAll(req.user.accountId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

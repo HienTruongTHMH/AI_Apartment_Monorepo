@@ -364,8 +364,15 @@ export const apiService = {
     db_apartment_data?: any;
   }) {
     const aiAgentUrl = process.env.NEXT_PUBLIC_AI_AGENT_URL || 'http://localhost:8000';
-    const res = await apiClient.post(`${aiAgentUrl}/api/verify-listing`, payload);
-    return res.data;
+    console.log('[apiService.verifyListingDirect] Sending payload to AI Agent:', JSON.stringify(payload, null, 2));
+    try {
+      const res = await apiClient.post(`${aiAgentUrl}/api/verify-listing`, payload);
+      console.log('[apiService.verifyListingDirect] Received successful response:', JSON.stringify(res.data, null, 2));
+      return res.data;
+    } catch (err: any) {
+      console.error('[apiService.verifyListingDirect] Error response:', err.response?.data || err.message);
+      throw err;
+    }
   },
 
   // AI Broker Agent (Calls POST /api/ai-agents/search matching SearchBrokerDto)
@@ -417,22 +424,23 @@ export const apiService = {
   // Contracts
   async getContracts() {
     try {
-      const res = await apiClient.get<ContractItem[]>('/contract');
-      return res.data;
+      const res = await apiClient.get<any>('/contract');
+      if (Array.isArray(res.data)) {
+        return res.data;
+      }
+      if (res.data && Array.isArray(res.data.data)) {
+        return res.data.data;
+      }
+      return MOCK_CONTRACTS;
     } catch {
       return MOCK_CONTRACTS;
     }
   },
 
-  // Offline Contract Physical Sign Confirmation -> Calls POST /contract/tenant-sgin
+  // Offline Contract Physical Sign Confirmation -> Calls POST /contract/tenant-sign
   async confirmOfflineRentalAndActivateAccount(contractId: string) {
-    try {
-      // Endpoint contract.controller.ts: @Post('tenant-sgin') expecting { contractId }
-      await apiClient.post('/contract/tenant-sgin', { contractId });
-    } catch {
-      // Local fallback simulation
-    }
-    useAuthStore.getState().setAccountActive(true);
-    return { success: true, message: 'Đã xác nhận ký hợp đồng bản cứng thành công. Tài khoản của bạn hiện đã được kích hoạt (isActive = true)!' };
+    const res = await apiClient.post('/contract/tenant-sign', { contractId });
+    useAuthStore.getState().setTenancyActive(true);
+    return res.data;
   }
 };

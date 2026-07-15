@@ -93,7 +93,25 @@ export default function CreateListingPage() {
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || 'Lỗi kết nối với AI Agent.');
+      let errorMsg = 'Lỗi kết nối với AI Agent.';
+      if (err.response?.data?.detail) {
+        const detail = err.response.data.detail;
+        if (typeof detail === 'string') {
+          errorMsg = detail;
+        } else if (Array.isArray(detail)) {
+          errorMsg = detail
+            .map((d: any) => {
+              const fieldName = Array.isArray(d.loc) ? d.loc[d.loc.length - 1] : '';
+              return `${fieldName ? `Trường [${fieldName}]: ` : ''}${d.msg}`;
+            })
+            .join(' | ');
+        } else {
+          errorMsg = JSON.stringify(detail);
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      setError(errorMsg);
     } finally {
       setVerifying(false);
     }

@@ -17,8 +17,9 @@ export default function UserActivationBanner() {
 
   const isOwnerPath = pathname.startsWith('/owner');
   const isOwner = user?.role === 'OWNER';
+  const isTenancyActive = user?.role !== 'TENANT' || user?.isTenancyActivated;
 
-  if (!mounted || !isLoggedIn || !user || user.isActive || isOwnerPath || isOwner) {
+  if (!mounted || !isLoggedIn || !user || isTenancyActive || isOwnerPath || isOwner) {
     return null;
   }
 

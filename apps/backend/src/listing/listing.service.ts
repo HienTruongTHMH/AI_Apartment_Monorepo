@@ -16,10 +16,61 @@ export class ListingService {
     process.env.SUPABASE_SERVICE_KEY as string,
   )
 
-  create(createListingDto: CreateListingDto) {
+  async create(createListingDto: CreateListingDto, ownerAccountId: string) {
     const { apartmentId, apartment, ...listData } = createListingDto;
 
+    // Check if the owner profile exists and is valid
+    const ownerProfile = await this.prisma.ownerProfile.findUnique({
+      where: { accountId: ownerAccountId }
+    });
+
+    if (!ownerProfile) {
+      throw new HttpException(
+        'Tài khoản của bạn chưa được cấp quyền chủ hộ hoặc không hợp lệ.',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    const ownerProfileId = ownerProfile.id;
+
     if (apartmentId) {
+      // Validate that the apartment actually exists in the database
+      const existingApartment = await this.prisma.apartment.findUnique({
+        where: { id: apartmentId }
+      });
+
+      if (!existingApartment) {
+        // If it doesn't exist but apartment details are provided, create it with forced ownerId
+        if (apartment) {
+          return this.prisma.listing.create({
+            data: {
+              ...listData,
+              apartment: {
+                create: {
+                  id: apartmentId,
+                  ...apartment,
+                  ownerId: ownerProfileId
+                }
+              }
+            }
+          });
+        }
+        // If no details are provided, throw an error
+        throw new HttpException(
+          `Căn hộ với ID ${apartmentId} không tồn tại trong cơ sở dữ liệu.`,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      // Check if the existing apartment belongs to the authenticated owner
+      if (existingApartment.ownerId !== ownerProfileId) {
+        throw new HttpException(
+          'Bạn không có quyền đăng tin cho căn hộ này vì nó thuộc sở hữu của chủ hộ khác.',
+          HttpStatus.FORBIDDEN
+        );
+      }
+
+      // If it exists and belongs to the owner, connect to it
       return this.prisma.listing.create({
         data: {
           ...listData,
@@ -33,11 +84,19 @@ export class ListingService {
         data: {
           ...listData,
           apartment: {
-            create: apartment
+            create: {
+              ...apartment,
+              ownerId: ownerProfileId
+            }
           }
         }
-      })
+      });
     }
+
+    throw new HttpException(
+      'Yêu cầu phải cung cấp thông tin căn hộ (apartment) hoặc ID căn hộ (apartmentId).',
+      HttpStatus.BAD_REQUEST
+    );
   }
 
   async search(searchDto: SearchListingDto) {

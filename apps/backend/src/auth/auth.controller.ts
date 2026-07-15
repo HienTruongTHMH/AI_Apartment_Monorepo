@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, Get, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -28,9 +28,22 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async getProfile(@Req() req) {
+        const account = await this.authService.getFreshAccount(req.user.accountId);
+        if (!account) {
+            throw new UnauthorizedException("Tài khoản không tồn tại hoặc đã bị khóa");
+        }
         return {
             message: 'Chào mừng bạn có quyền xem profile',
-            user: req.user
+            user: {
+                accountId: account.id,
+                email: account.email,
+                fullName: account.fullName,
+                isActive: account.isActive,
+                hasTenantProfile: !!account.tenantProfile,
+                hasOwnerProfile: !!account.ownerProfile,
+                ownerProfileId: account.ownerProfile?.id || null,
+                isTenancyActivated: account.tenantProfile ? account.tenantProfile.isActive : false,
+            }
         }
     }
 }
