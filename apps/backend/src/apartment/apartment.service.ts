@@ -38,13 +38,27 @@ export class ApartmentService {
 
 
   async findBelonging(accountId: string) {
+    const owner = await this.prisma.ownerProfile.findUnique({
+      where: { accountId }
+    });
+
+    if (!owner) {
+      return [];
+    }
+
     return this.prisma.apartment.findMany({
       where: {
-        ownerId: accountId,
+        ownerId: owner.id,
+      },
+      include: {
+        apartmentListing: {
+          include: {
+            images: true
+          }
+        }
       }
-    })
+    });
   }
-
 
   async findOne(id: string) {
     return this.prisma.apartment.findUnique({
