@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
+  // Gọi API BE Để lấy JWT
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -28,36 +28,28 @@ export default function LoginPage() {
       if (!token) {
         throw new Error('Không nhận được token xác thực từ backend.');
       }
-      
-      let profileData: { id: string; email: string; fullName: string; phone: string; isActive: boolean; role: 'TENANT' | 'OWNER' | 'GUEST'; ownerProfileId?: string } = {
-        id: 'usr-' + Date.now(),
-        email: email,
-        fullName: 'Người Dùng AI Apartment',
-        phone: '0901234567',
-        isActive: false,
-        role: 'TENANT'
-      };
 
-      try {
-        const meRes = await apiClient.get('/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (meRes.data && meRes.data.user) {
-          const u = meRes.data.user;
-          profileData = {
-            id: u.accountId || profileData.id,
-            email: u.email || email,
-            fullName: u.fullName || profileData.fullName,
-            phone: profileData.phone,
-            isActive: typeof u.isActive === 'boolean' ? u.isActive : false,
-            role: u.hasOwnerProfile ? 'OWNER' : 'TENANT',
-            ownerProfileId: u.ownerProfileId || undefined,
-          };
-        }
-      } catch {
-        // Fallback for profile data if /auth/me fails
+      // Lấy thông tin user từ endpoint chung /auth/me
+      const meRes = await apiClient.get('/auth/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (!meRes.data?.user) {
+        throw new Error('Không thể tải thông tin tài khoản. Vui lòng thử lại.');
       }
 
+      const u = meRes.data.user;
+      const profileData = {
+        id: u.accountId,
+        email: u.email,
+        fullName: u.fullName,
+        phone: u.phone || '',
+        identityCard: u.identityCard,
+        isActive: u.isActive,
+        role: u.hasOwnerProfile ? 'OWNER' : 'TENANT',
+        tenantProfileId: u.tenantProfileId,
+        ownerProfileId: u.ownerProfileId,
+      }
       setAuth(token, profileData);
       router.push(profileData.role === 'OWNER' ? '/owner/dashboard' : '/tenant/dashboard');
     } catch (err: any) {
