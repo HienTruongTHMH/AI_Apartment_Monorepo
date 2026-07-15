@@ -164,28 +164,28 @@ export default function CreateListingPage() {
   };
 
   return (
-    <div className="p-6 text-white w-full max-w-5xl mx-auto space-y-8">
+    <div className="p-6 text-[#2C2C2C] w-full max-w-5xl mx-auto space-y-8">
       <div className="text-center">
-        <h1 className="text-3xl font-extrabold mb-3 text-white flex items-center justify-center gap-2">
-          Đăng tin thông minh với AI <Sparkles className="text-amber-400 font-bold" size={24} />
+        <h1 className="text-3xl font-extrabold mb-3 text-[#2C2C2C] flex items-center justify-center gap-2">
+          Đăng tin thông minh với AI <Sparkles className="text-[#FF8E15] font-bold" size={24} />
         </h1>
-        <p className="text-gray-400 text-sm max-w-xl mx-auto">
+        <p className="text-[#5A5A5A] text-sm max-w-xl mx-auto">
           Nhập các thông số cơ bản và để AI viết tiêu đề, mô tả cực thu hút cho căn hộ của bạn.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form panel */}
-        <div className="lg:col-span-2 bg-slate-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl space-y-6">
+        <div className="lg:col-span-2 bg-white border border-[#E8E8E8] rounded-xl p-6 shadow-sm space-y-6">
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Phân loại căn hộ:</label>
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Phân loại căn hộ:</label>
               <select
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+                className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors"
               >
                 <option value="">-- Chọn --</option>
                 <option value="Normal">Căn hộ thường</option>
@@ -198,13 +198,13 @@ export default function CreateListingPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Giá thuê (VND/tháng):</label>
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Giá thuê (VND/tháng):</label>
               <input
                 type="number"
                 name="pricePerMonth"
                 value={formData.pricePerMonth}
                 onChange={handleChange}
-                className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+                className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors"
                 placeholder="VD: 5000000"
               />
             </div>
@@ -212,65 +212,65 @@ export default function CreateListingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Diện tích (m2):</label>
-              <input type="number" name="area" value={formData.area} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="VD: 50" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Diện tích (m2):</label>
+              <input type="number" name="area" value={formData.area} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" placeholder="VD: 50" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Số Tầng:</label>
-              <input type="number" name="floor" value={formData.floor} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="VD: 3" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Số Tầng:</label>
+              <input type="number" name="floor" value={formData.floor} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" placeholder="VD: 3" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Mã phòng:</label>
-              <input type="number" name="room_number" value={formData.room_number} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="VD: 301" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Mã phòng:</label>
+              <input type="number" name="room_number" value={formData.room_number} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" placeholder="VD: 301" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">P. Ngủ:</label>
-              <input type="number" name="bedroom" value={formData.bedroom} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">P. Ngủ:</label>
+              <input type="number" name="bedroom" value={formData.bedroom} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">P. Tắm:</label>
-              <input type="number" name="bathroom" value={formData.bathroom} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">P. Tắm:</label>
+              <input type="number" name="bathroom" value={formData.bathroom} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">P. Khách:</label>
-              <input type="number" name="livingroom" value={formData.livingroom} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">P. Khách:</label>
+              <input type="number" name="livingroom" value={formData.livingroom} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">P. Bếp:</label>
-              <input type="number" name="kitchen" value={formData.kitchen} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">P. Bếp:</label>
+              <input type="number" name="kitchen" value={formData.kitchen} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Quận/Huyện:</label>
-              <input type="text" name="district" value={formData.district} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="VD: Hải Châu" />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Quận/Huyện:</label>
+              <input type="text" name="district" value={formData.district} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" placeholder="VD: Hải Châu" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Địa chỉ chi tiết:</label>
-              <input type="text" name="fullAddress" value={formData.fullAddress} onChange={handleChange} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-amber-500/50 transition-colors" placeholder="VD: 123 Nguyễn Văn Linh..." />
+              <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Địa chỉ chi tiết:</label>
+              <input type="text" name="fullAddress" value={formData.fullAddress} onChange={handleChange} className="w-full bg-white border border-[#E8E8E8] rounded-xl p-3 text-[#2C2C2C] focus:outline-none focus:border-[#999999] transition-colors" placeholder="VD: 123 Nguyễn Văn Linh..." />
             </div>
           </div>
 
           {/* Raw Text Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Mô tả bổ sung (AI sẽ dùng làm tư liệu viết bài):</label>
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Mô tả bổ sung (AI sẽ dùng làm tư liệu viết bài):</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full h-24 bg-slate-950 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors resize-none text-sm"
+              className="w-full h-24 bg-white border border-[#E8E8E8] rounded-xl p-4 text-[#2C2C2C] placeholder-gray-400 focus:outline-none focus:border-[#999999] transition-colors resize-none text-sm"
               placeholder="VD: Căn hộ nằm gần siêu thị Lotte, nội thất cơ bản nhập khẩu, có ban công hướng Đông Nam mát mẻ..."
             ></textarea>
           </div>
 
           {/* Image Uploader */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Đính kèm hình ảnh thực tế:</label>
-            <div className="border border-dashed border-white/10 rounded-xl p-6 text-center hover:bg-white/5 transition-colors relative cursor-pointer group">
+            <label className="block text-sm font-medium text-[#2C2C2C] mb-2">Đính kèm hình ảnh thực tế:</label>
+            <div className="border border-dashed border-[#E8E8E8] rounded-xl p-6 text-center hover:bg-[#F9F9F9] transition-colors relative cursor-pointer group">
               <input
                 type="file"
                 multiple
@@ -278,19 +278,19 @@ export default function CreateListingPage() {
                 onChange={handleImageChange}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <Upload size={32} className="mx-auto mb-2 text-gray-500 group-hover:text-amber-400 transition-colors" />
-              <p className="text-xs text-gray-400">Kéo thả tệp vào đây hoặc nhấn để chọn tệp ảnh</p>
+              <Upload size={32} className="mx-auto mb-2 text-[#777777] group-hover:text-[#E03C3D] transition-colors" />
+              <p className="text-xs text-[#5A5A5A]">Kéo thả tệp vào đây hoặc nhấn để chọn tệp ảnh</p>
             </div>
 
             {/* Image Preview List */}
             {images.length > 0 && (
               <div className="grid grid-cols-4 gap-3 mt-4">
                 {images.map((img, idx) => (
-                  <div key={img.image_id} className="relative aspect-video rounded-lg overflow-hidden border border-white/10 group bg-slate-950">
+                  <div key={img.image_id} className="relative aspect-video rounded-lg overflow-hidden border border-[#E8E8E8] group bg-[#F2F2F2]">
                     <img src={`data:${img.media_type};base64,${img.base64_data}`} alt="Preview" className="w-full h-full object-cover" />
                     <button
                       onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 bg-[#E03C3D] text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       ✕
                     </button>
@@ -300,13 +300,13 @@ export default function CreateListingPage() {
             )}
           </div>
 
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-[#E03C3D]">{error}</p>}
 
           <div className="flex justify-end">
             <button
               onClick={handleVerify}
               disabled={verifying}
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-slate-900 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 disabled:opacity-50 transition-all shadow-lg shadow-amber-500/20"
+              className="flex items-center gap-2 px-6 py-3 rounded-[8px] font-bold text-white bg-[#E03C3D] hover:bg-[#C92F30] disabled:opacity-50 transition-all border-0 shadow-sm"
             >
               {verifying ? (
                 <>
@@ -323,39 +323,39 @@ export default function CreateListingPage() {
         </div>
 
         {/* Info panel / Results */}
-        <div className="bg-slate-900/30 border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl flex flex-col justify-between">
+        <div className="bg-[#F9F9F9] border border-[#E8E8E8] rounded-xl p-6 shadow-sm flex flex-col justify-between text-[#5A5A5A]">
           <div>
-            <h3 className="text-lg font-bold text-white mb-4">Kết Quả Kiểm Duyệt AI</h3>
+            <h3 className="text-lg font-bold text-[#2C2C2C] mb-4">Kết Quả Kiểm Duyệt AI</h3>
             
             {!result && !verifying && (
-              <div className="py-12 text-center text-gray-500">
-                <ImageIcon size={32} className="mx-auto mb-2 opacity-20" />
+              <div className="py-12 text-center text-[#777777]">
+                <ImageIcon size={32} className="mx-auto mb-2 opacity-30" />
                 <p className="text-xs">Vui lòng điền thông tin và bấm phân tích để AI viết nội dung hoàn chỉnh cho bạn.</p>
               </div>
             )}
 
             {verifying && (
-              <div className="py-12 text-center text-amber-400 space-y-3">
+              <div className="py-12 text-center text-[#FF8E15] space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin mx-auto" />
-                <p className="text-xs">Gemini AI đang chấm điểm, phát hiện lỗi chính tả, đối chiếu cơ sở dữ liệu và viết bài mô tả hấp dẫn...</p>
+                <p className="text-xs text-[#5A5A5A]">Gemini AI đang chấm điểm, phát hiện lỗi chính tả, đối chiếu cơ sở dữ liệu và viết bài mô tả hấp dẫn...</p>
               </div>
             )}
 
             {result && (
               <div className="space-y-4">
                 {/* Score */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-                  <span className="text-xs text-gray-400">Điểm chất lượng:</span>
-                  <span className={`text-xl font-extrabold ${result.score >= 70 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E8E8E8]">
+                  <span className="text-xs text-[#5A5A5A]">Điểm chất lượng:</span>
+                  <span className={`text-xl font-extrabold ${result.score >= 70 ? 'text-green-600' : 'text-[#FF8E15]'}`}>
                     {result.score || 0} / 100
                   </span>
                 </div>
 
                 {/* Status */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-                  <span className="text-xs text-gray-400">Trạng thái duyệt:</span>
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-[#E8E8E8]">
+                  <span className="text-xs text-[#5A5A5A]">Trạng thái duyệt:</span>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    result.verified ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                    result.verified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {result.verified ? 'Sẵn sàng đăng' : 'Cần sửa đổi'}
                   </span>
@@ -364,29 +364,29 @@ export default function CreateListingPage() {
                 {/* Title suggest */}
                 {result.standardizedTitle && (
                   <div className="space-y-1">
-                    <span className="text-xs text-gray-400 font-semibold block">Tiêu đề chuẩn SEO:</span>
-                    <p className="text-sm font-bold text-amber-400 leading-relaxed">{result.standardizedTitle}</p>
+                    <span className="text-xs text-[#5A5A5A] font-semibold block">Tiêu đề chuẩn SEO:</span>
+                    <p className="text-sm font-bold text-[#E03C3D] leading-relaxed">{result.standardizedTitle}</p>
                   </div>
                 )}
 
                 {/* Description suggest */}
                 {result.suggestedDescription && (
                   <div className="space-y-1">
-                    <span className="text-xs text-gray-400 font-semibold block">Bài viết mô tả do AI tạo:</span>
-                    <p className="text-xs text-gray-200 bg-slate-950 p-3 rounded-xl border border-white/5 leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap">{result.suggestedDescription}</p>
+                    <span className="text-xs text-[#5A5A5A] font-semibold block">Bài viết mô tả do AI tạo:</span>
+                    <p className="text-xs text-[#2C2C2C] bg-white p-3 rounded-xl border border-[#E8E8E8] leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap">{result.suggestedDescription}</p>
                   </div>
                 )}
 
                 {/* Suggestions feedback */}
                 {result.insights && result.insights.length > 0 && (
-                  <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs space-y-2">
+                  <div className="p-3.5 rounded-xl bg-green-50 border border-green-100 text-green-800 text-xs space-y-2">
                     <div className="font-bold flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Sparkles className="w-3.5 h-3.5 text-green-600" />
                       Nhận xét từ AI:
                     </div>
                     <ul className="list-disc list-inside space-y-1">
                       {result.insights.map((insight: string, idx: number) => (
-                        <li key={idx} className="text-[11px] leading-relaxed text-gray-300">{insight}</li>
+                        <li key={idx} className="text-[11px] leading-relaxed text-[#5A5A5A]">{insight}</li>
                       ))}
                     </ul>
                   </div>
@@ -396,11 +396,11 @@ export default function CreateListingPage() {
           </div>
 
           {result && (
-            <div className="pt-4 border-t border-white/10 mt-6 space-y-2">
+            <div className="pt-4 border-t border-[#E8E8E8] mt-6 space-y-2">
               <button
                 onClick={handlePublish}
                 disabled={publishing}
-                className="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                className="w-full py-3 rounded-[8px] bg-[#E03C3D] hover:bg-[#C92F30] disabled:opacity-50 text-white font-bold text-sm transition-colors border-0 flex items-center justify-center gap-2 shadow-sm"
               >
                 {publishing ? (
                   <>
@@ -413,7 +413,7 @@ export default function CreateListingPage() {
                   </>
                 )}
               </button>
-              {error && <p className="text-xs text-red-400 text-center mt-2">{error}</p>}
+              {error && <p className="text-xs text-[#E03C3D] text-center mt-2">{error}</p>}
             </div>
           )}
         </div>

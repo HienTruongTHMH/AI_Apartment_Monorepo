@@ -38,20 +38,20 @@ export default function Navbar() {
   const isUserLoggedIn = mounted && isLoggedIn && !!user;
 
   return (
-    <header className="sticky top-0 z-40 w-full glass-panel border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full bg-white border-b border-[#E8E8E8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 p-0.5 shadow-[0_0_20px_rgba(16,185,129,0.3)] group-hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all">
-            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+          <div className="w-10 h-10 rounded-xl bg-[#E03C3D] p-0.5 shadow-sm group-hover:shadow-md transition-all">
+            <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-[#E03C3D] group-hover:scale-110 transition-transform" />
             </div>
           </div>
           <div>
-            <div className="text-lg font-black tracking-tight text-white flex items-center gap-1">
-              AI APARTMENT <span className="text-emerald-400 font-extrabold text-xs px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">MONOREPO</span>
+            <div className="text-lg font-black tracking-tight text-[#2C2C2C] flex items-center gap-1">
+              Nesta <span className="text-[#E03C3D] font-extrabold text-xs px-1.5 py-0.5 rounded bg-red-50 border border-red-100">VIET</span>
             </div>
-            <div className="text-[10px] text-gray-400 uppercase tracking-widest">Luxury Living & AI Broker</div>
+            <div className="text-[10px] text-[#5A5A5A] uppercase tracking-widest">Luxury Living </div>
           </div>
         </Link>
 
@@ -59,13 +59,13 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium" suppressHydrationWarning>
           <Link
             href="/"
-            className={`transition-colors ${pathname === '/' ? 'text-emerald-400 font-semibold' : 'text-gray-300 hover:text-white'}`}
+            className={`transition-colors ${pathname === '/' ? 'text-[#2C2C2C] font-bold' : 'text-[#2C2C2C] hover:text-[#E03C3D]'}`}
           >
             Trang Chủ
           </Link>
           <Link
             href="/search"
-            className={`flex items-center gap-1.5 transition-colors ${pathname.startsWith('/search') ? 'text-emerald-400 font-semibold' : 'text-gray-300 hover:text-white'}`}
+            className={`flex items-center gap-1.5 transition-colors ${pathname.startsWith('/search') ? 'text-[#2C2C2C] font-bold' : 'text-[#2C2C2C] hover:text-[#E03C3D]'}`}
           >
             <Search className="w-4 h-4" /> Tìm Căn Hộ
           </Link>
@@ -73,7 +73,7 @@ export default function Navbar() {
           {isUserLoggedIn && currentRole === 'TENANT' && (
             <Link
               href="/tenant/dashboard"
-              className={`transition-colors ${pathname.startsWith('/tenant') ? 'text-emerald-400 font-semibold' : 'text-gray-300 hover:text-white'}`}
+              className={`transition-colors ${pathname.startsWith('/tenant') ? 'text-[#2C2C2C] font-bold' : 'text-[#2C2C2C] hover:text-[#E03C3D]'}`}
             >
               Dashboard Tenant
             </Link>
@@ -82,7 +82,7 @@ export default function Navbar() {
           {isUserLoggedIn && currentRole === 'OWNER' && (
             <Link
               href="/owner/dashboard"
-              className={`transition-colors ${pathname.startsWith('/owner') ? 'text-emerald-400 font-semibold' : 'text-gray-300 hover:text-white'}`}
+              className={`transition-colors ${pathname.startsWith('/owner') ? 'text-[#2C2C2C] font-bold' : 'text-[#2C2C2C] hover:text-[#E03C3D]'}`}
             >
               Dashboard Chủ Nhà
             </Link>
@@ -96,10 +96,10 @@ export default function Navbar() {
           {/* AI Broker Quick Launch Trigger */}
           <button
             onClick={toggleAiPanel}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 text-emerald-300 hover:border-emerald-400 transition-all text-xs font-semibold"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-transparent border border-[#E03C3D] text-[#E03C3D] hover:bg-[#FFF5F5] transition-colors duration-200 text-xs font-semibold group"
           >
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            <span className="hidden sm:inline">AI Broker Chat</span>
+            <Sparkles className="w-4 h-4 text-[#E03C3D]" />
+            <span className="hidden sm:inline">Trợ Lý Tư Vấn Ảo</span>
           </button>
 
           {/* User Auth Controls */}
@@ -112,8 +112,8 @@ export default function Navbar() {
                     href="/tenant/dashboard/activate"
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                       user.isActive
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                        : 'bg-amber-500/10 border-amber-500/40 text-amber-400 animate-pulse'
+                        ? 'bg-green-50 border-green-200 text-green-700'
+                        : 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
                     }`}
                     title={user.isActive ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
                   >
@@ -131,15 +131,14 @@ export default function Navbar() {
                   </Link>
                 )}
 
-                {/* User Dropdown / Profile */}
-                <div className="flex items-center gap-2 pl-2 border-l border-white/10">
+                <div className="flex items-center gap-2 pl-2 border-l border-[#E8E8E8]">
                   <div className="text-right hidden xl:block">
-                    <div className="text-xs font-semibold text-white">{user.fullName}</div>
-                    <div className="text-[10px] text-gray-400">{getRoleLabel(currentRole)}</div>
+                    <div className="text-xs font-semibold text-[#2C2C2C]">{user.fullName}</div>
+                    <div className="text-[10px] text-[#5A5A5A]">{getRoleLabel(currentRole)}</div>
                   </div>
                   <button
                     onClick={logout}
-                    className="w-9 h-9 rounded-xl bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/40 flex items-center justify-center text-gray-400 hover:text-rose-400 transition-all"
+                    className="w-9 h-9 rounded-xl bg-[#F2F2F2] hover:bg-red-50 border border-[#E8E8E8] hover:border-red-200 flex items-center justify-center text-[#5A5A5A] hover:text-[#E03C3D] transition-all"
                     title="Đăng xuất"
                   >
                     <LogOut className="w-4 h-4" />
@@ -150,13 +149,13 @@ export default function Navbar() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-gray-300 hover:text-white transition-colors"
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#5A5A5A] hover:text-[#2C2C2C] transition-colors"
                 >
                   Đăng Nhập
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 hover:scale-105 transition-transform"
+                  className="px-4 py-2 rounded-[8px] bg-[#E03C3D] hover:bg-[#C92F30] text-white font-bold text-xs border-0 transition-colors duration-200"
                 >
                   Đăng Ký
                 </Link>
@@ -164,8 +163,8 @@ export default function Navbar() {
             )
           ) : (
             <div className="flex items-center gap-2">
-              <div className="w-16 h-8 rounded-xl bg-white/5 animate-pulse" />
-              <div className="w-16 h-8 rounded-xl bg-white/5 animate-pulse" />
+              <div className="w-16 h-8 rounded-xl bg-[#F2F2F2] animate-pulse" />
+              <div className="w-16 h-8 rounded-xl bg-[#F2F2F2] animate-pulse" />
             </div>
           )}
         </div>

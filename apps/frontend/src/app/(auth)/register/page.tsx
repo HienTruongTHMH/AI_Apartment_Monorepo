@@ -59,54 +59,54 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg p-8 rounded-3xl bg-slate-900/80 border border-white/10 glass-panel shadow-2xl space-y-6">
+      <div className="w-full max-w-lg p-8 rounded-3xl bg-white border border-[#E8E8E8] shadow-xl space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400 mb-2">
+          <div className="inline-flex p-3 rounded-2xl bg-[#FFF5F5] border border-[#E03C3D]/10 text-[#E03C3D] mb-2">
             <Building2 className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-white">Đăng Ký Tài Khoản</h1>
-          <p className="text-xs text-gray-400">Tham gia hệ thống căn hộ cao cấp tích hợp AI</p>
+          <h1 className="text-2xl font-bold text-[#2C2C2C]">Đăng Ký Tài Khoản</h1>
+          <p className="text-xs text-[#5A5A5A]">Tham gia hệ thống căn hộ cao cấp tích hợp AI</p>
         </div>
 
         {/* Business Rule Banner Notice */}
-        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-1">
-          <div className="font-bold flex items-center gap-1.5 text-amber-400">
+        <div className="p-3.5 rounded-2xl bg-[#FFFBEB] border border-[#FEF3C7] text-[#D97706] text-xs space-y-1">
+          <div className="font-bold flex items-center gap-1.5 text-[#D97706]">
             <ShieldAlert className="w-4 h-4" />
             Lưu Ý Về Trạng Thái Tài Khoản
           </div>
-          <p className="text-gray-300 leading-relaxed text-[11px]">
-            Tài khoản mới sẽ ở trạng thái <span className="font-semibold text-amber-300">chưa kích hoạt</span>. Sau khi chọn nhà & xác nhận ký hợp đồng bản cứng ngoài thực tế, tài khoản sẽ được chính thức kích hoạt.
+          <p className="text-[#D97706] leading-relaxed text-[11px]">
+            Tài khoản mới sẽ ở trạng thái <span className="font-semibold">chưa kích hoạt</span>. Sau khi chọn nhà & xác nhận ký hợp đồng bản cứng ngoài thực tế, tài khoản sẽ được chính thức kích hoạt.
           </p>
         </div>
 
         {/* Display Server Errors if any */}
         {errorMsg && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-[#FFF5F5] border border-red-200 text-red-600 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Display Real Success Feedback Box if backend returned success */}
         {successInfo ? (
-          <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs space-y-4 shadow-xl">
-            <div className="flex items-center gap-2 text-sm font-bold text-emerald-400">
+          <div className="p-5 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0] text-[#166534] text-xs space-y-4 shadow-sm">
+            <div className="flex items-center gap-2 text-sm font-bold text-[#15803d]">
               <CheckCircle2 className="w-5 h-5" /> {successInfo.message}
             </div>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 space-y-1 text-[11px] font-mono">
-              <div>• Account ID: <span className="text-white">{successInfo.accountId}</span></div>
-              <div>• Email: <span className="text-white">{successInfo.email}</span></div>
-              <div>• Trạng thái ban đầu: <span className="text-amber-400 font-bold font-sans">Chưa kích hoạt</span></div>
-              <div>• Vai trò: <span className="text-emerald-400 font-bold">{role}</span></div>
+            <div className="p-3 rounded-xl bg-[#F9F9F9] border border-[#E8E8E8] space-y-1 text-[11px] font-mono text-[#2C2C2C]">
+              <div>• Account ID: <span className="font-bold">{successInfo.accountId}</span></div>
+              <div>• Email: <span className="font-bold">{successInfo.email}</span></div>
+              <div>• Trạng thái ban đầu: <span className="text-[#D97706] font-bold font-sans">Chưa kích hoạt</span></div>
+              <div>• Vai trò: <span className="text-[#166534] font-bold">{role}</span></div>
             </div>
-            <p className="text-[11px] text-gray-300">
+            <p className="text-[11px] text-[#166534]">
               Tài khoản của bạn đã được lưu chính thức vào PostgreSQL Database qua NestJS Backend! Vui lòng đăng nhập với thông tin vừa tạo.
             </p>
             <div className="pt-2">
               <Link
                 href="/login"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20"
+                className="w-full py-3 rounded-xl bg-[#E03C3D] hover:bg-[#C92F30] text-white font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
               >
                 <span>Đăng Nhập Ngay Với Tài Khoản Vừa Tạo</span>
                 <ArrowRight className="w-4 h-4" />
@@ -116,14 +116,14 @@ export default function RegisterPage() {
         ) : (
           <form onSubmit={handleRegister} className="space-y-4">
             {/* Persona Selection */}
-            <div className="grid grid-cols-2 gap-3 p-1 rounded-xl bg-slate-950 border border-white/10 text-xs">
+            <div className="grid grid-cols-2 gap-3 p-1 rounded-xl bg-[#F2F2F2] border border-[#E8E8E8] text-xs">
               <button
                 type="button"
                 onClick={() => setRole('TENANT')}
                 className={`py-2 rounded-lg font-semibold transition-all ${
                   role === 'TENANT'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-white text-[#2C2C2C] shadow-sm'
+                    : 'text-[#5A5A5A] hover:text-[#2C2C2C]'
                 }`}
               >
                 Khách Hàng
@@ -133,8 +133,8 @@ export default function RegisterPage() {
                 onClick={() => setRole('OWNER')}
                 className={`py-2 rounded-lg font-semibold transition-all ${
                   role === 'OWNER'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                    : 'text-gray-400 hover:text-white'
+                    ? 'bg-white text-[#2C2C2C] shadow-sm'
+                    : 'text-[#5A5A5A] hover:text-[#2C2C2C]'
                 }`}
               >
                 Chủ hộ
@@ -142,63 +142,63 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-300">Họ và Tên</label>
+              <label className="text-xs font-semibold text-[#2C2C2C]">Họ và Tên</label>
               <div className="relative">
-                <User className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
+                <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   placeholder="Nguyễn Văn A"
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none transition-all"
+                  className="w-full bg-[#F9F9F9] border border-[#E8E8E8] focus:border-[#E03C3D] focus:ring-1 focus:ring-[#E03C3D]/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#2C2C2C] focus:outline-none transition-all placeholder-gray-400"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-300">Email</label>
+                <label className="text-xs font-semibold text-[#2C2C2C]">Email</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
+                  <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@email.com"
-                    className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none transition-all"
+                    className="w-full bg-[#F9F9F9] border border-[#E8E8E8] focus:border-[#E03C3D] focus:ring-1 focus:ring-[#E03C3D]/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#2C2C2C] focus:outline-none transition-all placeholder-gray-400"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-gray-300">Số điện thoại</label>
+                <label className="text-xs font-semibold text-[#2C2C2C]">Số điện thoại</label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
+                  <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
                     placeholder="0901234567"
-                    className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none transition-all"
+                    className="w-full bg-[#F9F9F9] border border-[#E8E8E8] focus:border-[#E03C3D] focus:ring-1 focus:ring-[#E03C3D]/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#2C2C2C] focus:outline-none transition-all placeholder-gray-400"
                   />
                 </div>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-300">Mật khẩu</label>
+              <label className="text-xs font-semibold text-[#2C2C2C]">Mật khẩu</label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />
+                <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="Tối thiểu 6 ký tự"
-                  className="w-full bg-slate-950 border border-white/10 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none transition-all"
+                  className="w-full bg-[#F9F9F9] border border-[#E8E8E8] focus:border-[#E03C3D] focus:ring-1 focus:ring-[#E03C3D]/20 rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#2C2C2C] focus:outline-none transition-all placeholder-gray-400"
                 />
               </div>
             </div>
@@ -206,7 +206,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 disabled:opacity-50 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 mt-4 hover:scale-[1.01]"
+              className="w-full py-3.5 rounded-xl bg-[#E03C3D] hover:bg-[#C92F30] disabled:opacity-50 text-white font-extrabold text-sm transition-all flex items-center justify-center gap-2 mt-4 shadow-sm"
             >
               <span>{loading ? 'Đang gửi thông tin vào Database...' : 'Đăng Ký Tài Khoản'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -214,9 +214,9 @@ export default function RegisterPage() {
           </form>
         )}
 
-        <div className="text-center text-xs text-gray-400 pt-2 border-t border-white/5">
+        <div className="text-center text-xs text-[#5A5A5A] pt-2 border-t border-[#E8E8E8]">
           Đã có tài khoản?{' '}
-          <Link href="/login" className="text-emerald-400 font-bold hover:underline">
+          <Link href="/login" className="text-[#E03C3D] font-bold hover:underline">
             Đăng nhập ngay
           </Link>
         </div>
