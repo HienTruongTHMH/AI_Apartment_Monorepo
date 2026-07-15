@@ -42,49 +42,49 @@ export default function ContractManager({ role }: ContractManagerProps) {
   });
 
   return (
-    <div className="w-full text-white">
+    <div className="w-full text-[#2C2C2C]">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold mb-2 text-white">
+          <h1 className="text-3xl font-extrabold mb-2 text-[#2C2C2C]">
             Quản lý Hợp đồng
           </h1>
-          <p className="text-gray-400 text-sm max-w-xl">
+          <p className="text-[#5A5A5A] text-sm max-w-xl">
             {role === 'owner'
               ? 'Quản lý các hợp đồng cho thuê, theo dõi trạng thái và tạo hợp đồng mới.'
               : 'Xem danh sách các hợp đồng thuê nhà của bạn, kiểm tra hiệu lực pháp lý và gia hạn.'}
           </p>
         </div>
         {role === 'owner' && (
-          <button className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-slate-900 bg-emerald-400 hover:bg-emerald-500 transition-colors text-sm">
+          <button className="flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white bg-[#E03C3D] hover:bg-[#C92F30] transition-colors text-sm shadow-sm">
             <Plus size={16} /> Tạo hợp đồng mới
           </button>
         )}
       </div>
 
       {/* Contract list */}
-      <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+      <div className="bg-white border border-[#E8E8E8] rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h2 className="text-white font-bold text-lg">Danh sách hợp đồng</h2>
+          <h2 className="text-[#2C2C2C] font-bold text-lg">Danh sách hợp đồng</h2>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 min-w-[220px]">
-              <Search size={16} className="text-gray-400" />
+            <div className="flex items-center gap-2 bg-slate-50 border border-[#E8E8E8] rounded-xl px-3 py-2 min-w-[220px]">
+              <Search size={16} className="text-[#5A5A5A]" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm hợp đồng, mã HĐ..."
-                className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 text-sm"
+                className="flex-1 bg-transparent outline-none text-[#2C2C2C] placeholder-slate-400 text-sm"
               />
             </div>
             <div className="flex items-center gap-2">
-              <Filter size={16} className="text-gray-400" />
+              <Filter size={16} className="text-[#5A5A5A]" />
               {[{ v: 'all', l: 'Tất cả' }, { v: 'active', l: 'Hiệu lực' }, { v: 'pending', l: 'Chờ ký' }, { v: 'expired', l: 'Hết hạn' }].map((f) => (
                 <button
                   key={f.v}
                   onClick={() => setFilterStatus(f.v)}
                   className={`px-3 py-1.5 rounded-lg border transition-all text-xs font-medium ${filterStatus === f.v
-                    ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-                    : 'border-white/10 bg-transparent text-gray-400 hover:text-white'
+                    ? 'border-[#E03C3D] bg-[#E03C3D] text-white'
+                    : 'border-[#E8E8E8] bg-transparent text-[#5A5A5A] hover:text-[#E03C3D] hover:border-[#E03C3D]'
                     }`}
                 >
                   {f.l}
@@ -97,51 +97,55 @@ export default function ContractManager({ role }: ContractManagerProps) {
         <div className="space-y-3">
           {isLoading ? (
             <div className="py-12 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E03C3D]"></div>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 rounded-xl border border-white/5 bg-slate-950/30">
-              <FileText size={32} className="mx-auto mb-3 opacity-30" />
+            <div className="py-16 text-center text-[#5A5A5A] rounded-xl border border-[#E8E8E8] bg-slate-50/50">
+              <FileText size={32} className="mx-auto mb-3 opacity-30 text-[#5A5A5A]" />
               <p className="text-sm">Không tìm thấy hợp đồng phù hợp</p>
               {role === 'owner' && (
-                <button className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 rounded-lg text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition-all text-xs font-medium">
+                <button className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 rounded-lg text-white bg-[#E03C3D] hover:bg-[#C92F30] transition-all text-xs font-medium shadow-sm">
                   <Plus size={14} /> Tạo hợp đồng mới
                 </button>
               )}
             </div>
           ) : (
             filtered.map((c: any) => (
-              <div key={c.id} className="p-4 rounded-xl border border-white/10 bg-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/10 transition-colors">
+              <div key={c.id} className="p-4 bg-white border-b border-[#E8E8E8] flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
                 <div className="flex-1">
-                  <p className="text-white font-medium mb-1 truncate max-w-md">
+                  <p className="text-[#2C2C2C] font-semibold mb-1 truncate max-w-md">
                     {c.apartment?.fullAddress || c.property || 'Không rõ địa chỉ'}
                   </p>
-                  <p className="text-gray-400 text-xs">Mã HĐ: {c.id}</p>
+                  <p className="text-[#5A5A5A] text-xs">Mã HĐ: {c.id}</p>
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-sm text-gray-300">
-                    <span className="text-gray-500">Người thuê: </span>
-                    {c.tenant?.fullName || c.tenant || 'Chưa cập nhật'}
+                  <p className="text-sm text-[#5A5A5A]">
+                    <span className="text-[#5A5A5A] font-medium">Người thuê: </span>
+                    <span className="text-[#2C2C2C] font-semibold">{c.tenant?.fullName || c.tenant || 'Chưa cập nhật'}</span>
                   </p>
                 </div>
 
                 <div className="flex-1 text-right">
-                  <p className="text-emerald-400 font-bold mb-1">
+                  <p className="text-[#2C2C2C] font-bold mb-1">
                     {Number(c.rentPrice || c.amount || 0).toLocaleString('vi-VN')} VND / tháng
                   </p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="text-[#5A5A5A] text-xs">
                     {(c.startDate || '').substring(0, 10)} - {(c.endDate || '').substring(0, 10)}
                   </p>
                 </div>
 
                 <div className="flex-shrink-0 flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${c.contractStatus === 'Active' || c.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' :
-                    c.contractStatus === 'Draft' || c.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
-                      c.contractStatus === 'Expired' || c.status === 'expired' ? 'bg-red-500/20 text-red-400' :
-                        'bg-gray-500/20 text-gray-400'
-                    }`}>
-                    {c.contractStatus || c.status || 'Khác'}
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium border ${
+                    c.contractStatus === 'Active' || c.status === 'active' ? 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]' :
+                    c.contractStatus === 'Draft' || c.status === 'pending' || c.contractStatus === 'PendingTenantSignature' ? 'bg-[#FFF9E6] text-[#B7791F] border-[#FEEBC8]' :
+                    c.contractStatus === 'Expired' || c.status === 'expired' ? 'bg-[#FEF2F2] text-[#991B1B] border-[#FEE2E2]' :
+                    'bg-slate-50 text-slate-600 border-[#E8E8E8]'
+                  }`}>
+                    {c.contractStatus === 'Active' || c.status === 'active' ? 'Hiệu lực' :
+                     c.contractStatus === 'Draft' || c.status === 'pending' || c.contractStatus === 'PendingTenantSignature' ? 'Chờ ký' :
+                     c.contractStatus === 'Expired' || c.status === 'expired' ? 'Hết hạn' :
+                     (c.contractStatus || c.status || 'Khác')}
                   </span>
 
                   {role === 'tenant' && c.contractStatus === 'PendingTenantSignature' && (
@@ -153,7 +157,7 @@ export default function ContractManager({ role }: ContractManagerProps) {
                             window.location.reload();
                           } catch (e: any) { alert(e.message); }
                         }}
-                        className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 rounded-lg text-xs font-bold"
+                        className="px-3 py-1.5 bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0] rounded-lg text-xs font-bold transition-colors"
                       >
                         Xác nhận ký
                       </button>
@@ -164,7 +168,7 @@ export default function ContractManager({ role }: ContractManagerProps) {
                             window.location.reload();
                           } catch (e: any) { alert(e.message); }
                         }}
-                        className="px-3 py-1.5 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-lg text-xs font-bold"
+                        className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-650 border border-red-200 rounded-lg text-xs font-bold transition-colors"
                       >
                         Từ chối
                       </button>
@@ -180,7 +184,7 @@ export default function ContractManager({ role }: ContractManagerProps) {
                           window.location.reload();
                         } catch (e: any) { alert(e.message); }
                       }}
-                      className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 rounded-lg text-xs font-bold"
+                      className="px-3 py-1.5 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-lg text-xs font-bold transition-colors"
                     >
                       Gửi cho người thuê
                     </button>

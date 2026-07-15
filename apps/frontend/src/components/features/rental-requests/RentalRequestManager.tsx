@@ -40,14 +40,14 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
   };
 
   return (
-    <div className="w-full text-white">
+    <div className="w-full text-[#2C2C2C]">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold mb-2 text-white">
+          <h1 className="text-3xl font-extrabold mb-2 text-[#2C2C2C]">
             Quản lý Yêu Cầu Thuê
           </h1>
-          <p className="text-gray-400 text-sm max-w-xl">
+          <p className="text-[#5A5A5A] text-sm max-w-xl">
             {role === 'owner' 
               ? 'Duyệt hoặc từ chối các yêu cầu thuê từ khách hàng tiềm năng.' 
               : 'Theo dõi các yêu cầu thuê nhà bạn đã gửi cho chủ nhà.'}
@@ -56,17 +56,17 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
       </div>
 
       {/* List */}
-      <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+      <div className="bg-white border border-[#E8E8E8] rounded-2xl p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h2 className="text-white font-bold text-lg">Danh sách yêu cầu</h2>
+          <h2 className="text-[#2C2C2C] font-bold text-lg">Danh sách yêu cầu</h2>
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 min-w-[220px]">
-              <Search size={16} className="text-gray-400" />
+            <div className="flex items-center gap-2 bg-slate-50 border border-[#E8E8E8] rounded-xl px-3 py-2 min-w-[220px]">
+              <Search size={16} className="text-[#5A5A5A]" />
               <input 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
                 placeholder="Tìm địa chỉ, người thuê..."
-                className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 text-sm" 
+                className="flex-1 bg-transparent outline-none text-[#2C2C2C] placeholder-slate-400 text-sm" 
               />
             </div>
             <div className="flex items-center gap-2">
@@ -76,8 +76,8 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
                   onClick={() => setFilterStatus(f.v)}
                   className={`px-3 py-1.5 rounded-lg border transition-all text-xs font-medium ${
                     filterStatus === f.v 
-                      ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' 
-                      : 'border-white/10 bg-transparent text-gray-400 hover:text-white'
+                      ? 'border-[#E03C3D] bg-[#E03C3D] text-white' 
+                      : 'border-[#E8E8E8] bg-transparent text-[#5A5A5A] hover:text-[#E03C3D] hover:border-[#E03C3D]'
                   }`}
                 >
                   {f.l}
@@ -90,48 +90,48 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
         <div className="space-y-3">
           {isLoading ? (
             <div className="py-12 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E03C3D]"></div>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 rounded-xl border border-white/5 bg-slate-950/30">
-              <FileText size={32} className="mx-auto mb-3 opacity-30" />
+            <div className="py-16 text-center text-[#5A5A5A] rounded-xl border border-[#E8E8E8] bg-slate-50/50">
+              <FileText size={32} className="mx-auto mb-3 opacity-30 text-[#5A5A5A]" />
               <p className="text-sm">Không tìm thấy yêu cầu nào</p>
             </div>
           ) : (
             filtered.map((r: any) => (
-              <div key={r.id} className="p-4 rounded-xl border border-white/10 bg-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/10 transition-colors">
+              <div key={r.id} className="p-4 bg-white border-b border-[#E8E8E8] flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
                 <div className="flex-1">
-                  <p className="text-white font-medium mb-1 truncate max-w-md">
+                  <p className="text-[#2C2C2C] font-semibold mb-1 truncate max-w-md">
                     {r.apartment?.fullAddress || 'Không rõ địa chỉ'}
                   </p>
-                  <p className="text-gray-400 text-xs">Mã YC: {r.id}</p>
+                  <p className="text-[#5A5A5A] text-xs">Mã YC: {r.id}</p>
                 </div>
                 
                 <div className="flex-1">
                   {role === 'owner' ? (
-                    <p className="text-sm text-gray-300">
-                      <span className="text-gray-500">Người thuê: </span> 
-                      {r.account?.fullName || r.account?.email || 'Chưa cập nhật'}
+                    <p className="text-sm text-[#5A5A5A]">
+                      <span className="text-[#5A5A5A] font-medium">Người thuê: </span> 
+                      <span className="text-[#2C2C2C] font-semibold">{r.account?.fullName || r.account?.email || 'Chưa cập nhật'}</span>
                       <br/>
-                      <span className="text-gray-500">SĐT: </span>
-                      {r.account?.phone || 'Chưa cập nhật'}
+                      <span className="text-[#5A5A5A] font-medium">SĐT: </span>
+                      <span className="text-[#2C2C2C] font-semibold">{r.account?.phone || 'Chưa cập nhật'}</span>
                     </p>
                   ) : (
-                    <p className="text-sm text-gray-300">
-                      <span className="text-gray-500">Ngày gửi: </span> 
-                      {new Date(r.createdAt).toLocaleString('vi-VN')}
+                    <p className="text-sm text-[#5A5A5A]">
+                      <span className="text-[#5A5A5A] font-medium">Ngày gửi: </span> 
+                      <span className="text-[#2C2C2C] font-semibold">{new Date(r.createdAt).toLocaleString('vi-VN')}</span>
                     </p>
                   )}
                 </div>
 
                 <div className="flex-shrink-0 flex items-center gap-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    r.status === 'Accepted' ? 'bg-emerald-500/20 text-emerald-400' :
-                    r.status === 'Pending' ? 'bg-amber-500/20 text-amber-400' :
-                    r.status === 'Rejected' ? 'bg-red-500/20 text-red-400' :
-                    'bg-gray-500/20 text-gray-400'
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                    r.status === 'Accepted' ? 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]' :
+                    r.status === 'Pending' ? 'bg-[#FFF9E6] text-[#B7791F] border-[#FEEBC8]' :
+                    r.status === 'Rejected' ? 'bg-[#FEF2F2] text-[#991B1B] border-[#FEE2E2]' :
+                    'bg-slate-50 text-slate-600 border-[#E8E8E8]'
                   }`}>
-                    {r.status}
+                    {r.status === 'Accepted' ? 'Đã duyệt' : r.status === 'Pending' ? 'Chờ duyệt' : r.status === 'Rejected' ? 'Đã từ chối' : r.status}
                   </span>
 
                   {role === 'owner' && r.status === 'Pending' && (
@@ -139,7 +139,7 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
                       <button 
                         disabled={actionLoading}
                         onClick={() => handleAction(r.id, 'accept')}
-                        className="p-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 rounded-lg transition-colors"
+                        className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors"
                         title="Duyệt yêu cầu"
                       >
                         <CheckCircle size={16} />
@@ -147,7 +147,7 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
                       <button 
                         disabled={actionLoading}
                         onClick={() => handleAction(r.id, 'reject')}
-                        className="p-2 bg-red-500/20 text-red-400 hover:bg-red-500/40 rounded-lg transition-colors"
+                        className="p-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
                         title="Từ chối yêu cầu"
                       >
                         <XCircle size={16} />
@@ -190,7 +190,7 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
                           setActionLoading(false);
                         }
                       }}
-                      className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/40 rounded-lg text-xs font-bold transition-colors"
+                      className="px-3 py-1.5 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-lg text-xs font-bold transition-colors"
                     >
                       Tạo Hợp Đồng Nháp
                     </button>

@@ -75,7 +75,7 @@ export default function Navbar() {
               href="/tenant/dashboard"
               className={`transition-colors ${pathname.startsWith('/tenant') ? 'text-[#2C2C2C] font-bold' : 'text-[#2C2C2C] hover:text-[#E03C3D]'}`}
             >
-              Dashboard Tenant
+              Dashboard Khách Hàng
             </Link>
           )}
 

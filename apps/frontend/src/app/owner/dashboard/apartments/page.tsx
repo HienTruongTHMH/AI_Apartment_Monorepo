@@ -60,7 +60,7 @@ export default function OwnerApartmentsPage() {
                     <span className={`px-3 py-1 text-xs font-bold rounded-full text-white shadow-sm ${
                       apt.apartmentStatus === 'Available' ? 'bg-[#10B981]' : 'bg-[#E03C3D]'
                     }`}>
-                      {apt.apartmentStatus === 'Available' ? 'Trống' : 'Đã thuê'}
+                      {apt.apartmentStatus === 'Available' ? 'Cho Thuê' : 'Đã thuê'}
                     </span>
                   </div>
                 </div>
