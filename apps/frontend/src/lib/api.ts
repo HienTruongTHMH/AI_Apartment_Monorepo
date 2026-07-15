@@ -455,15 +455,54 @@ export const apiService = {
     }
   },
 
-  // Offline Contract Physical Sign Confirmation -> Calls POST /contract/tenant-sgin
   async confirmOfflineRentalAndActivateAccount(contractId: string) {
     try {
-      // Endpoint contract.controller.ts: @Post('tenant-sgin') expecting { contractId }
-      await apiClient.post('/contract/tenant-sgin', { contractId });
-    } catch {
-      // Local fallback simulation
+      const res = await apiClient.post('/contract/tenant-sign', { contractId });
+      useAuthStore.getState().setAccountActive(true);
+      return { success: true, message: 'Đã xác nhận ký hợp đồng bản cứng thành công. Tài khoản của bạn hiện đã được kích hoạt!', data: res.data };
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi ký hợp đồng');
     }
-    useAuthStore.getState().setAccountActive(true);
-    return { success: true, message: 'Đã xác nhận ký hợp đồng bản cứng thành công. Tài khoản của bạn hiện đã được kích hoạt (isActive = true)!' };
+  },
+
+  async tenantRejectContract(contractId: string) {
+    const res = await apiClient.post('/contract/tenant-reject', { contractId });
+    return res.data;
+  },
+
+  async createDraftContract(data: any) {
+    const res = await apiClient.post('/contract/create-draft', data);
+    return res.data;
+  },
+
+  async sendContractToTenant(contractId: string) {
+    const res = await apiClient.post('/contract/send-to-tenant', { contractId });
+    return res.data;
+  },
+
+  // Rental Requests
+  async createRentalRequest(apartmentId: string, message?: string) {
+    const res = await apiClient.post('/rental-request', { apartmentId, message });
+    return res.data; // { message, ownerContact: { email, phoneNumber, name } }
+  },
+
+  async getMyRentalRequests() {
+    const res = await apiClient.get('/rental-request/my-requests');
+    return res.data;
+  },
+
+  async getOwnerRentalRequests() {
+    const res = await apiClient.get('/rental-request/owner-requests');
+    return res.data;
+  },
+
+  async acceptRentalRequest(id: string) {
+    const res = await apiClient.patch(`/rental-request/${id}/accept`);
+    return res.data;
+  },
+
+  async rejectRentalRequest(id: string) {
+    const res = await apiClient.patch(`/rental-request/${id}/reject`);
+    return res.data;
   }
 };

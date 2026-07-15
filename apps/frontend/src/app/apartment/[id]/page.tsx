@@ -30,7 +30,9 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
   const [listing, setListing] = useState<ListingItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [showRentalModal, setShowRentalModal] = useState(false);
-  const [contractCreated, setContractCreated] = useState(false);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const [ownerContact, setOwnerContact] = useState<{ name: string, phoneNumber: string, email: string } | null>(null);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     apiService.getListingById(resolvedParams.id).then((data) => {
@@ -60,6 +62,23 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
   }
 
   const primaryImg = listing.images.find((i) => i.isPrimary)?.imageUrl || listing.images[0]?.imageUrl || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80';
+
+  const handleRequestRent = async () => {
+    if (!isLoggedIn) {
+      router.push('/auth/login');
+      return;
+    }
+    try {
+      setIsRequesting(true);
+      setErrorMsg('');
+      const res = await apiService.createRentalRequest(listing.apartmentId);
+      setOwnerContact(res.ownerContact);
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
+    } finally {
+      setIsRequesting(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
@@ -98,8 +117,8 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
           {user?.role === 'OWNER' ? (
             <div className="w-full py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-center font-bold text-sm text-gray-300 flex items-center justify-center gap-2">
               <span>
-                {listing.apartment.apartmentStatus === 'Available' 
-                  ? 'Trống' 
+                {listing.apartment.apartmentStatus === 'Available'
+                  ? 'Trống'
                   : `Khách Thuê : ${listing.apartment.contracts?.[0]?.tenant?.fullName || 'Đã Thuê'}`
                 }
               </span>
@@ -113,6 +132,17 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
               <span>Yêu Cầu Thuê & Hợp Đồng Nháp</span>
             </button>
           )}
+          <button
+            onClick={() => {
+              setOwnerContact(null);
+              setErrorMsg('');
+              setShowRentalModal(true);
+            }}
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/20 transition-all hover:scale-105 flex items-center justify-center gap-2"
+          >
+            <FileCheck className="w-4.5 h-4.5" />
+            <span>Yêu Cầu Thuê Ngay</span>
+          </button>
         </div>
       </div>
 
@@ -177,11 +207,12 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
           {/* Business Process Transparency Box */}
           <div className="p-6 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 glass-panel-emerald space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold text-emerald-400">
-              <ShieldCheck className="w-5 h-5" /> Quy Trình Ký Hợp Đồng Bản Cứng Hợp Lệ
+              <ShieldCheck className="w-5 h-5" /> Quy Trình Thuê & Ký Hợp Đồng
             </div>
             <p className="text-xs text-gray-300 leading-relaxed">
-              * **Không ký hợp đồng online:** Hợp đồng pháp lý thực tế sẽ được bàn giao và ký bằng giấy bản cứng giữa bạn và Chủ nhà ngoài hệ thống. <br />
-              * Sau khi hoàn tất ký giấy bản cứng, nút **&quot;Xác nhận đã ký bản cứng&quot;** trong Dashboard sẽ chuyển trạng thái tài khoản của bạn sang **Đã kích hoạt** và kích hoạt hợp đồng chính thức.**
+              * **Bảo mật thông tin:** Nhấn "Yêu Cầu Thuê Ngay" để hệ thống chia sẻ thông tin liên lạc của Chủ nhà. Chủ nhà cũng sẽ nhận được yêu cầu của bạn.<br />
+              * **Thương lượng trực tiếp:** Hai bên tự thương lượng và ký kết hợp đồng ngoài đời thực.<br />
+              * **Xác nhận trên hệ thống:** Sau khi ký hợp đồng, Chủ nhà sẽ cập nhật trạng thái hợp đồng, và bạn cần xác nhận để hoàn tất thủ tục lưu trú trên hệ thống.
             </p>
           </div>
         </div>
@@ -219,7 +250,7 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      {/* RENTAL CONFIRMATION & DRAFT CONTRACT MODAL */}
+      {/* RENTAL CONFIRMATION MODAL */}
       {showRentalModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-2xl bg-slate-900 border border-amber-500/40 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl glass-panel relative max-h-[90vh] overflow-y-auto">
@@ -232,52 +263,91 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
 
             <div className="space-y-2 border-b border-white/10 pb-4">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold">
-                <FileText className="w-4 h-4" /> Hợp Đồng Thuê Nháp (ContractStatus = Draft / Pending)
+                <FileText className="w-4 h-4" /> Xác Nhận Gửi Yêu Cầu Thuê
               </div>
-              <h2 className="text-2xl font-bold text-white">Xác Nhận Nhu Cầu Thuê & Khởi Tạo Hồ Sơ</h2>
+              <h2 className="text-2xl font-bold text-white">Yêu Cầu Thông Tin Liên Lạc</h2>
             </div>
 
-            <div className="space-y-4 text-xs text-gray-300">
-              <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-2">
-                <div className="font-bold text-white text-sm">{listing.title}</div>
-                <div>Địa chỉ: {listing.apartment.fullAddress}</div>
-                <div>Giá thuê: <span className="text-amber-400 font-bold">{listing.pricePerMonth.toLocaleString('vi-VN')} đ/tháng</span></div>
-                <div>Tiền cọc quy định: <span className="text-emerald-400 font-bold">{(listing.pricePerMonth * 2).toLocaleString('vi-VN')} đ (2 tháng)</span></div>
-              </div>
+            {!ownerContact ? (
+              <>
+                <div className="space-y-4 text-xs text-gray-300">
+                  <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-2">
+                    <div className="font-bold text-white text-sm">{listing.title}</div>
+                    <div>Địa chỉ: {listing.apartment.fullAddress}</div>
+                    <div>Giá thuê: <span className="text-amber-400 font-bold">{listing.pricePerMonth.toLocaleString('vi-VN')} đ/tháng</span></div>
+                  </div>
 
-              {/* Offline Signing Business Rule Step Explanation */}
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-2">
-                <div className="font-bold flex items-center gap-2 text-amber-400">
-                  <AlertTriangle className="w-4 h-4" /> QUY TRÌNH HỢP ĐỒNG BẢN CỨNG & KÍCH HOẠT TÀI KHOẢN
+                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 space-y-2">
+                    <div className="font-bold flex items-center gap-2 text-amber-400">
+                      <AlertTriangle className="w-4 h-4" /> QUY TRÌNH THUÊ
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      Nhấn "Gửi Yêu Cầu" để gửi thông báo cho Chủ nhà và nhận thông tin liên lạc của Chủ nhà. Sau đó hai bên tự đàm phán offline. Hệ thống không thu phí trung gian.
+                    </p>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 font-medium">
+                      {errorMsg}
+                    </div>
+                  )}
                 </div>
-                <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
-                  <li>Bước 1: Nhấn &quot;Gửi Yêu Cầu Thuê&quot; để thông báo cho Chủ nhà {listing.apartment.owner?.fullName}.</li>
-                  <li>Bước 2: Hai bên gặp mặt, bàn giao căn hộ và ký kết **giấy hợp đồng bản cứng**.</li>
-                  <li>Bước 3: Sau khi ký xong, truy cập Dashboard Khách Hàng / trang Kích hoạt bấm &quot;Xác nhận đã ký bản cứng&quot; để tài khoản chuyển sang **Đã kích hoạt** và Hợp đồng được kích hoạt chính thức!</li>
-                </ol>
-              </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                onClick={() => {
-                  setContractCreated(true);
-                  setTimeout(() => {
-                    setShowRentalModal(false);
-                    router.push('/tenant/dashboard');
-                  }, 1500);
-                }}
-                className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all"
-              >
-                {contractCreated ? 'Đã khởi tạo hồ sơ thuê! Đang chuyển đến Dashboard...' : 'Xác Nhận Nhu Cầu Thuê'}
-              </button>
-              <button
-                onClick={() => setShowRentalModal(false)}
-                className="px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 font-semibold text-sm hover:text-white"
-              >
-                Hủy
-              </button>
-            </div>
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    onClick={handleRequestRent}
+                    disabled={isRequesting}
+                    className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isRequesting ? 'Đang gửi yêu cầu...' : 'Gửi Yêu Cầu Ngay'}
+                  </button>
+                  <button
+                    onClick={() => setShowRentalModal(false)}
+                    disabled={isRequesting}
+                    className="px-6 py-3.5 rounded-xl bg-white/5 border border-white/10 text-gray-400 font-semibold text-sm hover:text-white disabled:opacity-50"
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-6">
+                <div className="text-center space-y-2 pt-4">
+                  <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/40">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Yêu Cầu Đã Được Gửi!</h3>
+                  <p className="text-sm text-gray-400">Chủ nhà đã nhận được thông báo về yêu cầu của bạn.</p>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-slate-900/60 border border-emerald-500/30 space-y-4">
+                  <div className="text-sm font-bold text-emerald-400 uppercase tracking-wider text-center border-b border-emerald-500/20 pb-3">
+                    Thông Tin Liên Lạc Chủ Nhà
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Họ và tên:</span>
+                      <span className="text-white font-semibold">{ownerContact.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Số điện thoại:</span>
+                      <span className="text-amber-400 font-bold text-lg">{ownerContact.phoneNumber}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Email:</span>
+                      <span className="text-white">{ownerContact.email}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowRentalModal(false)}
+                  className="w-full py-3.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                >
+                  Đóng
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
