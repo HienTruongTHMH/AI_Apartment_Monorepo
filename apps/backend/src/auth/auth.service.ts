@@ -105,8 +105,11 @@ export class AuthService {
             sub: account.id,
             email: account.email,
             fullName: account.fullName,
+            phone: account.phone,
+            identityCard: account.identityCard,
             isActive: account.isActive,
             hasTenantProfile: !!account.tenantProfile,
+            tenantProfileId: account.tenantProfile?.id || null,
             hasOwnerProfile: !!account.ownerProfile,
             ownerProfileId: account.ownerProfile?.id || null,
         }

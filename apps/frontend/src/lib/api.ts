@@ -308,7 +308,7 @@ export const apiService = {
     try {
       const res = await apiClient.post('/ai-agents/verify', payload);
       const data = res.data;
-      
+
       // Parse NestJS proxy output from FastAPI verifyListingResponse: { success: true, data: { listing, apartment_meta, validation, image_analyses, image_tags_suggested } }
       if (data && data.data) {
         const verifiedOutput = data.data;
@@ -385,7 +385,7 @@ export const apiService = {
       const responseData = res.data;
       // Handle NestJS proxy response wrapping FastAPI SearchBrokerResponse { success: true, data: { bot_response, recommendations } }
       const output = responseData?.data || responseData;
-      
+
       const replyText = output?.bot_response || output?.reply || 'Trợ lý AI Broker đã phân tích nhu cầu của bạn.';
       const rawRecs = output?.recommendations || output?.recommended_listings || [];
 
