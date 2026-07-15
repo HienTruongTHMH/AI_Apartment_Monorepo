@@ -46,6 +46,7 @@ export interface ListingItem {
     apartmentStatus: 'Available' | 'Rented';
     apartmentAmenities?: { amenity: { id: string; name: string; category: string; icon: string } }[];
     owner?: { id: string; fullName: string; taxCode?: string };
+    ownerId?: string;
     contracts?: ContractItem[];
   };
 }
@@ -439,7 +440,7 @@ export const apiService = {
     } catch (err: any) {
       console.error('[AI Broker Integration Error]:', err);
       return {
-        reply: 'Hệ thống AI Broker không thể kết nối hoặc nhận phản hồi từ server backend.',
+        reply: 'Lỗi kết nối với Trợ lý Ảo. Vui lòng thử lại sau.',
         recommended_listings: []
       };
     }

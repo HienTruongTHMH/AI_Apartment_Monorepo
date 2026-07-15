@@ -14,7 +14,9 @@ import {
   ChevronRight,
   RefreshCw,
   Zap,
-  CheckCircle2
+  CheckCircle2,
+  Smile,
+  Paperclip
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { apiService } from '@/lib/api';
@@ -48,7 +50,7 @@ export default function AiBrokerSidePanel() {
     {
       id: 'welcome',
       sender: 'ai',
-      text: `Xin chào ${user?.fullName || 'quý khách'}! Tôi là **AI Broker Agent** của AI Apartment Monorepo. Tôi có thể giúp bạn tìm căn hộ theo ngân sách, vị trí, tiện ích hoặc phong cách sống. Hãy thử nhập hoặc nói yêu cầu của bạn!`,
+      text: `Xin chào ${user?.fullName || 'quý khách'}! Tôi là trợ lý ảo của NestaVIET. Tôi có thể giúp bạn tìm căn hộ theo ngân sách, vị trí, tiện ích hoặc phong cách sống. Hãy thử nhập hoặc nói yêu cầu của bạn!`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       recommendedListings: []
     }
@@ -132,70 +134,64 @@ export default function AiBrokerSidePanel() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={toggleAiPanel}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-3 px-5 py-3.5 rounded-full bg-slate-900/90 border border-emerald-500/40 text-white shadow-[0_0_25px_rgba(16,185,129,0.35)] backdrop-blur-xl hover:border-emerald-400 transition-all group"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#E03C3D] hover:bg-[#C92F30] text-white flex items-center justify-center shadow-[0_4px_16px_rgba(224,60,61,0.4)] transition-all duration-300 cursor-pointer"
       >
-        <div className="relative flex items-center justify-center">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-          <div className="relative w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-            <Sparkles className="w-4.5 h-4.5" />
-          </div>
-        </div>
-        <div className="text-left hidden sm:block">
-          <div className="text-xs font-semibold tracking-wide text-emerald-400 flex items-center gap-1">
-            <span>AI BROKER ASSISTANT</span>
-            <Zap className="w-3 h-3 text-amber-400 fill-amber-400" />
-          </div>
-          <div className="text-[11px] text-gray-400">Tư vấn thuê nhà thông minh 24/7</div>
-        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+          <path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2z" strokeWidth="1.5" opacity="0.75" />
+          <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />
+          <circle cx="10" cy="14" r="1" fill="currentColor" stroke="none" />
+          <circle cx="14" cy="14" r="1" fill="currentColor" stroke="none" />
+          <circle cx="6" cy="14" r="1" fill="currentColor" stroke="none" />
+        </svg>
       </motion.button>
 
       {/* Slide Panel Overlay & Container */}
       <AnimatePresence>
         {aiPanelOpen && (
           <>
-            {/* Backdrop */}
+            {/* Invisible Click-away Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setAiPanelOpen(false)}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-transparent"
             />
 
-            {/* Side Drawer */}
+            {/* Popup Chat Window */}
             <motion.aside
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-[#0d1424] border-l border-emerald-500/20 shadow-2xl flex flex-col glass-panel"
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-32px)] h-[580px] max-h-[calc(100vh-120px)] bg-white border border-[#E8E8E8] rounded-2xl shadow-xl flex flex-col overflow-hidden"
             >
               {/* Header */}
-              <div className="p-4 border-b border-white/10 flex items-center justify-between bg-slate-950/60">
+              <div className="px-4 py-3 border-b border-[#E8E8E8] flex items-center justify-between bg-[#EAECEF]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                    <Bot className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-full bg-[#E03C3D] flex items-center justify-center text-white shrink-0">
+                    <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base flex items-center gap-2">
-                      AI Broker Agent
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <h3 className="font-semibold text-[#2C2C2C] text-sm flex items-center gap-2">
+                      NestaVIET Trợ Lý Ảo
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
                         Online
                       </span>
                     </h3>
-                    <p className="text-xs text-gray-400">AI Apartment Smart Match</p>
+                    <p className="text-[10px] text-[#5A5A5A] leading-relaxed">Chào mừng bạn đến với NestaVIET</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setAiPanelOpen(false)}
-                  className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-lg hover:bg-black/5 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Chat Messages Body */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
                 {messages.map((msg) => (
                   <motion.div
                     key={msg.id}
@@ -204,80 +200,80 @@ export default function AiBrokerSidePanel() {
                     className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                   >
                     <div
-                      className={`max-w-[88%] p-3.5 rounded-2xl text-sm leading-relaxed ${
+                      className={`max-w-[85%] p-3 rounded-[12px] text-sm leading-relaxed ${
                         msg.sender === 'user'
-                          ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-br-none shadow-md'
-                          : 'bg-slate-900/90 border border-white/10 text-gray-200 rounded-bl-none shadow-lg backdrop-blur-md'
+                          ? 'bg-[#E03C3D] text-white rounded-br-none shadow-sm'
+                          : 'bg-[#F0F2F5] border border-[#E8E8E8] text-[#2C2C2C] rounded-bl-none shadow-sm'
                       }`}
                     >
                       <div className="whitespace-pre-line">{msg.text}</div>
 
                       {/* Render recommended listing 3D cards if any */}
                       {msg.recommendedListings && msg.recommendedListings.length > 0 && (
-                        <div className="mt-3.5 space-y-2.5 pt-2 border-t border-white/10">
-                          <p className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" /> Gợi ý từ AI:
+                        <div className="mt-3 space-y-2.5 pt-2 border-t border-[#E8E8E8]">
+                          <p className="text-[11px] font-semibold text-[#E03C3D] uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="w-3.5 h-3.5 text-[#E03C3D]" /> Gợi ý từ AI:
                           </p>
                           {msg.recommendedListings.map((item) => (
                             <Link
                               key={item.listing_id}
                               href={`/apartment/${item.listing_id}`}
                               onClick={() => setAiPanelOpen(false)}
-                              className="group block p-2.5 rounded-xl bg-slate-950/70 border border-emerald-500/20 hover:border-emerald-400 transition-all hover:scale-[1.02]"
+                              className="group block p-2.5 rounded-[8px] bg-white border border-[#E8E8E8] hover:border-[#999999] transition-all hover:scale-[1.02]"
                             >
                               <div className="flex gap-3 items-center">
                                 {item.imageUrl ? (
                                   <img
                                     src={item.imageUrl}
                                     alt={item.title}
-                                    className="w-14 h-14 object-cover rounded-lg border border-white/10"
+                                    className="w-14 h-14 object-cover rounded-[6px] border border-[#E8E8E8]"
                                   />
                                 ) : (
-                                  <div className="w-14 h-14 rounded-lg bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                  <div className="w-14 h-14 rounded-[6px] bg-[#F2F2F2] border border-[#E8E8E8] flex items-center justify-center text-[#5A5A5A]">
                                     <Building2 className="w-6 h-6" />
                                   </div>
                                 )}
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="text-xs font-semibold text-white group-hover:text-emerald-300 truncate">
-                                      {item.title}
-                                    </h4>
-                                    <div className="text-[11px] text-gray-400 mt-0.5 flex flex-wrap items-center gap-1.5">
-                                      {item.roomNumber && <span>P.{item.roomNumber}</span>}
-                                      {item.area ? <span>• {item.area}m²</span> : null}
-                                      {item.district ? <span>• {item.district}</span> : null}
-                                      {item.bedroom ? <span>• {item.bedroom} PN</span> : null}
-                                    </div>
-                                    {item.reason && (
-                                      <p className="text-[10px] text-emerald-300/90 mt-1 line-clamp-2 italic">
-                                        &quot;{item.reason}&quot;
-                                      </p>
-                                    )}
-                                    <div className="text-xs font-bold text-amber-400 mt-1">
-                                      {((item.pricePerMonth ?? item.price) || 0).toLocaleString('vi-VN')} đ/tháng
-                                    </div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-xs font-semibold text-[#2C2C2C] group-hover:text-[#E03C3D] truncate">
+                                    {item.title}
+                                  </h4>
+                                  <div className="text-[11px] text-[#5A5A5A] mt-0.5 flex flex-wrap items-center gap-1.5">
+                                    {item.roomNumber && <span>P.{item.roomNumber}</span>}
+                                    {item.area ? <span>• {item.area}m²</span> : null}
+                                    {item.district ? <span>• {item.district}</span> : null}
+                                    {item.bedroom ? <span>• {item.bedroom} PN</span> : null}
                                   </div>
-                                <ExternalLink className="w-4 h-4 text-gray-500 group-hover:text-emerald-400 transition-colors" />
+                                  {item.reason && (
+                                    <p className="text-[10px] text-[#5A5A5A]/90 mt-1 line-clamp-2 italic">
+                                      &quot;{item.reason}&quot;
+                                    </p>
+                                  )}
+                                  <div className="text-xs font-bold text-[#E03C3D] mt-1">
+                                    {((item.pricePerMonth ?? item.price) || 0).toLocaleString('vi-VN')} đ/tháng
+                                  </div>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#E03C3D] transition-colors" />
                               </div>
                             </Link>
                           ))}
                         </div>
                       )}
                     </div>
-                    <span className="text-[10px] text-gray-500 mt-1 px-1">{msg.timestamp}</span>
+                    <span className="text-[10px] text-gray-400 mt-1 px-1">{msg.timestamp}</span>
                   </motion.div>
                 ))}
 
                 {loading && (
-                  <div className="flex items-center gap-2 text-emerald-400 text-xs bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl max-w-xs">
-                    <RefreshCw className="w-4 h-4 animate-spin text-emerald-400" />
-                    <span>........</span>
+                  <div className="flex items-center gap-2 text-[#E03C3D] text-xs bg-[#FFF5F5] border border-[#E03C3D]/20 p-3 rounded-[12px] max-w-xs">
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#E03C3D]" />
+                    <span>Trợ lý ảo đang phản hồi.............</span>
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
               {/* Quick Prompt Chips */}
-              <div className="px-4 py-2 border-t border-white/5 bg-slate-950/40 flex gap-2 overflow-x-auto no-scrollbar text-xs">
+              <div className="px-4 py-2 border-t border-[#E8E8E8] bg-[#F9F9F9] flex gap-2 overflow-x-auto no-scrollbar text-xs">
                 {[
                   'Căn hộ Studio dưới 15tr',
                   'Sky Villa view sông',
@@ -287,7 +283,7 @@ export default function AiBrokerSidePanel() {
                   <button
                     key={chip}
                     onClick={() => handleSend(chip)}
-                    className="whitespace-nowrap px-3 py-1 rounded-full bg-slate-900 border border-white/10 hover:border-emerald-500/40 text-gray-300 hover:text-emerald-300 transition-all text-[11px]"
+                    className="whitespace-nowrap px-3 py-1 rounded-full bg-white border border-[#E8E8E8] hover:border-[#999999] text-[#5A5A5A] hover:text-[#2C2C2C] transition-all text-[11px]"
                   >
                     + {chip}
                   </button>
@@ -295,14 +291,14 @@ export default function AiBrokerSidePanel() {
               </div>
 
               {/* Input Area */}
-              <div className="p-3.5 border-t border-white/10 bg-slate-950/80">
+              <div className="p-3 border-t border-[#E8E8E8] bg-[#F0F2F5]">
                 {isListening && (
-                  <div className="mb-2.5 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-emerald-300 text-xs animate-pulse">
+                  <div className="mb-2.5 p-2 rounded-lg bg-red-50 border border-red-200 flex items-center justify-between text-[#E03C3D] text-xs animate-pulse">
                     <span className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      <span className="w-2 h-2 rounded-full bg-[#E03C3D] animate-ping" />
                       Đang lắng nghe giọng nói... (nói câu lệnh của bạn)
                     </span>
-                    <button onClick={toggleVoiceRecording} className="text-gray-400 hover:text-white">
+                    <button onClick={toggleVoiceRecording} className="text-gray-400 hover:text-gray-600">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -312,30 +308,38 @@ export default function AiBrokerSidePanel() {
                   <button
                     type="button"
                     onClick={toggleVoiceRecording}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${
+                    className={`w-10 h-10 rounded-full flex items-center justify-center border transition-all ${
                       isListening
-                        ? 'bg-rose-500/20 border-rose-500 text-rose-400 animate-bounce'
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:text-emerald-400 hover:border-emerald-500/40'
+                        ? 'bg-red-100 border-red-300 text-[#E03C3D] animate-bounce'
+                        : 'bg-white border border-[#E8E8E8] text-[#5A5A5A] hover:border-[#999999]'
                     }`}
                     title="Nhập liệu bằng giọng nói"
                   >
                     {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                   </button>
 
-                  <input
-                    type="text"
-                    value={inputQuery}
-                    onChange={(e) => setInputQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Nhập yêu cầu căn hộ (VD: Căn hộ 2PN view đẹp)..."
-                    className="flex-1 bg-slate-900 border border-white/10 focus:border-emerald-500 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none transition-all"
-                  />
+                  <div className="flex-1 bg-white border border-[#E8E8E8] focus-within:border-[#999999] rounded-full px-4 py-2 flex items-center gap-2 transition-colors">
+                    <input
+                      type="text"
+                      value={inputQuery}
+                      onChange={(e) => setInputQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                      placeholder="Nhập tin nhắn"
+                      className="bg-transparent text-[#2C2C2C] placeholder-[#999999] text-sm focus:outline-none flex-1 min-w-0"
+                    />
+                    <button type="button" className="text-[#4A5568] hover:text-[#2C2C2C] transition-colors shrink-0">
+                      <Smile className="w-4 h-4" />
+                    </button>
+                    <button type="button" className="text-[#4A5568] hover:text-[#2C2C2C] transition-colors shrink-0">
+                      <Paperclip className="w-4 h-4" />
+                    </button>
+                  </div>
 
                   <button
                     type="button"
                     onClick={() => handleSend()}
                     disabled={!inputQuery.trim() || loading}
-                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all"
+                    className="w-10 h-10 rounded-full bg-[#E03C3D] hover:bg-[#C92F30] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-white transition-colors duration-200"
                   >
                     <Send className="w-4 h-4" />
                   </button>
