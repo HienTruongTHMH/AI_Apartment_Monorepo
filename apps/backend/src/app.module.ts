@@ -11,15 +11,18 @@ import { AmenityModule } from './amenity/amenity.module';
 import { UserModule } from './user/user.module';
 import { AiAgentsModule } from './ai-agents/ai-agents.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisController } from './redis/redis.controller';
+import { RedisService } from './redis/redis.service';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true
     }), PrismaModule, ListingModule, ApartmentModule,
-    ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule
+    ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule, RedisModule
   ],
-  controllers: [AppController],
+  controllers: [AppController, RedisController],
   providers: [AppService, PrismaService],
 })
 export class AppModule { }

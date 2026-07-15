@@ -23,8 +23,7 @@ export class ContractController {
   @RequireProfile('OWNER')
   createDraft(@Body() createDraftDto: CreateDraftDto, @Req() req) {
     const ownerId = req.user.accountId;
-    const apartmentId = req.body.apartmentId;
-    return this.contractService.createDraft(createDraftDto, ownerId, apartmentId);
+    return this.contractService.createDraft(createDraftDto, ownerId);
   }
 
   @Post('send-to-tenant')
@@ -36,7 +35,7 @@ export class ContractController {
     return this.contractService.sendToTenant(contractId, ownerId);
   }
 
-  @Post("tenant-sgin")
+  @Post("tenant-sign")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireProfile('TENANT')
   tenantSign(@Req() req) {
@@ -49,7 +48,17 @@ export class ContractController {
   @UseGuards(JwtAuthGuard)
   terminateEarly(@Req() req) {
     const { contractId, reason } = req.body
-    return this.contractService.terminateEarly(contractId, reason);
+    const tenantAccountId = req.user.accountId;
+    return this.contractService.terminateEarly(contractId, reason, tenantAccountId);
+  }
+
+  @Post("approve-termination")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireProfile('OWNER')
+  approveTermination(@Req() req) {
+    const { contractId } = req.body;
+    const ownerId = req.user.accountId
+    return this.contractService.approveTermination(contractId, ownerId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -62,19 +71,19 @@ export class ContractController {
   @RequireProfile('OWNER')
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.contractService.findOne(+id);
+    return this.contractService.findOne(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireProfile('OWNER')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateContractDto: UpdateContractDto) {
-    return this.contractService.update(+id, updateContractDto);
+    return this.contractService.update(id, updateContractDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.contractService.remove(+id);
+    return this.contractService.remove(id);
   }
 }

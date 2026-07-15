@@ -1,6 +1,6 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, GatewayTimeoutException, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom, catchError } from 'rxjs';
+import { firstValueFrom, catchError, timeout, TimeoutError } from 'rxjs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { VerifyListingDto } from './dto/verify-listing.dto';
 import { SearchBrokerDto } from './dto/search-broker.dto';
@@ -80,10 +80,15 @@ export class AiAgentsService {
 
     this.logger.log(`Gửi dữ liệu kiểm duyệt cho Agent: Apartment ${dto.apartmentId}`);
 
-    // 3. Gọi sang FastAPI
+    // 3. Gọi sang FastAPI (timeout 60s — phân tích ảnh có thể chậm)
     const { data } = await firstValueFrom(
       this.httpService.post(`${this.aiBaseUrl}/api/verify-listing`, payload).pipe(
+        timeout(60_000),
         catchError((error) => {
+          if (error instanceof TimeoutError) {
+            this.logger.error('AI Verification Agent timeout sau 60 giây.');
+            throw new GatewayTimeoutException('AI Verification Engine xử lý quá lâu. Vui lòng thử lại.');
+          }
           this.logger.error(`AI Agent Error: ${error.message}`);
           throw new InternalServerErrorException('AI Verification Engine đang bận.');
         }),
@@ -145,9 +150,16 @@ export class AiAgentsService {
     };
 
     // 4. Gọi sang FastAPI Broker endpoint
+    // NOTE: Gemini AI có thể mất 30-60s để xử lý RAG pipeline
+    // Set 90s để có đủ buffer, tránh timeout giả (false positive)
     const { data } = await firstValueFrom(
       this.httpService.post(`${this.aiBaseUrl}/api/search`, payload).pipe(
+        timeout(90_000),
         catchError((error) => {
+          if (error instanceof TimeoutError) {
+            this.logger.error('AI Broker Agent timeout sau 90 giây.');
+            throw new GatewayTimeoutException('AI Broker Engine xử lý quá lâu. Vui lòng thử lại.');
+          }
           this.logger.error(`AI Broker Agent Error: ${error.message}`);
           throw new InternalServerErrorException('AI Broker Engine đang bận.');
         }),
