@@ -109,13 +109,28 @@ export const useAuthStore = create<AuthState>((set) => ({
         const data = response.data;
         if (data && data.user) {
           const u = data.user;
+          let finalRole: 'GUEST' | 'TENANT' | 'OWNER' = 'GUEST';
+          if (u.role) {
+            const upper = u.role.toUpperCase();
+            if (upper === 'OWNER') finalRole = 'OWNER';
+            else if (upper === 'TENANT') finalRole = 'TENANT';
+            else if (upper === 'GUEST') finalRole = 'GUEST';
+          } else {
+            if (u.hasOwnerProfile || u.ownerProfileId) {
+              finalRole = 'OWNER';
+            } else if (u.hasTenantProfile || u.tenantProfileId) {
+              finalRole = 'TENANT';
+            }
+          }
+
           const updatedUser = {
             ...user,
             id: u.accountId || user?.id,
             email: u.email || user?.email,
             fullName: u.fullName || user?.fullName,
             isActive: typeof u.isActive === 'boolean' ? u.isActive : false,
-            role: u.hasOwnerProfile ? 'OWNER' : 'TENANT',
+            role: finalRole,
+            tenantProfileId: u.tenantProfileId || undefined,
             ownerProfileId: u.ownerProfileId || undefined,
             isTenancyActivated: typeof u.isTenancyActivated === 'boolean' ? u.isTenancyActivated : false
           };
