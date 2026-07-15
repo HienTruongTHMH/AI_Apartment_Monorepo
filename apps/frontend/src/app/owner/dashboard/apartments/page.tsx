@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Building2, Plus } from 'lucide-react';
+import { Building2, Plus, Edit2 } from 'lucide-react';
 import Link from 'next/link';
 import { useApartments } from '@/lib/api-hooks';
 
@@ -58,9 +58,11 @@ export default function OwnerApartmentsPage() {
                     </span>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="text-white font-bold text-lg mb-1 truncate">{apt.fullAddress || 'Căn hộ mới'}</h3>
-                  <p className="text-gray-400 text-sm mb-3">Loại: {apt.type || 'Normal'} • Tầng {apt.floor || 1}</p>
+                <div className="p-4 space-y-4">
+                  <div>
+                    <h3 className="text-white font-bold text-lg mb-1 truncate">{apt.fullAddress || 'Căn hộ mới'}</h3>
+                    <p className="text-gray-400 text-sm">Loại: {apt.type || 'Normal'} • Tầng {apt.floor || 1}</p>
+                  </div>
                   
                   <div className="flex items-center justify-between pt-3 border-t border-white/10">
                     <span className="text-amber-400 font-bold">
@@ -70,6 +72,16 @@ export default function OwnerApartmentsPage() {
                     </span>
                     <span className="text-gray-500 text-sm">{apt.area || 0} m²</span>
                   </div>
+
+                  {apt.apartmentListing && (
+                    <Link
+                      href={`/owner/dashboard/apartments/${apt.apartmentListing.id}/edit`}
+                      className="w-full flex items-center justify-center gap-2 py-2 mt-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors font-semibold text-sm border border-emerald-500/20 hover:border-emerald-500/40"
+                      onClick={(e) => e.stopPropagation()} // Prevent card click event if any
+                    >
+                      <Edit2 size={16} /> Chỉnh sửa tin
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}

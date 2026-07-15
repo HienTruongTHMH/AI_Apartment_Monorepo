@@ -277,6 +277,36 @@ export const apiService = {
     return res.data;
   },
 
+  async updateListing(id: string, payload: any) {
+    const res = await apiClient.patch(`/listing/${id}`, payload);
+    return res.data;
+  },
+
+  async getPresignedUrl(fileName: string) {
+    const res = await apiClient.post('/listing/upload/get-presigned-url', { fileName });
+    return res.data; // { token, path }
+  },
+
+  async uploadToSupabase(file: File, path: string, token: string, supabaseUrl: string) {
+    // Construct the direct storage API upload URL
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/apartment-listings/${path}`;
+    const res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': file.type || 'application/octet-stream',
+      },
+      body: file,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Upload failed: ${res.statusText}`);
+    }
+
+    // Construct public URL assuming standard Supabase storage format
+    return `${supabaseUrl}/storage/v1/object/public/apartment-listings/${path}`;
+  },
+
   async getMyApartments() {
     try {
       const res = await apiClient.get('/apartment/my-apartments');

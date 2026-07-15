@@ -2,7 +2,7 @@ import { ApartmentStatus, ApartmentTypes, ListingStatus } from "@prisma/client";
 import { Type } from "class-transformer";
 import { IsString, IsNumber, IsEnum, IsNotEmpty, IsUUID, IsInt, ValidateNested, Min, IsArray, IsOptional } from "class-validator";
 
-class ApartmentDto {
+export class ApartmentDto {
     @IsUUID()
     ownerId!: string
 
