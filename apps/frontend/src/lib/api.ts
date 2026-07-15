@@ -46,6 +46,7 @@ export interface ListingItem {
     apartmentStatus: 'Available' | 'Rented';
     apartmentAmenities?: { amenity: { id: string; name: string; category: string; icon: string } }[];
     owner?: { id: string; fullName: string; taxCode?: string };
+    contracts?: ContractItem[];
   };
 }
 

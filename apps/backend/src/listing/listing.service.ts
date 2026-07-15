@@ -157,13 +157,23 @@ export class ListingService {
   // }
 
   async findOne(id: string) {
-    return this.prisma.listing.findUnique({
-      where: { id },
+    return this.prisma.listing.findFirst({
+      where: {
+        OR: [
+          { id },
+          { apartmentId: id }
+        ]
+      },
       include: {
         images: true,
         apartment: {
           include: {
             owner: true,
+            contracts: {
+              include: {
+                tenant: true
+              }
+            },
             apartmentAmenities: {
               include: {
                 amenity: true
