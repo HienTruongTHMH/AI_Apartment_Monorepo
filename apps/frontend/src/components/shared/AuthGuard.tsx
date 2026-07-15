@@ -24,6 +24,7 @@ export default function AuthGuard({ children, allowedRoles, requireActive = fals
       allowedRoles,
       pathname,
       isActive: user?.isActive,
+      isTenancyActivated: user?.isTenancyActivated,
       requireActive
     });
 
@@ -57,7 +58,8 @@ export default function AuthGuard({ children, allowedRoles, requireActive = fals
     }
 
     // Active status check
-    if (requireActive && !user.isActive) {
+    const isActivated = user.role === 'OWNER' ? user.isActive : user.isTenancyActivated;
+    if (requireActive && !isActivated) {
       console.log('[AuthGuard Debug]: User is not active. Redirecting to activation page.');
       router.push('/tenant/dashboard/activate');
       return;

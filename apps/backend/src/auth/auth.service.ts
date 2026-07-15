@@ -112,6 +112,7 @@ export class AuthService {
             tenantProfileId: account.tenantProfile?.id || null,
             hasOwnerProfile: !!account.ownerProfile,
             ownerProfileId: account.ownerProfile?.id || null,
+            isTenancyActivated: account.tenantProfile?.isActive || false,
         }
 
         this.logger.log(`User ${account.email} đã đăng nhập thành công `);

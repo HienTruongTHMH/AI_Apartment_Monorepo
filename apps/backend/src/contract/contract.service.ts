@@ -149,19 +149,38 @@ export class ContractService {
         data: {
           apartmentStatus: "Rented"
         }
-      }),
-
-      this.prismaService.tenantProfile.update({
-        where: {
-          accountId: tenantId
-        },
-        data: {
-          isActive: true
-        }
       })
     ])
 
     return 'This action signs contract';
+  }
+
+  async activateTenantProfile(tenantAccountId: string) {
+    const tenantProfile = await this.prismaService.tenantProfile.findUnique({
+      where: { accountId: tenantAccountId }
+    });
+
+    if (!tenantProfile) {
+      throw new ForbiddenException("Không tìm thấy hồ sơ khách thuê");
+    }
+
+    const activeContract = await this.prismaService.contract.findFirst({
+      where: {
+        tenantId: tenantProfile.id,
+        contractStatus: "Active"
+      }
+    });
+
+    if (!activeContract) {
+      throw new BadRequestException("Bạn phải có ít nhất một hợp đồng có hiệu lực (Active) để kích hoạt tài khoản");
+    }
+
+    await this.prismaService.tenantProfile.update({
+      where: { id: tenantProfile.id },
+      data: { isActive: true }
+    });
+
+    return { success: true, message: "Tài khoản của bạn đã được kích hoạt thành công!" };
   }
 
   async tenantReject(contractId: string, tenantId: string) {
