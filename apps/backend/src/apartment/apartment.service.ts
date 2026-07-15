@@ -36,6 +36,7 @@ export class ApartmentService {
   }
 
 
+
   async findBelonging(accountId: string) {
     return this.prisma.apartment.findMany({
       where: {

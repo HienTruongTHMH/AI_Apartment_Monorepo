@@ -20,6 +20,10 @@ export class SearchBrokerDto {
   @IsNotEmpty()
   tenant_id!: string;
 
+  @IsString()
+  @IsOptional()
+  sessionId?: string;
+
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
