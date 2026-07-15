@@ -1,7 +1,9 @@
 import { Injectable, InternalServerErrorException, GatewayTimeoutException, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom, catchError, timeout, TimeoutError } from 'rxjs';
+import { randomUUID } from 'crypto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { RedisService } from 'src/redis/redis.service';
 import { VerifyListingDto } from './dto/verify-listing.dto';
 import { SearchBrokerDto } from './dto/search-broker.dto';
 import { Apartment } from '@prisma/client';
@@ -14,7 +16,8 @@ export class AiAgentsService {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly redisService: RedisService,
   ) {}
 
   async verifyApartmentListing(dto: VerifyListingDto) {
@@ -100,9 +103,19 @@ export class AiAgentsService {
   }
 
   async searchBroker(dto: SearchBrokerDto) {
-    this.logger.log(`Truy vấn danh sách căn hộ từ Supabase để gửi cho Agent Broker...`);
+    // 1. Session management — dùng sessionId có sẵn hoặc tạo mới
+    const sessionId = dto.sessionId || randomUUID();
+    const sessionKey = `chat:${sessionId}`;
 
-    // 1. Lấy tất cả bài đăng đã duyệt từ Postgres / Supabase
+    // Load conversation history từ Redis (ưu tiên hơn history từ client)
+    const cachedRaw = await this.redisService.get(sessionKey);
+    const history: { role: string; content: string }[] = cachedRaw
+      ? JSON.parse(cachedRaw)
+      : (dto.conversation_history || []);
+
+    this.logger.log(`[Session: ${sessionId}] History: ${history.length} messages. Query: "${dto.query}"`);
+
+    // 2. Lấy tất cả bài đăng đã duyệt từ Postgres / Supabase
     const dbListings = await this.prisma.listing.findMany({
       where: { listingStatus: 'Published' },
       include: {
@@ -121,7 +134,7 @@ export class AiAgentsService {
 
     this.logger.log(`Đã tìm thấy ${dbListings.length} căn hộ. Đang chuẩn bị dữ liệu gửi sang Python Broker...`);
 
-    // 2. Định dạng cấu trúc danh sách khớp với Python RAG
+    // 3. Định dạng cấu trúc danh sách khớp với Python RAG
     const listings = dbListings.map(listing => {
       const amenities = (listing.apartment.apartmentAmenities || []).map(aa => aa.amenity.name);
       const primaryImage = listing.images.find(img => img.isPrimary)?.imageUrl || listing.images[0]?.imageUrl || null;
@@ -140,24 +153,22 @@ export class AiAgentsService {
       };
     });
 
-    // 3. Chuẩn bị payload gửi sang FastAPI
+    // 4. Chuẩn bị payload gửi sang FastAPI
     const payload = {
       query: dto.query,
       tenant_id: dto.tenant_id,
-      conversation_history: dto.conversation_history || [],
+      conversation_history: history, // ← Dùng history từ Redis
       audio_url: dto.audio_url || null,
       listings,
     };
 
-    // 4. Gọi sang FastAPI Broker endpoint
-    // NOTE: Gemini AI có thể mất 30-60s để xử lý RAG pipeline
-    // Set 90s để có đủ buffer, tránh timeout giả (false positive)
+    // 5. Gọi sang FastAPI Broker endpoint (timeout 30s cho chat)
     const { data } = await firstValueFrom(
       this.httpService.post(`${this.aiBaseUrl}/api/search`, payload).pipe(
-        timeout(90_000),
+        timeout(30_000),
         catchError((error) => {
           if (error instanceof TimeoutError) {
-            this.logger.error('AI Broker Agent timeout sau 90 giây.');
+            this.logger.error('AI Broker Agent timeout sau 30 giây.');
             throw new GatewayTimeoutException('AI Broker Engine xử lý quá lâu. Vui lòng thử lại.');
           }
           this.logger.error(`AI Broker Agent Error: ${error.message}`);
@@ -166,6 +177,16 @@ export class AiAgentsService {
       ),
     );
 
-    return data;
+    // 6. Cập nhật history và lưu vào Redis (TTL: 1 giờ)
+    const botResponse: string = data?.data?.bot_response ?? data?.bot_response ?? '';
+    const updatedHistory = [
+      ...history,
+      { role: 'user', content: dto.query },
+      { role: 'assistant', content: botResponse },
+    ];
+    await this.redisService.set(sessionKey, JSON.stringify(updatedHistory), 3600);
+
+    // 7. Trả kết quả kèm sessionId để Frontend track
+    return { ...data, sessionId };
   }
 }
