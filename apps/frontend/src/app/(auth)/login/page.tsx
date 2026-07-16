@@ -64,6 +64,7 @@ export default function LoginPage() {
         role: finalRole,
         tenantProfileId: u.tenantProfileId || undefined,
         ownerProfileId: u.ownerProfileId || undefined,
+        isTenancyActivated: u.isTenancyActivated || false,
       };
       setAuth(token, profileData);
       router.push('/');
@@ -92,7 +93,7 @@ export default function LoginPage() {
             <Building2 className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-bold text-[#2C2C2C]">Đăng Nhập Tài Khoản</h1>
-          <p className="text-xs text-[#5A5A5A]">Chào mừng trở lại với AI Apartment Monorepo</p>
+          <p className="text-xs text-[#5A5A5A]">Chào mừng trở lại với NestaVIET</p>
         </div>
 
         {errorMsg && (

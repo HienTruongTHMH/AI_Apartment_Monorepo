@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Search, Building2, Bot, Sparkles, MapPin, Home } from 'lucide-react';
+import { apiService } from '@/lib/api';
 
 interface HeroSectionProps {
   toggleAiPanel: () => void;
@@ -16,6 +17,7 @@ const CARDS_DATA = [
     location: 'Bình Thạnh, TP.HCM',
     price: '18.5 Triệu/tháng',
     specs: '2 PN • 75m²',
+    imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80',
   },
   {
     id: '2',
@@ -23,6 +25,7 @@ const CARDS_DATA = [
     location: 'Quận 2, TP.HCM',
     price: '16 Triệu/tháng',
     specs: '2 PN • 68m²',
+    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80',
   },
   {
     id: '3',
@@ -30,6 +33,7 @@ const CARDS_DATA = [
     location: 'Quận 7, TP.HCM',
     price: '14 Triệu/tháng',
     specs: '1 PN • 55m²',
+    imageUrl: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&q=80',
   },
 ];
 
@@ -40,6 +44,44 @@ export default function HeroSection({ toggleAiPanel }: HeroSectionProps) {
   const [cards, setCards] = useState(CARDS_DATA);
 
   useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await apiService.getListings({ limit: 10 });
+        if (data && data.length > 0) {
+          const listingsToUse = data.slice(0, 3);
+          const mappedCards = listingsToUse.map((listing: any) => {
+            const primaryImage = listing.images?.find((img: any) => img.isPrimary)?.imageUrl || listing.images?.[0]?.imageUrl;
+            return {
+              id: listing.id,
+              title: listing.title,
+              location: `${listing.apartment?.district || 'Đà Nẵng'}, Đà Nẵng`,
+              price: listing.pricePerMonth >= 1000000 
+                ? `${listing.pricePerMonth / 1000000} Triệu/tháng` 
+                : `${listing.pricePerMonth.toLocaleString('vi-VN')} VND/tháng`,
+              specs: `${listing.apartment?.bedroom || 0} PN • ${listing.apartment?.area || 0}m²`,
+              imageUrl: primaryImage || null
+            };
+          });
+
+          // Pad with mock data if we have less than 3 cards
+          while (mappedCards.length < 3) {
+            const mock = CARDS_DATA[mappedCards.length % CARDS_DATA.length];
+            mappedCards.push({
+              ...mock,
+              imageUrl: mock.imageUrl
+            });
+          }
+          setCards(mappedCards);
+        }
+      } catch (err) {
+        console.error('Lỗi khi tải danh sách căn hộ cho Hero:', err);
+      }
+    };
+    fetchListings();
+  }, []);
+
+  useEffect(() => {
+    if (cards.length === 0) return;
     const interval = setInterval(() => {
       setCards((prev) => {
         const newCards = [...prev];
@@ -49,7 +91,7 @@ export default function HeroSection({ toggleAiPanel }: HeroSectionProps) {
       });
     }, 3500);
     return () => clearInterval(interval);
-  }, []);
+  }, [cards.length]);
 
   return (
     <section className="relative pt-12 pb-24 md:pt-20 md:pb-32 bg-gradient-to-r from-[#F5C870] via-[#E9AC3C] to-[#E09015] min-h-[550px] overflow-hidden">

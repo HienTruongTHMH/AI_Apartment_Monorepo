@@ -24,16 +24,11 @@ export default function TenantDashboardOverview() {
             Quản lý hồ sơ thuê căn hộ, theo dõi hợp đồng bản cứng & kích hoạt tài khoản
           </p>
         </div>
-
+ 
         {/* Account Activation Badge Status */}
-        <div className="p-4 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm shrink-0 space-y-2">
-          <div className="text-[11px] text-[#5A5A5A]">Trạng Thái Kích Hoạt Tài Khoản</div>
-          {mounted && user?.isTenancyActivated ? (
-            <div className="text-xs font-bold text-[#065F46] flex items-center gap-1.5 bg-[#ECFDF5] border border-[#A7F3D0] px-3 py-1.5 rounded-xl">
-              <ShieldCheck className="w-4 h-4 text-[#065F46]" />
-              <span>Đã Kích Hoạt</span>
-            </div>
-          ) : (
+        {mounted && !user?.isTenancyActivated && (
+          <div className="p-4 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm shrink-0 space-y-2">
+            <div className="text-[11px] text-[#5A5A5A]">Trạng Thái Kích Hoạt Tài Khoản</div>
             <div className="space-y-2">
               <div className="text-xs font-bold text-[#B7791F] flex items-center gap-1.5 bg-[#FFF9E6] border border-[#FEEBC8] px-3 py-1.5 rounded-xl animate-pulse">
                 <ShieldAlert className="w-4 h-4 text-[#B7791F]" />
@@ -47,10 +42,10 @@ export default function TenantDashboardOverview() {
                 <ArrowRight className="w-3 h-3 text-[#E03C3D]" />
               </Link>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
+ 
       {/* Quick Access Tiles */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link
@@ -86,23 +81,25 @@ export default function TenantDashboardOverview() {
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
-
-        <Link
-          href="/tenant/dashboard/activate"
-          className="group p-6 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm hover:border-[#E03C3D]/40 hover:shadow-md transition-all space-y-4"
-        >
-          <div className="w-10 h-10 rounded-xl bg-[#FFF5F5] border border-[#FEE2E2] text-[#E03C3D] flex items-center justify-center group-hover:scale-110 transition-transform">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-[#2C2C2C] group-hover:text-[#E03C3D]">Kích Hoạt Tài Khoản</h3>
-            <p className="text-xs text-[#5A5A5A] mt-1">Xác nhận đã ký bản cứng để kích hoạt tài khoản sử dụng dịch vụ</p>
-          </div>
-          <div className="text-xs font-medium text-[#E03C3D] group-hover:underline flex items-center gap-1 pt-2">
-            <span>Kích hoạt ngay</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
+ 
+        {!(mounted && user?.isTenancyActivated) && (
+          <Link
+            href="/tenant/dashboard/activate"
+            className="group p-6 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm hover:border-[#E03C3D]/40 hover:shadow-md transition-all space-y-4"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FFF5F5] border border-[#FEE2E2] text-[#E03C3D] flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#2C2C2C] group-hover:text-[#E03C3D]">Kích Hoạt Tài Khoản</h3>
+              <p className="text-xs text-[#5A5A5A] mt-1">Xác nhận đã ký bản cứng để kích hoạt tài khoản sử dụng dịch vụ</p>
+            </div>
+            <div className="text-xs font-medium text-[#E03C3D] group-hover:underline flex items-center gap-1 pt-2">
+              <span>Kích hoạt ngay</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        )}
 
         <Link
           href="/search"

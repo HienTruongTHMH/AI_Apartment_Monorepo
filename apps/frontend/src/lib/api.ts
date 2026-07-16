@@ -475,6 +475,15 @@ export const apiService = {
     }
   },
 
+  async getTenantProfile() {
+    try {
+      const res = await apiClient.get('/user/tenant-profile');
+      return res.data;
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi lấy thông tin hồ sơ khách thuê');
+    }
+  },
+
   async tenantRejectContract(contractId: string) {
     const res = await apiClient.post('/contract/tenant-reject', { contractId });
     return res.data;

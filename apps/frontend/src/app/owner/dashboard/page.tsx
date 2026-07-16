@@ -38,7 +38,7 @@ export default function OwnerDashboardOverview() {
           <div className="text-xs text-[#E03C3D] font-bold uppercase tracking-wider">Dashboard Chủ hộ</div>
           <h1 className="text-3xl font-black text-[#2C2C2C]">Bảng Quản Lý Chủ hộ: {mounted ? (user?.fullName || 'Chủ hộ') : 'Chủ hộ'}</h1>
           <p className="text-xs text-[#5A5A5A]">
-            Quản lý danh sách căn hộ, tạo tin đăng bằng AI Verifier và xác nhận hợp đồng với khách thuê
+            Quản lý danh sách căn hộ, tạo tin đăng được xác thực bằng AI và xác nhận hợp đồng với khách thuê
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function OwnerDashboardOverview() {
           className="px-6 py-3.5 rounded-xl bg-[#E03C3D] hover:bg-[#C92F30] text-white font-bold text-xs shadow-sm flex items-center gap-2 transition-all hover:scale-[1.02] shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>Đăng Tin Mới Với AI Verifier</span>
+          <span>Đăng Tin Mới Với AI</span>
         </Link>
       </div>
 
@@ -113,7 +113,7 @@ export default function OwnerDashboardOverview() {
           </div>
           <div>
             <h3 className="text-base font-bold text-[#2C2C2C] group-hover:text-[#E03C3D]">Soạn Bài Đăng AI</h3>
-            <p className="text-xs text-[#5A5A5A] mt-1">Sử dụng AI Verifier để phân tích tin đăng</p>
+            <p className="text-xs text-[#5A5A5A] mt-1">Sử dụng AI để phân tích tin đăng</p>
           </div>
         </Link>
         

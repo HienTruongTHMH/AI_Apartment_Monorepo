@@ -1,36 +1,38 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useContracts } from '@/lib/api-hooks';
 import { apiService } from '@/lib/api';
-import { ShieldCheck, ShieldAlert, FileCheck, CheckCircle2, ArrowRight, Sparkles, AlertCircle } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, FileCheck, AlertCircle } from 'lucide-react';
 
 export default function AccountActivationHub() {
-  const { user } = useAuthStore();
+  const { user, setAccountActive } = useAuthStore();
   const { data: contracts, isLoading: loadingContracts } = useContracts('tenant');
-  const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    const checkTenantProfileStatus = async () => {
+      try {
+        const tenantProfile = await apiService.getTenantProfile();
+        if (tenantProfile) {
+          if (tenantProfile.isActive) {
+            setAccountActive(true);
+          } else {
+            setAccountActive(false);
+          }
+        }
+      } catch (err) {
+        console.error('Lỗi khi kiểm tra hồ sơ khách thuê:', err);
+      }
+    };
+
+    checkTenantProfileStatus();
+  }, [setAccountActive]);
 
   const hasActiveContract = contracts?.some(c => c.contractStatus === 'Active') || false;
-
-  const handleActivateAccount = async () => {
-    setLoading(true);
-    try {
-      await apiService.activateTenantAccount();
-      setSuccessMsg('Tài khoản của bạn đã được kích hoạt thành công!');
-    } catch (err: any) {
-      alert(err.message || 'Không thể kích hoạt tài khoản. Vui lòng ký hợp đồng trước.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
@@ -82,7 +84,7 @@ export default function AccountActivationHub() {
             <div className="p-4 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0] space-y-2">
               <div className="text-xs font-bold text-[#166534]">2. Sau khi ký giấy hợp đồng bản cứng</div>
               <p className="text-[11px] text-[#5A5A5A] leading-relaxed">
-                Sau khi ký hợp đồng giấy bản cứng ngoài hệ thống, bấm nút xác nhận dưới đây để kích hoạt tài khoản và đưa hợp đồng vào trạng thái hoạt động chính thức.
+                Sau khi ký hợp đồng giấy bản cứng ngoài hệ thống, tài khoản của bạn sẽ tự động được chuyển sang trạng thái kích hoạt hoạt động chính thức.
               </p>
             </div>
           </div>
@@ -93,55 +95,28 @@ export default function AccountActivationHub() {
           <div className={`p-4 rounded-2xl flex items-start gap-3 text-xs ${hasActiveContract ? 'bg-emerald-50 border border-emerald-200 text-[#065F46]' : 'bg-rose-50 border border-rose-100 text-[#C53030]'}`}>
             <AlertCircle className="w-5 h-5 shrink-0" />
             <div>
-              <div className="font-bold">{hasActiveContract ? 'Điều kiện kích hoạt hợp lệ!' : 'Chưa đủ điều kiện kích hoạt!'}</div>
+              <div className="font-bold">{hasActiveContract ? 'Hợp đồng đã ký thành công!' : 'Chưa có hợp đồng có hiệu lực!'}</div>
               <p className="opacity-90 mt-0.5">
                 {hasActiveContract 
-                  ? 'Hệ thống phát hiện bạn đã ký thành công ít nhất một hợp đồng (Active). Nút kích hoạt tài khoản đã sẵn sàng.'
-                  : 'Bạn phải có ít nhất một hợp đồng ở trạng thái hoạt động (Hợp Lệ) để có thể nhấn nút kích hoạt tài khoản.'}
+                  ? 'Hệ thống phát hiện bạn đã có hợp đồng ở trạng thái hoạt động (Active).'
+                  : 'Bạn phải có ít nhất một hợp đồng ở trạng thái hoạt động (Active) để tài khoản được tự động kích hoạt.'}
               </p>
             </div>
           </div>
         )}
 
         {/* Action Controls */}
-        {successMsg ? (
-          <div className="p-4 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold text-center space-y-3">
-            <CheckCircle2 className="w-8 h-8 text-[#065F46] mx-auto" />
-            <p>{successMsg}</p>
-            <div className="pt-2">
-              <Link
-                href="/tenant/dashboard/contracts"
-                className="px-6 py-2.5 rounded-xl bg-[#E03C3D] text-white font-bold inline-flex items-center gap-2 hover:bg-[#C92F30] transition-colors"
-              >
-                <span>Xem Hợp Đồng Đã Kích Hoạt</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+        <div className="pt-2">
+          {mounted && user?.isTenancyActivated ? (
+            <div className="p-4 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold text-center">
+              Tài khoản của bạn đang ở trạng thái HOẠT ĐỘNG (Đã kích hoạt). Quyền truy cập các tính năng thuê nhà đã được mở đầy đủ!
             </div>
-          </div>
-        ) : (
-          <div className="pt-2">
-            {mounted && user?.isTenancyActivated ? (
-              <div className="p-4 rounded-2xl bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold text-center">
-                Tài khoản của bạn đang ở trạng thái HOẠT ĐỘNG (Đã kích hoạt). Quyền truy cập các tính năng thuê nhà đã được mở đầy đủ!
-              </div>
-            ) : (
-              <button
-                onClick={handleActivateAccount}
-                disabled={loading || !mounted || loadingContracts || !hasActiveContract}
-                className="w-full py-4 rounded-2xl bg-[#E03C3D] hover:bg-[#C92F30] text-white font-black text-sm shadow-sm transition-all flex items-center justify-center gap-2 hover:scale-[1.01] disabled:opacity-50 disabled:hover:scale-100 cursor-pointer disabled:cursor-not-allowed"
-              >
-                <Sparkles className="w-5 h-5" />
-                <span>
-                  {loadingContracts 
-                    ? 'Đang kiểm tra hợp đồng...' 
-                    : loading 
-                    ? 'Đang kích hoạt...' 
-                    : 'Xác Nhận Đã Ký Bản Cứng & Kích Hoạt Tài Khoản'}
-                </span>
-              </button>
-            )}
-          </div>
-        )}
+          ) : (
+            <div className="p-4 rounded-2xl bg-[#FFFBEB] border border-[#FEF3C7] text-[#D97706] text-xs font-bold text-center">
+              Tài khoản của bạn chưa được kích hoạt. Trạng thái này sẽ tự động thay đổi khi hồ sơ khách thuê của bạn được kích hoạt trên hệ thống.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
