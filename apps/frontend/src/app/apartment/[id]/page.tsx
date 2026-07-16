@@ -84,6 +84,7 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
 
       const res = await apiService.createRentalRequest(listing.apartmentId, payload);
       setOwnerContact(res.ownerContact);
+      window.dispatchEvent(new Event('RENTAL_REQUEST_UPDATED'));
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
     } finally {

@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { FileText, Search, CheckCircle, XCircle, X } from 'lucide-react';
-import { useRentalRequests } from '@/lib/api-hooks';
+import { useRentalRequests, useContracts } from '@/lib/api-hooks';
 import { apiService } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface RentalRequestManagerProps {
   role: 'tenant' | 'owner';
@@ -16,6 +17,7 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
   
   const { data: requests, isLoading, error, refetch } = useRentalRequests(role);
+  const { data: contracts } = useContracts(role);
 
   const filtered = requests.filter((r) =>
     (filterStatus === 'all' || r.status === filterStatus) &&
@@ -23,18 +25,32 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
      r.account?.fullName?.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const checkHasContract = (r: any) => {
+    if (!contracts) return false;
+    return contracts.some((c: any) => {
+      const matchApartment = c.apartmentId === r.apartmentId || (c.apartment && c.apartment.id === r.apartmentId);
+      const matchTenant = c.tenantId === r.accountId || c.tenant === r.accountId || (c.tenant && c.tenant.accountId === r.accountId);
+      const status = c.contractStatus || c.status;
+      const isActiveOrDraft = ['Draft', 'PendingTenantSignature', 'Active', 'active', 'pending'].includes(status);
+      return matchApartment && matchTenant && isActiveOrDraft;
+    });
+  };
+
   const handleAction = async (id: string, action: 'accept' | 'reject') => {
     try {
       setActionLoading(true);
       if (action === 'accept') {
         await apiService.acceptRentalRequest(id);
+        toast.success('Đã duyệt yêu cầu thuê!');
       } else {
         await apiService.rejectRentalRequest(id);
+        toast.success('Đã từ chối yêu cầu thuê!');
       }
       await refetch();
+      window.dispatchEvent(new Event('RENTAL_REQUEST_UPDATED'));
     } catch (err) {
       console.error(err);
-      alert('Có lỗi xảy ra khi thực hiện hành động');
+      toast.error('Có lỗi xảy ra khi thực hiện hành động');
     } finally {
       setActionLoading(false);
     }
@@ -81,10 +97,10 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
         terms: terms
       });
       
-      alert('Đã tạo hợp đồng nháp thành công! Vui lòng vào Quản lý Hợp Đồng để xem.');
+      toast.success('Đã tạo hợp đồng nháp thành công! Vui lòng vào Quản lý Hợp Đồng để xem.');
       setSelectedRequest(null);
     } catch (e: any) {
-      alert(e.message || 'Lỗi tạo hợp đồng');
+      toast.error(e.message || 'Lỗi tạo hợp đồng');
     } finally {
       setActionLoading(false);
     }
@@ -222,16 +238,22 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
                   )}
 
                   {role === 'owner' && r.status === 'Accepted' && (
-                    <button
-                      disabled={actionLoading}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await handleCreateDraftContract(r);
-                      }}
-                      className="px-3 py-1.5 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-lg text-xs font-bold transition-colors"
-                    >
-                      Tạo Hợp Đồng Nháp
-                    </button>
+                    checkHasContract(r) ? (
+                      <span className="px-3 py-1.5 bg-slate-100 text-[#5A5A5A] rounded-lg text-xs font-bold border border-slate-200">
+                        Đã tạo HĐ
+                      </span>
+                    ) : (
+                      <button
+                        disabled={actionLoading}
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await handleCreateDraftContract(r);
+                        }}
+                        className="px-3 py-1.5 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-lg text-xs font-bold transition-colors"
+                      >
+                        Tạo Hợp Đồng Nháp
+                      </button>
+                    )
                   )}
                 </div>
               </div>
@@ -388,13 +410,19 @@ export default function RentalRequestManager({ role }: RentalRequestManagerProps
               )}
 
               {role === 'owner' && selectedRequest.status === 'Accepted' && (
-                <button
-                  disabled={actionLoading}
-                  onClick={() => handleCreateDraftContract(selectedRequest)}
-                  className="px-4 py-2 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-xl text-xs font-bold transition-colors"
-                >
-                  Tạo Hợp Đồng Nháp
-                </button>
+                checkHasContract(selectedRequest) ? (
+                  <span className="px-4 py-2 bg-slate-100 text-[#5A5A5A] rounded-xl text-xs font-bold border border-slate-200 flex items-center justify-center">
+                    Đã tạo Hợp Đồng
+                  </span>
+                ) : (
+                  <button
+                    disabled={actionLoading}
+                    onClick={() => handleCreateDraftContract(selectedRequest)}
+                    className="px-4 py-2 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    Tạo Hợp Đồng Nháp
+                  </button>
+                )
               )}
             </div>
           </div>

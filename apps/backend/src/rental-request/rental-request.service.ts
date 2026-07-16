@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class RentalRequestService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
+  ) {}
 
   async create(accountId: string, apartmentId: string, message?: string) {
     // Check if already requested and pending
@@ -41,6 +45,20 @@ export class RentalRequestService {
         message
       }
     });
+
+    const tenantAccount = await this.prisma.account.findUnique({
+      where: { id: accountId }
+    });
+
+    // Gửi email thông báo cho owner ở chế độ chạy nền (fire and forget)
+    if (apartment.owner.account.email) {
+      this.mailService.sendRentalRequestNotification(
+        apartment.owner.account.email,
+        tenantAccount?.fullName || 'Khách',
+        apartment.fullAddress,
+        message
+      ).catch(e => console.error('Failed to send email:', e));
+    }
 
     return {
       message: 'Gửi yêu cầu thành công',

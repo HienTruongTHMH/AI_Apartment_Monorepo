@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { FileText, Search, Filter, X } from 'lucide-react';
 import { useContracts } from '@/lib/api-hooks';
 import { apiService } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface ContractRecord {
   id: string;
@@ -24,7 +25,7 @@ export default function ContractManager({ role }: ContractManagerProps) {
   const [search, setSearch] = useState('');
   const [selectedContract, setSelectedContract] = useState<any | null>(null);
 
-  const { data: contracts, isLoading, error } = useContracts(role);
+  const { data: contracts, isLoading, error, refetch } = useContracts(role);
 
   const filtered = contracts.filter((c) => {
     let statusMatch = false;
@@ -159,8 +160,9 @@ export default function ContractManager({ role }: ContractManagerProps) {
                           e.stopPropagation();
                           try {
                             await apiService.confirmOfflineRentalAndActivateAccount(c.id);
-                            window.location.reload();
-                          } catch (e: any) { alert(e.message); }
+                            toast.success('Xác nhận ký hợp đồng thành công!');
+                            refetch();
+                          } catch (e: any) { toast.error(e.message || 'Lỗi hệ thống'); }
                         }}
                         className="px-3 py-1.5 bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0] rounded-lg text-xs font-bold transition-colors"
                       >
@@ -171,8 +173,9 @@ export default function ContractManager({ role }: ContractManagerProps) {
                           e.stopPropagation();
                           try {
                             await apiService.tenantRejectContract(c.id);
-                            window.location.reload();
-                          } catch (e: any) { alert(e.message); }
+                            toast.success('Đã từ chối hợp đồng');
+                            refetch();
+                          } catch (e: any) { toast.error(e.message || 'Lỗi hệ thống'); }
                         }}
                         className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-650 border border-red-200 rounded-lg text-xs font-bold transition-colors"
                       >
@@ -187,9 +190,9 @@ export default function ContractManager({ role }: ContractManagerProps) {
                         e.stopPropagation();
                         try {
                           await apiService.sendContractToTenant(c.id);
-                          alert('Đã gửi hợp đồng cho người thuê!');
-                          window.location.reload();
-                        } catch (e: any) { alert(e.message); }
+                          toast.success('Đã gửi hợp đồng cho người thuê!');
+                          refetch();
+                        } catch (e: any) { toast.error(e.message || 'Lỗi hệ thống'); }
                       }}
                       className="px-3 py-1.5 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-lg text-xs font-bold transition-colors"
                     >
@@ -312,8 +315,10 @@ export default function ContractManager({ role }: ContractManagerProps) {
                     onClick={async () => {
                       try {
                         await apiService.tenantRejectContract(selectedContract.id);
-                        window.location.reload();
-                      } catch (e: any) { alert(e.message); }
+                        toast.success('Đã từ chối hợp đồng');
+                        setSelectedContract(null);
+                        refetch();
+                      } catch (e: any) { toast.error(e.message || 'Lỗi hệ thống'); }
                     }}
                     className="px-4 py-2 bg-red-50 text-red-655 border border-red-200 rounded-xl text-xs font-semibold transition-colors"
                   >
@@ -323,8 +328,10 @@ export default function ContractManager({ role }: ContractManagerProps) {
                     onClick={async () => {
                       try {
                         await apiService.confirmOfflineRentalAndActivateAccount(selectedContract.id);
-                        window.location.reload();
-                      } catch (e: any) { alert(e.message); }
+                        toast.success('Xác nhận ký hợp đồng thành công!');
+                        setSelectedContract(null);
+                        refetch();
+                      } catch (e: any) { toast.error(e.message || 'Lỗi hệ thống'); }
                     }}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-colors"
                   >
@@ -338,9 +345,10 @@ export default function ContractManager({ role }: ContractManagerProps) {
                   onClick={async () => {
                     try {
                       await apiService.sendContractToTenant(selectedContract.id);
-                      alert('Đã gửi hợp đồng cho người thuê!');
-                      window.location.reload();
-                    } catch (e: any) { alert(e.message); }
+                      toast.success('Đã gửi hợp đồng cho người thuê!');
+                      setSelectedContract(null);
+                      refetch();
+                    } catch (e: any) { toast.error(e.message || 'Lỗi hệ thống'); }
                   }}
                   className="px-4 py-2 bg-[#E03C3D] hover:bg-[#C92F30] text-white rounded-xl text-xs font-bold transition-colors"
                 >

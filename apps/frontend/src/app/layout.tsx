@@ -4,6 +4,7 @@ import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import UserActivationBanner from '@/components/shared/UserActivationBanner';
 import AiBrokerSidePanel from '@/components/ai-broker/AiBrokerSidePanel';
+import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
   title: 'Apartment Network - Nền Tảng Thuê Căn Hộ Cao Cấp',
@@ -25,6 +26,7 @@ export default function RootLayout({
         </main>
         <AiBrokerSidePanel />
         <Footer />
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

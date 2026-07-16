@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useRentalRequests } from '@/lib/api-hooks';
 import {
   Building2,
   Sparkles,
@@ -12,7 +13,8 @@ import {
   ShieldAlert,
   Search,
   Sliders,
-  X
+  X,
+  Bell
 } from 'lucide-react';
 import UserProfile from './UserProfile';
 
@@ -36,7 +38,9 @@ export default function Navbar() {
     return role || '';
   };
 
-
+  const roleForHook = currentRole === 'OWNER' ? 'owner' : (currentRole === 'TENANT' ? 'tenant' : null);
+  const { data: requests } = useRentalRequests(roleForHook);
+  const pendingRequestsCount = requests?.filter((r: any) => r.status === 'Pending').length || 0;
 
   const isUserLoggedIn = mounted && isLoggedIn && !!user;
 
@@ -95,6 +99,20 @@ export default function Navbar() {
         {/* Action Controls & User Account Pill */}
         <div className="flex items-center gap-3">
 
+          {/* Notification Bell */}
+          {isUserLoggedIn && roleForHook && (
+            <Link 
+              href={roleForHook === 'owner' ? '/owner/dashboard/rental-requests' : '/tenant/dashboard/rental-requests'}
+              className="relative p-2 text-[#5A5A5A] hover:text-[#E03C3D] hover:bg-red-50 rounded-full transition-colors"
+            >
+              <Bell className="w-5 h-5" />
+              {pendingRequestsCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-[#E03C3D] rounded-full transform translate-x-1/4 -translate-y-1/4">
+                  {pendingRequestsCount > 99 ? '99+' : pendingRequestsCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {/* AI Broker Quick Launch Trigger */}
           <button
