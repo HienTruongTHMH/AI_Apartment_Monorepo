@@ -71,7 +71,17 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
     try {
       setIsRequesting(true);
       setErrorMsg('');
-      const res = await apiService.createRentalRequest(listing.apartmentId);
+
+      const payload = JSON.stringify({
+        isMetadata: true,
+        title: listing.title,
+        address: listing.apartment.fullAddress,
+        price: listing.pricePerMonth,
+        apartmentId: listing.apartmentId,
+        userMessage: ''
+      });
+
+      const res = await apiService.createRentalRequest(listing.apartmentId, payload);
       setOwnerContact(res.ownerContact);
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || err.message || 'Có lỗi xảy ra');
