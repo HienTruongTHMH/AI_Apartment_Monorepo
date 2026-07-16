@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } fro
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RequireProfile } from 'src/auth/decorators/require-profile.decorator';
@@ -26,8 +27,19 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('/tenant-profile')
   getTenantProfile(@Req() req) {
-    const accountId = req.user.accountId;
+    const accountId = req.user.accountId || req.user.sub;
     return this.userService.getTenantProfile(accountId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/profile')
+  async updateProfile(@Req() req, @Body() updateProfileDto: UpdateProfileDto) {
+    const accountId = req.user.accountId || req.user.sub;
+    const account = await this.userService.updateProfile(accountId, updateProfileDto);
+    return {
+      message: 'Cập nhật thông tin thành công',
+      account
+    };
   }
 
   @Get()
