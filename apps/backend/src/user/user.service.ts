@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -39,6 +40,38 @@ export class UserService {
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `Cập nhập thôn tin cá nhân`;
+  }
+
+  async updateProfile(accountId: string, dto: UpdateProfileDto) {
+    return this.prismaService.$transaction(async (tx) => {
+      // 1. Cập nhật bảng gốc Account
+      const account = await tx.account.update({
+        where: { id: accountId },
+        data: {
+          ...(dto.fullName && { fullName: dto.fullName }),
+        }
+      });
+
+      // 2. Đồng bộ sang TenantProfile nếu tồn tại
+      const tenant = await tx.tenantProfile.findUnique({ where: { accountId } });
+      if (tenant && dto.fullName) {
+        await tx.tenantProfile.update({
+          where: { accountId },
+          data: { fullName: dto.fullName }
+        });
+      }
+
+      // 3. Đồng bộ sang OwnerProfile nếu tồn tại
+      const owner = await tx.ownerProfile.findUnique({ where: { accountId } });
+      if (owner && dto.fullName) {
+        await tx.ownerProfile.update({
+          where: { accountId },
+          data: { fullName: dto.fullName }
+        });
+      }
+
+      return account;
+    });
   }
 
   remove(id: number) {

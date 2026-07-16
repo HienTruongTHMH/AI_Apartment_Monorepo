@@ -523,5 +523,11 @@ export const apiService = {
   async rejectRentalRequest(id: string) {
     const res = await apiClient.patch(`/rental-request/${id}/reject`);
     return res.data;
+  },
+
+  // User Profile
+  async updateProfile(payload: { fullName: string }) {
+    const res = await apiClient.patch('/user/profile', payload);
+    return res.data;
   }
 };

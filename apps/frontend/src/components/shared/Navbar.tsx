@@ -11,13 +11,16 @@ import {
   ShieldCheck,
   ShieldAlert,
   Search,
-  Sliders
+  Sliders,
+  X
 } from 'lucide-react';
+import UserProfile from './UserProfile';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user, isLoggedIn, logout, toggleAiPanel, updateUser } = useAuthStore();
   const [mounted, setMounted] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -110,11 +113,10 @@ export default function Navbar() {
                 {currentRole === 'TENANT' && (
                   <Link
                     href="/tenant/dashboard/activate"
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                      user.isActive
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${user.isActive
                         ? 'bg-green-50 border-green-200 text-green-700'
                         : 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
-                    }`}
+                      }`}
                     title={user.isActive ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
                   >
                     {user.isActive ? (
@@ -132,10 +134,13 @@ export default function Navbar() {
                 )}
 
                 <div className="flex items-center gap-2 pl-2 border-l border-[#E8E8E8]">
-                  <div className="text-right hidden xl:block">
+                  <button
+                    onClick={() => setIsProfileOpen(true)}
+                    className="text-right hidden xl:block hover:opacity-80 transition-opacity text-left"
+                  >
                     <div className="text-xs font-semibold text-[#2C2C2C]">{user.fullName}</div>
                     <div className="text-[10px] text-[#5A5A5A]">{getRoleLabel(currentRole)}</div>
-                  </div>
+                  </button>
                   <button
                     onClick={logout}
                     className="w-9 h-9 rounded-xl bg-[#F2F2F2] hover:bg-red-50 border border-[#E8E8E8] hover:border-red-200 flex items-center justify-center text-[#5A5A5A] hover:text-[#E03C3D] transition-all"
@@ -169,6 +174,22 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {/* User Profile Modal */}
+      {isProfileOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl">
+            {/* Close Button positioned outside the UserProfile to not interfere with its layout */}
+            <button
+              onClick={() => setIsProfileOpen(false)}
+              className="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white text-gray-500 hover:text-red-500 rounded-full shadow-lg flex items-center justify-center border border-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <UserProfile />
+          </div>
+        </div>
+      )}
     </header>
   );
 }
