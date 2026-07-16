@@ -47,7 +47,6 @@ export default function FeatureHighlight({ onCtaClick }: FeatureHighlightProps) 
                 onClick={onCtaClick}
                 className="px-6 py-3 rounded-[8px] bg-[#E03C3D] hover:bg-[#C92F30] border-0 text-white font-semibold text-sm transition-colors duration-200 flex items-center gap-2"
               >
-                <Bot className="w-5 h-5" />
                 <span>Trò Chuyện Với Trợ Lý Ngay</span>
               </button>
             </div>

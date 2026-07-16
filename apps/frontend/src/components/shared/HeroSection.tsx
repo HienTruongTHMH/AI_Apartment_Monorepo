@@ -209,7 +209,6 @@ export default function HeroSection({ toggleAiPanel }: HeroSectionProps) {
                 <div className="absolute inset-0 rounded-full bg-[#2C2C2C] blur-md opacity-50 group-hover:opacity-75 transition-opacity animate-pulse"></div>
                 <Sparkles className="w-4 h-4 text-[#FF8E15] relative z-10" />
                 <span className="relative z-10">Khám Phá Trợ Lý AI</span>
-                <Bot className="w-4 h-4 text-[#FF8E15] relative z-10 ml-1" />
               </button>
             </motion.div>
 

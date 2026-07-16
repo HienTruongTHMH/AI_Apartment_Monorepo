@@ -6,12 +6,14 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { ShieldCheck, ShieldAlert, FileText, ArrowRight, Sparkles, Home, Clock, Users } from 'lucide-react';
 
 export default function TenantDashboardOverview() {
-  const { user } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Tải lại thông tin mới nhất từ DB để cập nhật trạng thái kích hoạt hoạt động
+    refreshUser();
+  }, [refreshUser]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">

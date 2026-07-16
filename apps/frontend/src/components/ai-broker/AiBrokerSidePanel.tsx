@@ -105,7 +105,7 @@ export default function AiBrokerSidePanel() {
       const errorMsg: Message = {
         id: 'err-' + Date.now(),
         sender: 'ai',
-        text: 'Hệ thống AI Broker đang cập nhật dữ liệu. Bạn vui lòng thử lại sau giây lát!',
+        text: 'Hệ thống trợ lý ảo đang cập nhật dữ liệu. Bạn vui lòng thử lại sau giây lát!',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -214,9 +214,9 @@ export default function AiBrokerSidePanel() {
                           <p className="text-[11px] font-semibold text-[#E03C3D] uppercase tracking-wider flex items-center gap-1">
                             <Sparkles className="w-3.5 h-3.5 text-[#E03C3D]" /> Gợi ý từ AI:
                           </p>
-                          {msg.recommendedListings.map((item) => (
+                          {msg.recommendedListings.map((item, idx) => (
                             <Link
-                              key={item.listing_id}
+                              key={`${item.listing_id}-${idx}`}
                               href={`/apartment/${item.listing_id}`}
                               onClick={() => setAiPanelOpen(false)}
                               className="group block p-2.5 rounded-[8px] bg-white border border-[#E8E8E8] hover:border-[#999999] transition-all hover:scale-[1.02]"

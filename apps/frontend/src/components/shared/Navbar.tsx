@@ -117,9 +117,9 @@ export default function Navbar() {
                         ? 'bg-green-50 border-green-200 text-green-700'
                         : 'bg-amber-50 border-amber-200 text-amber-700 animate-pulse'
                       }`}
-                    title={user.isActive ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
+                    title={user.isTenancyActivated ? 'Tài khoản đã kích hoạt' : 'Tài khoản chưa kích hoạt (Chờ xác nhận thuê)'}
                   >
-                    {user.isActive ? (
+                    {user.isTenancyActivated ? (
                       <>
                         <ShieldCheck className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Đã kích hoạt</span>

@@ -244,7 +244,7 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
               <Bot className="w-5 h-5" /> Có Thắc Mắc Về Căn Hộ?
             </div>
             <p className="text-xs text-[#5A5A5A]">
-              Bạn có thể hỏi AI Broker Agent về chi phí quản lý, tiện ích dịch vụ hoặc thời gian đi chuyển tới các quận trung tâm.
+              Bạn có thể hỏi cô nàng trợ lý ảo về chi phí quản lý, tiện ích dịch vụ hoặc thời gian đi chuyển tới các quận trung tâm.
             </p>
             <button
               onClick={toggleAiPanel}

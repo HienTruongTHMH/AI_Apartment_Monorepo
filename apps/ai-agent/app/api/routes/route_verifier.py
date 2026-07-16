@@ -42,6 +42,7 @@ async def verify_listing_endpoint(payload: rawListingInput) -> verifyListingResp
         if result.listing.status.value == "published":
             event_payload = {
                 "owner_id": payload.owner_id,
+                "listing_id": payload.listing_id,  # Có thể null nếu là tạo mới chưa lưu DB
                 "title": result.listing.title,
                 "description": result.listing.description,
                 "price": result.listing.pricePerMonth,
@@ -50,7 +51,7 @@ async def verify_listing_endpoint(payload: rawListingInput) -> verifyListingResp
                 "metadata": result.model_dump_json()
             }
             emit_event("listing.approved", event_payload)
-            logger.info(f"Emitted listing.approved for owner {payload.owner_id}")
+            logger.info(f"Emitted listing.approved for owner {payload.owner_id} (listing_id={payload.listing_id})")
 
         return verifyListingResponse(
             success=True,

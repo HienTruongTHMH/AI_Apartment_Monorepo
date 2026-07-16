@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CreditCard, Search, Filter, Download } from 'lucide-react';
+import { CreditCard, Search, Download } from 'lucide-react';
 import { usePayments } from '@/lib/api-hooks';
 
 interface PaymentManagerProps {
@@ -11,24 +11,25 @@ interface PaymentManagerProps {
 export default function PaymentManager({ role }: PaymentManagerProps) {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [search, setSearch] = useState('');
-  
-  const { data: payments, isLoading, error } = usePayments(role);
 
-  const filtered = payments.filter((p: any) =>
+  const { data: payments = [], isLoading } = usePayments(role);
+
+  const filtered = (payments || []).filter((p: any) =>
     (filterStatus === 'all' || p.status?.toLowerCase() === filterStatus) &&
     (p.id?.toLowerCase().includes(search.toLowerCase()) || 
-     p.contract?.apartment?.fullAddress?.toLowerCase().includes(search.toLowerCase()))
+     p.contract?.apartment?.fullAddress?.toLowerCase().includes(search.toLowerCase()) ||
+     p.apartmentName?.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
-    <div className="w-full text-white">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-8">
+    <div className="w-full min-h-full bg-[#F9FAFB] py-8 px-4 sm:px-6 font-sans">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-extrabold mb-2 text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#111827] mb-1">
             Quản lý Thanh toán
           </h1>
-          <p className="text-gray-400 text-sm max-w-xl">
+          <p className="text-[#4B5563] text-sm max-w-xl">
             {role === 'owner' 
               ? 'Theo dõi dòng tiền, hóa đơn đã xuất và xác nhận thanh toán từ khách thuê.' 
               : 'Xem lịch sử thanh toán, hóa đơn đến hạn và phương thức thanh toán.'}
@@ -36,87 +37,142 @@ export default function PaymentManager({ role }: PaymentManagerProps) {
         </div>
       </div>
 
-      {/* Payment list */}
-      <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-          <h2 className="text-white font-bold text-lg">Lịch sử giao dịch</h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-950 border border-white/10 rounded-xl px-3 py-2 min-w-[220px]">
-              <Search size={16} className="text-gray-400" />
+      {/* Main Card Panel */}
+      <div className="bg-[#FFFFFF] rounded-[12px] border border-[#E5E7EB] shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_0_rgba(0,0,0,0.06)] p-[24px]">
+        {/* Panel Header Flex */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-6 border-b border-[#E5E7EB]">
+          <h2 className="text-[18px] font-semibold text-[#111827]">
+            Lịch sử giao dịch
+          </h2>
+
+          <div className="flex flex-wrap items-center gap-[12px]">
+            {/* Search Input */}
+            <div className="flex items-center gap-2 bg-[#FFFFFF] border border-[#E5E7EB] rounded-[6px] px-3 py-1.5 w-full sm:w-[260px] focus-within:ring-2 focus-within:ring-[#111827]/10 focus-within:border-[#111827] transition-all">
+              <Search size={16} className="text-[#9CA3AF] shrink-0" />
               <input 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
-                placeholder="Tìm mã giao dịch..."
-                className="flex-1 bg-transparent outline-none text-white placeholder-gray-500 text-sm" 
+                placeholder="Tìm mã giao dịch, căn hộ..."
+                className="flex-1 bg-transparent outline-none text-[#111827] placeholder-[#9CA3AF] text-sm" 
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-gray-400" />
-              {[{ v: 'all', l: 'Tất cả' }, { v: 'paid', l: 'Thành công' }, { v: 'pending', l: 'Đang xử lý' }].map((f) => (
-                <button 
-                  key={f.v} 
-                  onClick={() => setFilterStatus(f.v)}
-                  className={`px-3 py-1.5 rounded-lg border transition-all text-xs font-medium ${
-                    filterStatus === f.v 
-                      ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' 
-                      : 'border-white/10 bg-transparent text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {f.l}
-                </button>
-              ))}
+
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1 bg-[#F9FAFB] p-1 rounded-[20px] border border-[#E5E7EB]">
+              {[
+                { v: 'all', l: 'Tất cả' }, 
+                { v: 'paid', l: 'Thành công' }, 
+                { v: 'pending', l: 'Đang xử lý' }
+              ].map((f) => {
+                const isActive = filterStatus === f.v;
+                return (
+                  <button 
+                    key={f.v} 
+                    onClick={() => setFilterStatus(f.v)}
+                    className={`px-3.5 py-1.5 rounded-[20px] text-xs font-medium transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-[#111827] text-[#FFFFFF] shadow-xs' 
+                        : 'bg-transparent text-[#4B5563] hover:text-[#111827] hover:bg-gray-200/50'
+                    }`}
+                  >
+                    {f.l}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        <div className="space-y-3">
-          {isLoading ? (
-            <div className="py-12 flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="py-16 text-center text-gray-400 rounded-xl border border-white/5 bg-slate-950/30">
-              <CreditCard size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Chưa có giao dịch nào</p>
-              {role === 'owner' && (
-                <button className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 rounded-lg text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/10 transition-all text-xs font-medium">
-                  <Download size={14} /> Xuất báo cáo
-                </button>
-              )}
-            </div>
-          ) : (
-            filtered.map((p: any) => (
-              <div key={p.id} className="p-4 rounded-xl border border-white/10 bg-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/10 transition-colors">
-                <div className="flex-1">
-                  <p className="text-white font-medium mb-1 truncate max-w-md">
-                    {p.contract?.apartment?.fullAddress || 'Thanh toán hợp đồng'}
-                  </p>
-                  <p className="text-gray-400 text-xs">Mã GD: {p.id}</p>
-                </div>
+        {/* Dynamic States */}
+        {isLoading ? (
+          <div className="py-20 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111827]"></div>
+          </div>
+        ) : filtered.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-[80px]">
+            <CreditCard size={48} className="text-[#9CA3AF] mb-[16px]" strokeWidth={1.5} />
+            <p className="text-[#4B5563] text-[14px] mb-[20px] font-normal text-center">
+              Chưa có lịch sử giao dịch nào
+            </p>
+            <button className="flex items-center gap-2 px-4 py-2 border border-[#E5E7EB] bg-[#FFFFFF] text-[#111827] hover:bg-[#F9FAFB] rounded-[6px] text-sm font-medium transition-colors shadow-xs cursor-pointer">
+              <Download size={16} />
+              <span>Xuất báo cáo</span>
+            </button>
+          </div>
+        ) : (
+          /* Data State - Table */
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#E5E7EB]">
+                  <th className="py-3 px-4 text-[13px] font-medium text-[#4B5563] first:pl-2 last:pr-2">
+                    Mã giao dịch
+                  </th>
+                  <th className="py-3 px-4 text-[13px] font-medium text-[#4B5563]">
+                    Căn hộ / Dự án
+                  </th>
+                  <th className="py-3 px-4 text-[13px] font-medium text-[#4B5563]">
+                    Ngày giao dịch
+                  </th>
+                  <th className="py-3 px-4 text-[13px] font-medium text-[#4B5563]">
+                    Số tiền
+                  </th>
+                  <th className="py-3 px-4 text-[13px] font-medium text-[#4B5563] text-right last:pr-2">
+                    Trạng thái
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E5E7EB]">
+                {filtered.map((p: any) => {
+                  const statusLower = (p.status || '').toLowerCase();
+                  const isSuccess = statusLower === 'paid' || statusLower === 'success' || statusLower === 'thành công';
+                  const isPending = statusLower === 'pending' || statusLower === 'đang xử lý';
 
-                <div className="flex-1 text-right">
-                  <p className="text-cyan-400 font-bold mb-1">
-                    {Number(p.amount || 0).toLocaleString('vi-VN')} VND
-                  </p>
-                  <p className="text-gray-500 text-xs">
-                    Ngày TT: {p.paymentDate ? p.paymentDate.substring(0, 10) : 'Chưa cập nhật'}
-                  </p>
-                </div>
-
-                <div className="flex-shrink-0">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    p.status?.toLowerCase() === 'paid' ? 'bg-cyan-500/20 text-cyan-400' :
-                    p.status?.toLowerCase() === 'pending' ? 'bg-amber-500/20 text-amber-400' :
-                    'bg-red-500/20 text-red-400'
-                  }`}>
-                    {p.status || 'Khác'}
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+                  return (
+                    <tr 
+                      key={p.id} 
+                      className="border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors text-[14px]"
+                    >
+                      <td className="py-3.5 px-4 first:pl-2 font-mono font-medium text-[#111827]">
+                        {p.id}
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-[#111827]">
+                        {p.contract?.apartment?.fullAddress || p.apartmentName || 'Thanh toán hợp đồng'}
+                      </td>
+                      <td className="py-3.5 px-4 text-[#4B5563]">
+                        {p.paymentDate ? p.paymentDate.substring(0, 10) : 'Chưa cập nhật'}
+                      </td>
+                      <td className="py-3.5 px-4 font-semibold text-[#111827]">
+                        {Number(p.amount || 0).toLocaleString('vi-VN')} ₫
+                      </td>
+                      <td className="py-3.5 px-4 text-right last:pr-2">
+                        {isSuccess ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DEF7EC] text-[#03543F]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#03543F]" />
+                            Thành công
+                          </span>
+                        ) : isPending ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FEF3C7] text-[#92400E]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#92400E]" />
+                            Đang xử lý
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-800" />
+                            {p.status || 'Khác'}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
