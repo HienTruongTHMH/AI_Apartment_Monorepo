@@ -28,9 +28,10 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('me')
     async getProfile(@Req() req) {
+        const freshUser = await this.authService.getFreshProfile(req.user.accountId);
         return {
             message: 'Chào mừng bạn có quyền xem profile',
-            user: req.user
+            user: freshUser
         }
     }
 }

@@ -34,6 +34,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
             tenantProfileId: payload.tenantProfileId || null,
             hasOwnerProfile: payload.hasOwnerProfile,
             ownerProfileId: payload.ownerProfileId || null,
+            isTenancyActivated: payload.isTenancyActivated || false,
         }
     }
 }

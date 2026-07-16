@@ -23,6 +23,12 @@ export class UserService {
     return owner;
   }
 
+  async getTenantProfile(accountId: string) {
+    return this.prismaService.tenantProfile.findUnique({
+      where: { accountId }
+    });
+  }
+
   findAll() {
     return `This action returns all user`;
   }

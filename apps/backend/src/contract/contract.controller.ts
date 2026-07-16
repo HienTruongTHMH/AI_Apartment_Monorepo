@@ -44,6 +44,14 @@ export class ContractController {
     return this.contractService.tenantSign(contractId, tenantId);
   }
 
+  @Post("activate-tenant")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireProfile('TENANT')
+  activateTenant(@Req() req) {
+    const tenantId = req.user.accountId;
+    return this.contractService.activateTenantProfile(tenantId);
+  }
+
   @Post("tenant-reject")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @RequireProfile('TENANT')

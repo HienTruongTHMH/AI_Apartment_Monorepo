@@ -23,6 +23,13 @@ export class UserController {
     return this.userService.getOwner(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('/tenant-profile')
+  getTenantProfile(@Req() req) {
+    const accountId = req.user.accountId;
+    return this.userService.getTenantProfile(accountId);
+  }
+
   @Get()
   findAll() {
     return this.userService.findAll();

@@ -155,13 +155,13 @@ function SearchContent() {
           <AlertCircle className="w-10 h-10 text-[#FF8E15] mx-auto" />
           <h3 className="text-base font-bold text-[#2C2C2C]">Không tìm thấy căn hộ phù hợp</h3>
           <p className="text-xs text-[#5A5A5A] max-w-sm mx-auto">
-            Hãy thử điều chỉnh lại bộ lọc hoặc bấm nút bên dưới để nhờ AI Broker tìm thêm dữ liệu khác.
+            Hãy thử điều chỉnh lại bộ lọc hoặc bấm nút bên dưới để nhờ trợ lý ảo tìm thêm dữ liệu khác.
           </p>
           <button
             onClick={toggleAiPanel}
             className="px-5 py-2.5 rounded-[8px] bg-[#E03C3D] hover:bg-[#C92F30] text-white font-bold text-xs border-0 transition-colors inline-flex items-center gap-2"
           >
-            <Bot className="w-4 h-4" /> Hỏi Trợ Lý AI Broker
+            <Bot className="w-4 h-4" /> Hỏi Trợ Lý Ảo
           </button>
         </div>
       ) : (
