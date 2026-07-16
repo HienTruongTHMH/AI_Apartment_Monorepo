@@ -3,15 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ShieldCheck, ShieldAlert, FileText, ArrowRight, Sparkles, Home, Clock, Users } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, FileText, ArrowRight, Home, Users, CreditCard } from 'lucide-react';
 
 export default function TenantDashboardOverview() {
-  const { user } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    // Tải lại thông tin mới nhất từ DB để cập nhật trạng thái kích hoạt hoạt động
+    refreshUser();
+  }, [refreshUser]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
@@ -24,28 +26,35 @@ export default function TenantDashboardOverview() {
             Quản lý hồ sơ thuê căn hộ, theo dõi hợp đồng bản cứng & kích hoạt tài khoản
           </p>
         </div>
- 
+
         {/* Account Activation Badge Status */}
-        {mounted && !user?.isTenancyActivated && (
+        {mounted && (
           <div className="p-4 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm shrink-0 space-y-2">
             <div className="text-[11px] text-[#5A5A5A]">Trạng Thái Kích Hoạt Tài Khoản</div>
-            <div className="space-y-2">
-              <div className="text-xs font-bold text-[#B7791F] flex items-center gap-1.5 bg-[#FFF9E6] border border-[#FEEBC8] px-3 py-1.5 rounded-xl animate-pulse">
-                <ShieldAlert className="w-4 h-4 text-[#B7791F]" />
-                <span>Chưa Kích Hoạt</span>
+            {user?.isTenancyActivated ? (
+              <div className="text-xs font-bold text-[#03543F] flex items-center gap-1.5 bg-[#DEF7EC] border border-[#BCF0DA] px-3 py-1.5 rounded-xl">
+                <ShieldCheck className="w-4 h-4 text-[#03543F]" />
+                <span>Đã Kích Hoạt</span>
               </div>
-              <Link
-                href="/tenant/dashboard/activate"
-                className="text-[11px] text-[#E03C3D] hover:underline flex items-center gap-1 font-semibold"
-              >
-                <span>Xác nhận đã ký bản cứng để kích hoạt</span>
-                <ArrowRight className="w-3 h-3 text-[#E03C3D]" />
-              </Link>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-[#B7791F] flex items-center gap-1.5 bg-[#FFF9E6] border border-[#FEEBC8] px-3 py-1.5 rounded-xl animate-pulse">
+                  <ShieldAlert className="w-4 h-4 text-[#B7791F]" />
+                  <span>Chưa Kích Hoạt</span>
+                </div>
+                <Link
+                  href="/tenant/dashboard/activate"
+                  className="text-[11px] text-[#E03C3D] hover:underline flex items-center gap-1 font-semibold"
+                >
+                  <span>Xác nhận đã ký bản cứng để kích hoạt</span>
+                  <ArrowRight className="w-3 h-3 text-[#E03C3D]" />
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>
- 
+
       {/* Quick Access Tiles */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link
@@ -81,8 +90,25 @@ export default function TenantDashboardOverview() {
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
- 
-        {!(mounted && user?.isTenancyActivated) && (
+
+        {mounted && user?.isTenancyActivated ? (
+          <Link
+            href="/tenant/dashboard/payments"
+            className="group p-6 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm hover:border-[#E03C3D]/40 hover:shadow-md transition-all space-y-4"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#FFF5F5] border border-[#FEE2E2] text-[#E03C3D] flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#2C2C2C] group-hover:text-[#E03C3D]">Thanh Toán</h3>
+              <p className="text-xs text-[#5A5A5A] mt-1">Xem các khoản cần thanh toán & thanh toán tự động</p>
+            </div>
+            <div className="text-xs font-medium text-[#E03C3D] group-hover:underline flex items-center gap-1 pt-2">
+              <span>Xem thanh toán</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </div>
+          </Link>
+        ) : (
           <Link
             href="/tenant/dashboard/activate"
             className="group p-6 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm hover:border-[#E03C3D]/40 hover:shadow-md transition-all space-y-4"

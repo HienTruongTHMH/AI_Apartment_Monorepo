@@ -55,6 +55,10 @@ class rawListingInput(BaseModel):
     rawText: str = Field(..., min_length=20, max_length=1000)
     images: list[rawListingImageInput] = Field(default_factory=list, max_length=12)
     owner_id: str
+    listing_id: Optional[str] = Field(
+        None,
+        description="UUID thật của Listing trong PostgreSQL. Gửi từ NestJS để đảm bảo Qdrant lưu đúng ID."
+    )
     db_apartment_data: Optional[dict] = None
 
 

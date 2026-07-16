@@ -7,12 +7,13 @@ import { apiService } from '@/lib/api';
 import { ShieldCheck, ShieldAlert, FileCheck, AlertCircle } from 'lucide-react';
 
 export default function AccountActivationHub() {
-  const { user, setAccountActive } = useAuthStore();
+  const { user, setAccountActive, refreshUser } = useAuthStore();
   const { data: contracts, isLoading: loadingContracts } = useContracts('tenant');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    refreshUser();
 
     const checkTenantProfileStatus = async () => {
       try {
@@ -30,7 +31,7 @@ export default function AccountActivationHub() {
     };
 
     checkTenantProfileStatus();
-  }, [setAccountActive]);
+  }, [setAccountActive, refreshUser]);
 
   const hasActiveContract = contracts?.some(c => c.contractStatus === 'Active') || false;
 
@@ -78,7 +79,7 @@ export default function AccountActivationHub() {
             <div className="p-4 rounded-2xl bg-[#FFFBEB] border border-[#FEF3C7] space-y-2">
               <div className="text-xs font-bold text-[#D97706]">1. Khi mới tạo tài khoản (Chưa kích hoạt)</div>
               <p className="text-[11px] text-[#5A5A5A] leading-relaxed">
-                Người dùng có thể đăng ký tự do, tìm kiếm căn hộ, trao đổi qua trợ lý AI Broker và nhận hợp đồng nháp từ Chủ nhà.
+                Người dùng có thể đăng ký tự do, tìm kiếm căn hộ, trao đổi qua trợ lý ảo và nhận hợp đồng nháp từ Chủ nhà.
               </p>
             </div>
             <div className="p-4 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0] space-y-2">

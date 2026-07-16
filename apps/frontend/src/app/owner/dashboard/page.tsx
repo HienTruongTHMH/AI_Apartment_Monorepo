@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Building2, Plus, FileText, ArrowRight, ShieldCheck, DollarSign, Users } from 'lucide-react';
+import { Building2, Plus, FileText, ArrowRight, ShieldCheck, DollarSign, Users, CreditCard } from 'lucide-react';
 import { useApartments, useContracts, usePayments } from '@/lib/api-hooks';
 
 export default function OwnerDashboardOverview() {
@@ -102,18 +102,18 @@ export default function OwnerDashboardOverview() {
         </Link>
 
         <Link
-          href="/owner/dashboard/create-listing"
+          href="/owner/dashboard/payments"
           className="group p-6 rounded-2xl bg-white border border-[#E8E8E8] shadow-sm hover:border-[#E03C3D]/40 hover:shadow-md transition-all space-y-4"
         >
           <div className="flex items-center justify-between">
             <div className="w-10 h-10 rounded-xl bg-[#FFF5F5] border border-[#FEE2E2] text-[#E03C3D] flex items-center justify-center">
-              <Plus className="w-5 h-5" />
+              <CreditCard className="w-5 h-5" />
             </div>
             <ArrowRight className="w-4 h-4 text-gray-500 group-hover:text-[#E03C3D] group-hover:translate-x-1 transition-all" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#2C2C2C] group-hover:text-[#E03C3D]">Soạn Bài Đăng AI</h3>
-            <p className="text-xs text-[#5A5A5A] mt-1">Sử dụng AI để phân tích tin đăng</p>
+            <h3 className="text-base font-bold text-[#2C2C2C] group-hover:text-[#E03C3D]">Thanh Toán</h3>
+            <p className="text-xs text-[#5A5A5A] mt-1">Xem các khoản cần thanh toán & thanh toán tự động</p>
           </div>
         </Link>
         

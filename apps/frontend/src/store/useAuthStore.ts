@@ -27,6 +27,7 @@ interface AuthState {
   logout: () => void;
   toggleAiPanel: () => void;
   setAiPanelOpen: (isOpen: boolean) => void;
+  refreshUser: () => Promise<void>;
 }
 
 // Initial state loader from localStorage if running in client

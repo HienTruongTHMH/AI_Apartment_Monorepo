@@ -459,6 +459,8 @@ export const apiService = {
   async confirmOfflineRentalAndActivateAccount(contractId: string) {
     try {
       const res = await apiClient.post('/contract/tenant-sign', { contractId });
+      // Tải lại profile mới nhất để đồng bộ localStorage và AuthStore
+      await useAuthStore.getState().refreshUser();
       return { success: true, message: 'Đã xác nhận ký hợp đồng bản cứng thành công. Hợp đồng của bạn hiện đã có hiệu lực!', data: res.data };
     } catch (err: any) {
       throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi ký hợp đồng');
@@ -468,7 +470,7 @@ export const apiService = {
   async activateTenantAccount() {
     try {
       const res = await apiClient.post('/contract/activate-tenant');
-      useAuthStore.getState().setAccountActive(true);
+      await useAuthStore.getState().refreshUser();
       return { success: true, message: 'Tài khoản của bạn đã được kích hoạt thành công!', data: res.data };
     } catch (err: any) {
       throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi kích hoạt tài khoản');
@@ -528,6 +530,22 @@ export const apiService = {
   // User Profile
   async updateProfile(payload: { fullName: string }) {
     const res = await apiClient.patch('/user/profile', payload);
+    return res.data;
+  },
+
+  // Payments
+  async getPayments(contractId?: string) {
+    const res = await apiClient.get('/payments', { params: { contractId } });
+    return res.data;
+  },
+
+  async getPendingPayments() {
+    const res = await apiClient.get('/payments/pending');
+    return res.data;
+  },
+
+  async confirmPayment(paymentId: string) {
+    const res = await apiClient.patch(`/payments/${paymentId}/confirm`);
     return res.data;
   }
 };

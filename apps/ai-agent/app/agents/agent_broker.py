@@ -3,9 +3,16 @@ Agent 2 — Super Broker: Core RAG Pipeline
 
 Luồng xử lý 3 stage:
   Stage 1 — Intent Analysis  : Gemini phân tích query + audio → QueryIntentConstraints
-  Stage 2 — Hybrid Search    : embed semantic_query → Qdrant search với hard filters
+  Stage 2 — Qdrant Search    : embed semantic_query (1 lần duy nhất) → search với hard filters
                                Nếu 0 kết quả → Relax Constraints → retry
-  Stage 3 — RAG Synthesis    : Gemini tổng hợp SearchResponseOutput từ listings + context
+  Stage 3 — RAG Synthesis    : Gemini tổng hợp SearchResponseOutput từ ≤3 listings + context
+
+Tối ưu:
+  - Greeting/small-talk → early return, không gọi DB hoặc vector search.
+  - Chỉ generate 1 embedding cho user query, không embed từng listing.
+  - Tìm kiếm trực tiếp trên Qdrant (pre-indexed embeddings).
+  - Tối đa 3 listings được đưa vào Stage 3.
+  - History giới hạn 3 turns gần nhất trong Stage 3 prompt.
 """
 
 import logging
@@ -29,10 +36,9 @@ from app.services.qdrant_service import get_embedding, search_apartments, get_ap
 
 logger = logging.getLogger(__name__)
 
-# Model tốc độ cao nhất cho cả intent parsing và RAG synthesis
 MODEL_NAME = "gemini-3.1-flash-lite"
 _AUDIO_DOWNLOAD_TIMEOUT = 10.0  # giây
-_MAX_HISTORY_TURNS = 5          # Giữ tối đa 5 turns gần nhất
+_MAX_HISTORY_TURNS = 3          # Giữ tối đa 3 turns trong Stage 3 prompt
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -80,9 +86,9 @@ def _detect_audio_mime(url: str) -> str:
 # History Formatter
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _format_history(payload: SearchQueryInput) -> str:
+def _format_history(payload: SearchQueryInput, max_turns: int = _MAX_HISTORY_TURNS) -> str:
     """Định dạng lịch sử hội thoại thành chuỗi text ngắn gọn."""
-    history = payload.conversation_history[-_MAX_HISTORY_TURNS:]
+    history = payload.conversation_history[-max_turns:]
     if not history:
         return ""
     lines = []
@@ -104,14 +110,14 @@ def _stage1_extract_intent(
     Gọi Gemini để phân tích query + lịch sử → QueryIntentConstraints.
     Nếu có audio_url, tải audio và gửi kèm như multimodal input.
     """
-    history_text = _format_history(payload)
+    history_text = _format_history(payload, max_turns=5)  # Stage 1 dùng 5 turns để hiểu ngữ cảnh
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     user_content_text = (
         f"Thời gian hiện tại: {current_time}\n\n"
-        f"Lịch sử hội thoại:\n{history_text}\n\n" if history_text else
-        f"Thời gian hiện tại: {current_time}\n\n"
-    ) + f"Tin nhắn mới nhất của khách: {payload.query}"
+        + (f"Lịch sử hội thoại:\n{history_text}\n\n" if history_text else "")
+        + f"Tin nhắn mới nhất của khách: {payload.query}"
+    )
 
     # Multimodal: thêm audio nếu có
     user_content: str | list
@@ -145,7 +151,9 @@ def _stage1_extract_intent(
     )
     logger.info(
         f"[Stage1] Intent extracted — "
-        f"semantic_query='{constraints.semantic_query[:60]}...', "
+        f"is_greeting={constraints.is_greeting}, "
+        f"semantic_query='{constraints.semantic_query[:60]}', "
+        f"min_price={constraints.min_price}, "
         f"max_price={constraints.max_price}, "
         f"min_area={constraints.min_area}, "
         f"is_booking={constraints.is_booking_request}, "
@@ -155,186 +163,119 @@ def _stage1_extract_intent(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 2 — Hybrid Vector Search (with Constraint Relaxation fallback)
+# Stage 2 — Qdrant Vector Search (with Constraint Relaxation fallback)
+# Chỉ generate 1 embedding cho query — không embed từng listing.
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _filter_local_listings(
     listings: list[dict],
-    semantic_query: str,
+    min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     min_area: Optional[float] = None,
+    preferred_district: Optional[str] = None,
     top_k: int = 3,
 ) -> list[dict]:
-    """
-    Lọc danh sách căn hộ theo giá và diện tích, sau đó xếp hạng bằng độ tương đồng cosine vector.
-    """
+    """Lọc danh sách căn hộ từ PostgreSQL fallback nếu Qdrant chưa có index."""
     filtered = []
     for lst in listings:
-        price = float(lst.get("pricePerMonth") or 0)
+        price = float(lst.get("pricePerMonth") or lst.get("price") or 0)
         area = float(lst.get("area") or 0)
-        
+        district = str(lst.get("district") or "").lower()
+
+        if min_price is not None and price < min_price:
+            continue
         if max_price is not None and price > max_price:
             continue
         if min_area is not None and area < min_area:
             continue
-            
+        if preferred_district and preferred_district.lower() not in district:
+            continue
+
         filtered.append(lst)
-        
-    if not filtered:
-        return []
-        
-    # Tính toán cosine similarity của từng căn hộ so với query
+
+    return filtered[:top_k]
+
+
+def _stage2_search(
+    constraints: QueryIntentConstraints,
+    listings_source: Optional[list[dict]] = None,
+) -> list[dict]:
+    """
+    Tìm kiếm căn hộ phù hợp trực tiếp trên Qdrant với pre-indexed embeddings.
+    Nếu Qdrant trả về 0 kết quả (vd: đang re-index), tự động fallback lọc trên listings_source từ PostgreSQL.
+    """
+    # 1. Thử tìm kiếm trên Qdrant với đầy đủ constraints
     try:
-        query_vector = get_embedding(semantic_query)
-        scored_listings = []
-        for lst in filtered:
-            search_text = (
-                f"Tiêu đề: {lst.get('title', '')}. "
-                f"Mô tả: {lst.get('description', '')}. "
-                f"Phòng số: {lst.get('roomNumber', '')}, "
-                f"diện tích {lst.get('area', '')} m2. "
-                f"Giá: {lst.get('pricePerMonth', '')} VND/tháng. "
-                f"Tiện ích: {', '.join(lst.get('amenities', []))}."
-            )
-            lst_vector = get_embedding(search_text)
-            
-            # Tính cosine similarity bằng pure Python
-            dot_product = sum(x * y for x, y in zip(query_vector, lst_vector))
-            norm_q = sum(x * x for x in query_vector) ** 0.5
-            norm_lst = sum(x * x for x in lst_vector) ** 0.5
-            similarity = dot_product / (norm_q * norm_lst) if norm_q and norm_lst else 0.0
-            
-            scored_listings.append((similarity, lst))
-            
-        # Sắp xếp theo similarity score giảm dần
-        scored_listings.sort(key=lambda x: x[0], reverse=True)
-        return [item[1] for item in scored_listings[:top_k]]
-    except Exception as e:
-        logger.error(f"Error during local ranking: {e}")
-        return filtered[:top_k]
-
-
-def _stage2_search(constraints: QueryIntentConstraints, listings_source: Optional[list[dict]] = None) -> list[dict]:
-    """
-    Tìm kiếm căn hộ phù hợp với ràng buộc cứng.
-    Nếu có listings_source truyền vào từ backend, lọc và xếp hạng trên danh sách đó.
-    Nếu không, tìm kiếm trên Qdrant.
-    """
-    if listings_source is not None:
-        logger.info(f"[Stage2] Filtering locally on {len(listings_source)} listings from backend.")
-        # Lần 1: Lọc với đầy đủ constraints
-        results = _filter_local_listings(
-            listings=listings_source,
-            semantic_query=constraints.semantic_query,
+        vector = get_embedding(constraints.semantic_query)
+        results = search_apartments(
+            vector=vector,
+            min_price=constraints.min_price,
             max_price=constraints.max_price,
             min_area=constraints.min_area,
             top_k=3,
         )
+
         if results:
-            logger.info(f"[Stage2] Local search found {len(results)} listings with full constraints.")
+            logger.info(f"[Stage2] Qdrant found {len(results)} listings with full constraints.")
             return results
+    except Exception as e:
+        logger.error(f"[Stage2] Qdrant search error: {e}")
+        results = []
 
-        # Lần 2: Nới lỏng ràng buộc
-        logger.info("[Stage2] Zero local results — relaxing price/area filters.")
-        relaxed_price = (constraints.max_price * 1.15) if constraints.max_price else None
-        relaxed_area = (constraints.min_area * 0.8) if constraints.min_area else None
+    # 2. Qdrant 0 kết quả → thử nới lỏng constraints trên Qdrant (-15% min_price, +15% max_price, -20% min_area)
+    logger.info("[Stage2] Zero Qdrant strict results — relaxing price/area filters.")
+    relaxed_min_price = (constraints.min_price * 0.85) if constraints.min_price else None
+    relaxed_max_price = (constraints.max_price * 1.15) if constraints.max_price else None
+    relaxed_area = (constraints.min_area * 0.8) if constraints.min_area else None
 
-        results = _filter_local_listings(
-            listings=listings_source,
-            semantic_query=constraints.semantic_query,
-            max_price=relaxed_price,
+    try:
+        results = search_apartments(
+            vector=vector,
+            min_price=relaxed_min_price,
+            max_price=relaxed_max_price,
             min_area=relaxed_area,
             top_k=3,
         )
-        logger.info(f"[Stage2] Relaxed local search found {len(results)} listings.")
-        return results
+        if results:
+            logger.info(f"[Stage2] Relaxed Qdrant search found {len(results)} listings.")
+            return results
+    except Exception:
+        pass
 
-    # Fallback to Qdrant search
-    vector = get_embedding(constraints.semantic_query)
-    results = search_apartments(
-        vector=vector,
-        max_price=constraints.max_price,
-        min_area=constraints.min_area,
-        top_k=3,
-    )
+    # 3. Fallback: Nếu Qdrant chưa có dữ liệu và NestJS gửi listings_source từ Postgres → lọc trực tiếp
+    if listings_source:
+        logger.info(f"[Stage2] Qdrant 0 hits — falling back to filtering {len(listings_source)} PostgreSQL listings.")
+        local_results = _filter_local_listings(
+            listings=listings_source,
+            min_price=constraints.min_price,
+            max_price=constraints.max_price,
+            min_area=constraints.min_area,
+            preferred_district=constraints.preferred_district,
+            top_k=3,
+        )
+        if local_results:
+            logger.info(f"[Stage2] Local PostgreSQL fallback found {len(local_results)} listings.")
+            return local_results
 
-    if results:
-        logger.info(f"[Stage2] Found {len(results)} listings with full constraints in Qdrant.")
-        return results
+        # Try relaxed on local listings
+        local_relaxed = _filter_local_listings(
+            listings=listings_source,
+            min_price=relaxed_min_price,
+            max_price=relaxed_max_price,
+            min_area=relaxed_area,
+            preferred_district=None,
+            top_k=3,
+        )
+        if local_relaxed:
+            logger.info(f"[Stage2] Local relaxed PostgreSQL fallback found {len(local_relaxed)} listings.")
+            return local_relaxed
 
-    # Lần 2: Relax constraints nếu không tìm thấy
-    logger.info("[Stage2] Zero Qdrant results with full constraints — relaxing price/area filters.")
-    relaxed_price = (constraints.max_price * 1.15) if constraints.max_price else None  # +15%
-    relaxed_area = (constraints.min_area * 0.8) if constraints.min_area else None       # -20%
-
-    results = search_apartments(
-        vector=vector,
-        max_price=relaxed_price,
-        min_area=relaxed_area,
-        top_k=3,
-    )
-    logger.info(f"[Stage2] Relaxed Qdrant search found {len(results)} listings.")
-    return results
+    return []
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 3 — RAG Synthesis
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _build_rag_prompt(
-    payload: SearchQueryInput,
-    constraints: QueryIntentConstraints,
-    listings: list[dict],
-) -> str:
-    """Xây dựng user prompt cho lần gọi RAG cuối."""
-    history_text = _format_history(payload)
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    listings_section = ""
-    if listings:
-        listing_items = []
-        for i, lst in enumerate(listings, 1):
-            amenities_str = ", ".join(lst.get("amenities", []))
-            listing_items.append(
-                f"--- Căn {i} ---\n"
-                f"listing_id: {lst.get('listing_id', '')}\n"
-                f"Tiêu đề: {lst.get('title', '')}\n"
-                f"Phòng số: {lst.get('roomNumber', '')}\n"
-                f"Diện tích: {lst.get('area', 0)} m²\n"
-                f"Giá thuê: {lst.get('pricePerMonth', 0):,.0f} VND/tháng\n"
-                f"Tiện ích: {amenities_str or 'Không có thông tin'}\n"
-                f"Mô tả: {lst.get('description', '')[:300]}..."
-            )
-        listings_section = (
-            f"\n\nDANH SÁCH CĂN HỘ GỢI Ý TỪ HỆ THỐNG (dùng để tư vấn):\n"
-            + "\n".join(listing_items)
-        )
-    else:
-        listings_section = "\n\nKHÔNG TÌM THẤY CĂN HỘ NÀO PHÙ HỢP trong cơ sở dữ liệu."
-
-    booking_context = ""
-    if constraints.is_booking_request and constraints.booking_listing_id:
-        booking_context = (
-            f"\n\nNGỮ CẢNH ĐẶT LỊCH: Khách đang xác nhận lịch xem nhà.\n"
-            f"  - listing_id: {constraints.booking_listing_id}\n"
-            f"  - Ngày: {constraints.booking_date or 'Chưa xác định'}\n"
-            f"  - Giờ: {constraints.booking_time or 'Chưa xác định'}\n"
-            f"Quy tắc: Giờ hợp lệ là 8h00–20h00. Ngày phải sau {current_time.split()[0]}."
-        )
-
-    return (
-        f"Thời gian hiện tại: {current_time}\n"
-        f"Tenant ID: {payload.tenant_id}\n"
-        f"\nLịch sử hội thoại:\n{history_text}\n" if history_text else
-        f"Thời gian hiện tại: {current_time}\n"
-        f"Tenant ID: {payload.tenant_id}\n"
-    ) + (
-        f"\nTin nhắn hiện tại của khách: {payload.query}"
-        f"{listings_section}"
-        f"{booking_context}"
-        f"\n\nYêu cầu: Soạn phản hồi hoàn hảo bằng tiếng Việt theo format JSON SearchResponseOutput đã định nghĩa."
-    )
-
 
 def _stage3_rag_synthesis(
     payload: SearchQueryInput,
@@ -343,26 +284,21 @@ def _stage3_rag_synthesis(
     client: instructor.Instructor,
 ) -> SearchResponseOutput:
     """
-    Gọi Gemini với SYSTEM_INSTRUCTION + context đầy đủ → SearchResponseOutput.
+    Gọi Gemini với SYSTEM_INSTRUCTION + context rút gọn → SearchResponseOutput.
+    Lịch sử giới hạn 3 turns. Listing context chỉ gồm các trường thiết yếu.
     """
-    # Build RAG prompt  
-    history_text = _format_history(payload)
+    history_text = _format_history(payload, max_turns=_MAX_HISTORY_TURNS)
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    listings_section = ""
+    # Build listing context — chỉ các trường thiết yếu, không gửi full description
     if listings:
         listing_items = []
         for i, lst in enumerate(listings, 1):
-            amenities_str = ", ".join(lst.get("amenities", []))
+            amenities_str = ", ".join(lst.get("amenities", [])[:5])  # tối đa 5 tiện ích
             listing_items.append(
-                f"--- Căn {i} ---\n"
-                f"listing_id: {lst.get('listing_id', '')}\n"
-                f"Tiêu đề: {lst.get('title', '')}\n"
-                f"Phòng số: {lst.get('roomNumber', '')}\n"
-                f"Diện tích: {lst.get('area', 0)} m²\n"
-                f"Giá thuê: {lst.get('pricePerMonth', 0):,.0f} VND/tháng\n"
-                f"Tiện ích: {amenities_str or 'Không có'}\n"
-                f"Mô tả: {lst.get('description', '')[:300]}"
+                f"[{i}] ID:{lst.get('listing_id', '')} | {lst.get('title', '')} | "
+                f"{lst.get('area', 0)}m² | {lst.get('pricePerMonth', 0):,.0f}VND/tháng | "
+                f"Tiện ích: {amenities_str or 'N/A'}"
             )
         listings_section = "\n\nCĂN HỘ GỢI Ý:\n" + "\n".join(listing_items)
     else:
@@ -459,37 +395,20 @@ def run_broker_agent(payload: SearchQueryInput) -> SearchResponseOutput:
     # ── Stage 1: Intent Analysis ──────────────────────────────────────────────
     constraints = _stage1_extract_intent(payload, client)
 
-    # ── Stage 2: Hybrid Search ────────────────────────────────────────────────
-    # Nếu cần clarification → trả về response yêu cầu làm rõ mà không search
-    if constraints.needs_clarification:
-        logger.info("[BrokerAgent] needs_clarification=True — skipping search, asking clarification.")
-        return SearchResponseOutput(
-            bot_response=(
-                "Dạ, để mình tìm căn hộ chính xác nhất cho bạn, "
-                "bạn có thể cho mình biết thêm một số thông tin không ạ?\n"
-                "- Ngân sách thuê tầm bao nhiêu triệu/tháng?\n"
-                "- Cần diện tích khoảng bao nhiêu m²?\n"
-                "- Ưu tiên quận nào ở Đà Nẵng? 😊"
-            ),
-            recommendations=[],
-            next_action="CONTINUE_CHAT",
-        )
-
+    # ── Stage 2: Qdrant Search ────────────────────────────────────────────────
     listings: list[dict] = []
-    if not constraints.is_booking_request:
+
+    if constraints.is_greeting:
+        logger.info("[BrokerAgent] is_greeting=True — skipping search, generating contextual response via Stage 3.")
+        listings = []
+    elif constraints.needs_clarification:
+        logger.info("[BrokerAgent] needs_clarification=True — skipping search, asking clarification via Stage 3.")
+        listings = []
+    elif not constraints.is_booking_request:
         listings = _stage2_search(constraints, payload.listings)
     elif constraints.booking_listing_id:
-        # Fetch the specific listing being booked so RAG knows it is available
-        lst = None
-        if payload.listings:
-            lst = next(
-                (l for l in payload.listings 
-                 if l.get("listing_id") == constraints.booking_listing_id 
-                 or l.get("roomNumber") == constraints.booking_listing_id),
-                None
-            )
-        if not lst:
-            lst = get_apartment_by_id(constraints.booking_listing_id)
+        # Fetch the specific listing being booked from Qdrant
+        lst = get_apartment_by_id(constraints.booking_listing_id)
         if lst:
             listings = [lst]
 

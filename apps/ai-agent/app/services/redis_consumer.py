@@ -66,11 +66,17 @@ def _parse_stream_message(fields: dict, msg_id: str = "") -> Optional[dict]:
             if owner_id and title:
                 import hashlib
                 listing_id = hashlib.md5(f"{owner_id}:{title}".encode()).hexdigest()[:16]
-                logger.debug(f"Generated listing_id from owner+title hash: {listing_id}")
+                # CẢNH BÁO: listing_id này là hash, không phải UUID thật từ PostgreSQL.
+                # NestJS sẽ cần enrich lại sau khi nhận kết quả từ Qdrant.
+                logger.warning(
+                    f"[Consumer] listing_id KHÔNG có trong stream — "
+                    f"dùng hash md5(owner+title)='{listing_id}'. "
+                    f"Cần đảm bảo NestJS gửi listing_id thật khi publish event."
+                )
             else:
                 # Dùng msg_id như last resort
                 listing_id = msg_id.replace("-", "_")
-                logger.debug(f"Using msg_id as listing_id: {listing_id}")
+                logger.warning(f"[Consumer] Fallback listing_id từ msg_id: {listing_id}")
 
         # Lấy amenities từ metadata nếu có
         amenities: list[str] = []
@@ -185,6 +191,20 @@ def _consumer_loop(stop_event: threading.Event):
     """Vòng lặp chính của consumer worker."""
     logger.info(f"[Consumer] Starting background indexer for stream '{STREAM_NAME}'")
 
+    try:
+        _run_consumer(stop_event)
+    except Exception as e:
+        # Top-level guard: ngăn exception lan ra khỏi daemon thread và kill process
+        logger.error(
+            f"[Consumer] Unhandled exception in consumer loop — worker stopped: {e}",
+            exc_info=True,
+        )
+
+    logger.info("[Consumer] Worker stopped gracefully.")
+
+
+def _run_consumer(stop_event: threading.Event) -> None:
+    """Thân thực sự của consumer loop, được bọc bởi _consumer_loop."""
     if not redis_client:
         logger.error("[Consumer] Redis client is not available. Worker will not start.")
         return
@@ -237,13 +257,10 @@ def _consumer_loop(stop_event: threading.Event):
                 if processed > 0:
                     logger.debug(f"[Consumer] Processed {processed} new messages.")
         except redis.exceptions.TimeoutError:
-            # Đây là hành vi bình thường khi block timeout hết hạn mà không có message mới
             logger.debug("[Consumer] Timeout reading from socket (no new messages), retrying...")
         except Exception as e:
             logger.error(f"[Consumer] Phase 2 polling error: {e}", exc_info=True)
             stop_event.wait(timeout=_RETRY_SLEEP)
-
-    logger.info("[Consumer] Worker stopped gracefully.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

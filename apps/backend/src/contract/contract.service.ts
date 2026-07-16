@@ -149,10 +149,19 @@ export class ContractService {
         data: {
           apartmentStatus: "Rented"
         }
+      }),
+
+      this.prismaService.tenantProfile.update({
+        where: {
+          id: tenantProfile.id
+        },
+        data: {
+          isActive: true
+        }
       })
     ])
 
-    return 'This action signs contract';
+    return 'This action signs contract and activates tenant profile';
   }
 
   async activateTenantProfile(tenantAccountId: string) {

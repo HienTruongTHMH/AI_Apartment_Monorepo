@@ -27,8 +27,8 @@ const pythonPath = isWindows
   : path.join(venvDir, 'bin', 'python');
 
 // ── 2. Định nghĩa lệnh uvicorn sẽ chạy ───────────────────────────────────────
-// Tương đương: python -m uvicorn app.main:app --reload --port 8000
-const args = ['-m', 'uvicorn', 'app.main:app', '--reload', '--port', '8000'];
+// Tương đương: python -m uvicorn app.main:app --reload --reload-dir app --port 8000
+const args = ['-m', 'uvicorn', 'app.main:app', '--reload', '--reload-dir', 'app', '--port', '8000'];
 
 console.log(`[AI] Platform: ${process.platform}`);
 console.log(`[AI] Python path: ${pythonPath}`);
