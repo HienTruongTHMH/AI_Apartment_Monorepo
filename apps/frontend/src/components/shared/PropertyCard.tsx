@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { ListingItem } from '@/lib/api';
 import { Building2, Bed, Bath, Maximize2, MapPin, Sparkles, ArrowRight, ShieldCheck, Heart } from 'lucide-react';
 
+import ImageWithFallback from './ImageWithFallback';
+
 interface PropertyCardProps {
   listing: ListingItem;
 }
@@ -16,10 +18,10 @@ export default function PropertyCard({ listing }: PropertyCardProps) {
     <div className="group relative rounded-lg bg-white border border-[#E8E8E8] overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col">
       {/* Property Image & Badges Overlay */}
       <div className="relative h-56 w-full overflow-hidden bg-gray-100">
-        <img
+        <ImageWithFallback
           src={primaryImg}
           alt={listing.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="group-hover:scale-105 transition-transform duration-500"
         />
 
         {/* Heart Icon Wrapper (Neutral Soft Button) */}
