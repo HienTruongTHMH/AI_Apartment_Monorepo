@@ -22,6 +22,7 @@ import {
   FileText,
   X
 } from 'lucide-react';
+import ImageWithFallback from '@/components/shared/ImageWithFallback';
 
 export default function ApartmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -155,12 +156,12 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
       {/* Image Gallery Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-3xl overflow-hidden border border-[#E8E8E8] shadow-sm">
         <div className="md:col-span-2 h-[420px] bg-slate-100 overflow-hidden">
-          <img src={primaryImg} alt={listing.title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+          <ImageWithFallback src={primaryImg} alt={listing.title} className="hover:scale-105 transition-transform duration-500" />
         </div>
         <div className="grid grid-rows-2 gap-4 h-[420px]">
           {listing.images.slice(1, 3).map((img, idx) => (
             <div key={img.id || idx} className="h-full bg-slate-100 overflow-hidden">
-              <img src={img.imageUrl} alt="Sub view" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+              <ImageWithFallback src={img.imageUrl} alt="Sub view" className="hover:scale-105 transition-transform duration-500" />
             </div>
           ))}
           {listing.images.length <= 1 && (
