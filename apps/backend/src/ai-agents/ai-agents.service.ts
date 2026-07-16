@@ -28,7 +28,7 @@ function isConnectionRefused(err: any): boolean {
 @Injectable()
 export class AiAgentsService {
   private readonly logger = new Logger(AiAgentsService.name);
-  private readonly aiBaseUrl = 'http://127.0.0.1:8000'; // Cổng chạy FastAPI
+  private readonly aiBaseUrl = process.env.AI_AGENT_URL || 'http://127.0.0.1:8000'; // Đọc từ biến môi trường
 
   constructor(
     private readonly httpService: HttpService,
