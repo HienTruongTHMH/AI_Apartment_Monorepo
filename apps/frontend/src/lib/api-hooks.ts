@@ -24,30 +24,24 @@ export function useContracts(role: 'tenant' | 'owner') {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchContracts = async () => {
-      try {
-        setIsLoading(true);
-        // Map to the correct endpoint. Using /contract as defined in spec.
-        const res = await api.get('/contract');
-        
-        // Ensure data is array
-        const contracts = Array.isArray(res.data) ? res.data : (res.data.data || []);
-        
-        // Filter out by role if the backend returns all (in a real scenario backend filters this)
-        // But for UI stability, just return what backend gives.
-        setData(contracts);
-      } catch (err: any) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchContracts = async () => {
+    try {
+      setIsLoading(true);
+      const res = await api.get('/contract');
+      const contracts = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      setData(contracts);
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchContracts();
   }, [role]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch: fetchContracts };
 }
 
 export function usePayments(role: 'tenant' | 'owner', contractId?: string) {
@@ -146,12 +140,13 @@ export function useApartments() {
   return { data, isLoading, error };
 }
 
-export function useRentalRequests(role: 'tenant' | 'owner') {
+export function useRentalRequests(role: 'tenant' | 'owner' | null) {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchRequests = async () => {
+    if (!role) return;
     try {
       setIsLoading(true);
       const url = role === 'owner' ? '/rental-request/owner-requests' : '/rental-request/my-requests';
@@ -166,6 +161,13 @@ export function useRentalRequests(role: 'tenant' | 'owner') {
 
   useEffect(() => {
     fetchRequests();
+
+    const handleUpdate = () => {
+      fetchRequests();
+    };
+    
+    window.addEventListener('RENTAL_REQUEST_UPDATED', handleUpdate);
+    return () => window.removeEventListener('RENTAL_REQUEST_UPDATED', handleUpdate);
   }, [role]);
 
   return { data, isLoading, error, refetch: fetchRequests };

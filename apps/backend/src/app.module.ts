@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
@@ -15,8 +16,8 @@ import { RedisController } from './redis/redis.controller';
 import { RedisService } from './redis/redis.service';
 import { RedisModule } from './redis/redis.module';
 import { RentalRequestModule } from './rental-request/rental-request.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { PaymentModule } from './payment/payment.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { PaymentModule } from './payment/payment.module';
     ScheduleModule.forRoot(),
     PrismaModule, ListingModule, ApartmentModule,
     ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule, RedisModule, RentalRequestModule,
-    PaymentModule
+    PaymentModule, MailModule,
   ],
   controllers: [AppController, RedisController],
   providers: [AppService, PrismaService],
