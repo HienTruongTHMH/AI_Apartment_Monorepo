@@ -34,7 +34,7 @@ export default function UserActivationBanner() {
               Trạng Thái Tài Khoản: Chưa Kích Hoạt
             </div>
             <p className="text-gray-300 mt-0.5">
-              Bạn có thể tìm kiếm căn hộ và dùng AI Broker. Sau khi ký kết **hợp đồng bản cứng ngoài hệ thống** & xác nhận thuê, tài khoản của bạn sẽ được kích hoạt chính thức.
+              Bạn có thể tìm kiếm căn hộ và dùng AI Broker. Sau khi ký kết <span className="font-semibold">hợp đồng bản cứng ngoài hệ thống</span> & xác nhận thuê, tài khoản của bạn sẽ được kích hoạt chính thức.
             </p>
           </div>
         </div>

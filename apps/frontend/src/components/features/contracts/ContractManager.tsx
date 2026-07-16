@@ -27,7 +27,16 @@ export default function ContractManager({ role }: ContractManagerProps) {
   const { data: contracts, isLoading, error } = useContracts(role);
 
   const filtered = contracts.filter((c) => {
-    const statusMatch = filterStatus === 'all' || c.contractStatus === filterStatus || c.status === filterStatus;
+    let statusMatch = false;
+    if (filterStatus === 'all') {
+      statusMatch = true;
+    } else if (filterStatus === 'active') {
+      statusMatch = c.contractStatus === 'Active' || c.status === 'active';
+    } else if (filterStatus === 'pending') {
+      statusMatch = c.contractStatus === 'PendingTenantSignature' || c.contractStatus === 'Draft' || c.status === 'pending';
+    } else if (filterStatus === 'expired') {
+      statusMatch = c.contractStatus === 'Expired' || c.contractStatus === 'Terminated' || c.status === 'expired';
+    }
     
     const tenantName = (c.tenant?.fullName || c.tenant || '').toString().toLowerCase();
     const propertyName = (c.apartment?.fullAddress || c.property || '').toString().toLowerCase();
