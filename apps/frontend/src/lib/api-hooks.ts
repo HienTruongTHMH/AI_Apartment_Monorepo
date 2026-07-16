@@ -50,28 +50,52 @@ export function useContracts(role: 'tenant' | 'owner') {
   return { data, isLoading, error };
 }
 
-export function usePayments(role: 'tenant' | 'owner') {
+export function usePayments(role: 'tenant' | 'owner', contractId?: string) {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  const fetchPayments = async () => {
+    try {
+      setIsLoading(true);
+      const res = await api.get('/payments', { params: { contractId } }); 
+      setData(Array.isArray(res.data) ? res.data : (res.data.data || []));
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        setIsLoading(true);
-        const res = await api.get('/payment'); 
-        setData(Array.isArray(res.data) ? res.data : (res.data.data || []));
-      } catch (err: any) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchPayments();
-  }, [role]);
+  }, [role, contractId]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch: fetchPayments };
+}
+
+export function usePendingPayments() {
+  const [data, setData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchPending = async () => {
+    try {
+      setIsLoading(true);
+      const res = await api.get('/payments/pending');
+      setData(Array.isArray(res.data) ? res.data : (res.data.data || []));
+    } catch (err: any) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
+  return { data, isLoading, error, refetch: fetchPending };
 }
 
 export function useChat(role: 'tenant' | 'owner') {

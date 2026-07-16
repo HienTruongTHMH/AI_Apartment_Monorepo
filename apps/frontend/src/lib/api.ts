@@ -531,5 +531,21 @@ export const apiService = {
   async updateProfile(payload: { fullName: string }) {
     const res = await apiClient.patch('/user/profile', payload);
     return res.data;
+  },
+
+  // Payments
+  async getPayments(contractId?: string) {
+    const res = await apiClient.get('/payments', { params: { contractId } });
+    return res.data;
+  },
+
+  async getPendingPayments() {
+    const res = await apiClient.get('/payments/pending');
+    return res.data;
+  },
+
+  async confirmPayment(paymentId: string) {
+    const res = await apiClient.patch(`/payments/${paymentId}/confirm`);
+    return res.data;
   }
 };
