@@ -83,6 +83,13 @@ class apartmentMetaOutput(BaseModel):
     floor: Optional[int] = Field(None, ge=1)
     roomNumber: Optional[str] = None
     note: Optional[str] = None
+    bedroom: Optional[int] = Field(1, ge=0)
+    bathroom: Optional[int] = Field(1, ge=0)
+    livingroom: Optional[int] = Field(1, ge=0)
+    kitchen: Optional[int] = Field(1, ge=0)
+    type: Optional[str] = Field("Normal", description="Studio, Officetel, Shophouse, Penthouse, Duplex, SkyVilla, Normal")
+    district: Optional[str] = None
+    fullAddress: Optional[str] = None
     amenities: list[amenityItem] = Field(default_factory=list)
 
 

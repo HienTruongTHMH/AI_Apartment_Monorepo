@@ -13,8 +13,8 @@ export class VerifyListingDto {
     ownerId!: string;
 
     @IsString()
-    @IsNotEmpty({ message: 'Tiêu đề không được để trống' })
-    title!: string;
+    @IsOptional()
+    title?: string;
 
     @IsString()
     @IsNotEmpty({ message: 'Mô tả không được để trống' })
@@ -22,50 +22,61 @@ export class VerifyListingDto {
 
     @IsNumber()
     @Type(() => Number)
+    @IsOptional()
     @Min(0, {message: "Vui lòng nhập số tiền cần thuê"})
-    pricePerMonth!: number;
+    pricePerMonth?: number;
 
     @IsNumber()
     @Type(() => Number)
+    @IsOptional()
     @Min(0, {message: "Số phòng không đúng định dạng số !!!"})
-    room_number!: number;
+    room_number?: number;
 
     @IsNumber()
     @Type(() => Number)
+    @IsOptional()
     @Min(0, {message: "Số tầng không đúng định dạng số !!!"})
-    floor!: number;
+    floor?: number;
 
     @IsNumber()
-    area!: number;
+    @IsOptional()
+    area?: number;
 
     @IsString()
-    district!: string;
+    @IsOptional()
+    district?: string;
 
     @IsString()
-    fullAddress!: string;
+    @IsOptional()
+    fullAddress?: string;
 
     @Type(() => Number)
     @IsNumber()
+    @IsOptional()
     @Min(0)
-    bedroom!: number;
+    bedroom?: number;
 
     @Type(() => Number)
     @IsNumber()
+    @IsOptional()
     @Min(0)
-    bathroom!: number;
+    bathroom?: number;
 
     @Type(() => Number)
     @IsNumber()
+    @IsOptional()
     @Min(0)
-    livingroom!: number;
+    livingroom?: number;
 
     @Type(() => Number)
     @IsNumber()
+    @IsOptional()
     @Min(0)
-    kitchen!: number;
+    kitchen?: number;
 
     @IsEnum(ApartmentTypes, {message: "Chọn các thuộc tính của căn hộ"})
-    type!: ApartmentTypes;
+    @IsOptional()
+    type?: ApartmentTypes;
 
     // --- ẢNH GỬI LÊN ---
     @IsArray()

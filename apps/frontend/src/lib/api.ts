@@ -349,6 +349,8 @@ export const apiService = {
           score: verifiedOutput.validation?.score || 90,
           standardizedTitle: verifiedOutput.listing?.title || `[Verified AI] ${payload.title}`,
           suggestedDescription: verifiedOutput.listing?.description || payload.description,
+          pricePerMonth: verifiedOutput.listing?.pricePerMonth,
+          apartmentMeta: verifiedOutput.apartment_meta,
           insights: [
             ...(verifiedOutput.validation?.issues || []),
             verifiedOutput.validation?.feedback_to_owner || 'Dữ liệu căn hộ đã vượt qua vòng kiểm tra tiêu chuẩn AI.'
