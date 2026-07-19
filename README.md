@@ -1,6 +1,6 @@
 # AI Apartment Management System - Monorepo
 
-Chào mừng bạn đến với kho lưu trữ chính của dự án **Hệ thống Quản lý Căn hộ Tự trị ứng dụng Đa tác nhân AI (Self-Governing Apartment Management System)**.
+Chào mừng bạn đến với kho lưu trữ chính của dự án **Hệ thống Quản lý Căn hộ Tự trị ứng dụng Đa tác nhân AI (Apartment Management System)**.
 
 Dự án này là một nền tảng PropTech tiên tiến, loại bỏ vai trò của quản trị viên tập trung (Admin) bằng cách ứng dụng Trí tuệ Nhân tạo để tự động hóa toàn bộ tương tác P2P (Peer-to-Peer) giữa Chủ nhà (Owner) và Người thuê (Tenant).
 
