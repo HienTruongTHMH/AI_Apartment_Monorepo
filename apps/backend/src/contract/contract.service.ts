@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -53,6 +53,24 @@ export class ContractService {
       throw new NotFoundException(`Tài khoản ID: ${createDraftDto.tenantId} chưa được cấp quyền chủ hộ`);
     }
 
+    // Phòng thủ: Kiểm tra đã tồn tại Draft/PendingTenantSignature cho cặp tenant + apartment này chưa
+    const existingDraft = await this.prismaService.contract.findFirst({
+      where: {
+        apartmentId: createDraftDto.apartmentId,
+        tenantId: tenantProfile.id,
+        ownerId: owner.id,
+        contractStatus: {
+          in: ['Draft', 'PendingTenantSignature'],
+        },
+      },
+    });
+
+    if (existingDraft) {
+      throw new ConflictException(
+        'Đã tồn tại hợp đồng nháp cho căn hộ và khách thuê này. Vui lòng kiểm tra lại trong Quản lý Hợp Đồng.'
+      );
+    }
+
     await this.prismaService.contract.create({
       data: {
         rentPrice: new Prisma.Decimal(createDraftDto.rentPrice),
@@ -75,92 +93,74 @@ export class ContractService {
 
   async sendToTenant(contractId: string, ownerId: string) {
     const ownerProfile = await this.prismaService.ownerProfile.findUnique({
-      where: {
-        accountId: ownerId
-      }
+      where: { accountId: ownerId }
     })
-
     const contract = await this.prismaService.contract.findUnique({
-      where: {
-        id: contractId
-      }
+      where: { id: contractId }
     })
-
     if (contract?.ownerId !== ownerProfile?.id) {
       throw new ForbiddenException("Bạn không có quyền ký hợp đồng")
     }
-
     if (contract?.contractStatus !== "Draft") {
       throw new BadRequestException("Hợp đồng không trong trạng thái Draft");
     }
 
-    await this.prismaService.contract.update({
+    const updateResult = await this.prismaService.contract.updateMany({
       where: {
-        id: contract.id
+        id: contract.id,
+        contractStatus: "Draft"
       },
       data: {
         contractStatus: "PendingTenantSignature"
       }
-    })
-
+    });
+    if (updateResult.count === 0) {
+      throw new BadRequestException("Hợp đồng đã được xử lý bởi một request khác hoặc không còn ở trạng thái Nháp.");
+    }
     return 'This action sends contract to tenant, done!!';
   }
 
   async tenantSign(contractId: string, tenantId: string) {
     const tenantProfile = await this.prismaService.tenantProfile.findUnique({
-      where: {
-        accountId: tenantId
-      }
+      where: { accountId: tenantId }
     })
-
     if (!tenantProfile) {
       throw new ForbiddenException("Bạn chưa có được kích hoạt quyền công dân")
     }
-
     const contract = await this.prismaService.contract.findUnique({
-      where: {
-        id: contractId
-      }
+      where: { id: contractId }
     })
-
     if (contract?.tenantId !== tenantProfile?.id) {
       throw new ForbiddenException("Bạn không có quyền ký hợp đồng")
     }
-
     if (contract?.contractStatus !== "PendingTenantSignature") {
       throw new BadRequestException("Hợp đồng không trong trạng thái PendingTenantSignature");
     }
 
-    await this.prismaService.$transaction([
-      this.prismaService.contract.update({
+    await this.prismaService.$transaction(async (tx) => {
+      const updateResult = await tx.contract.updateMany({
         where: {
-          id: contractId
+          id: contractId,
+          contractStatus: "PendingTenantSignature"
         },
         data: {
           contractStatus: "Active",
           signAt: new Date(),
         }
-      }),
+      });
 
-      this.prismaService.apartment.update({
-        where: {
-          id: contract.apartmentId
-        },
-        data: {
-          apartmentStatus: "Rented"
-        }
-      }),
-
-      this.prismaService.tenantProfile.update({
-        where: {
-          id: tenantProfile.id
-        },
-        data: {
-          isActive: true
-        }
-      })
-    ])
-
+      if (updateResult.count === 0) {
+        throw new BadRequestException("Hợp đồng đã thay đổi trạng thái hoặc đang được ký bởi một phiên khác.");
+      }
+      await tx.apartment.update({
+        where: { id: contract.apartmentId },
+        data: { apartmentStatus: "Rented" }
+      });
+      await tx.tenantProfile.update({
+        where: { id: tenantProfile.id },
+        data: { isActive: true }
+      });
+    });
     return 'This action signs contract and activates tenant profile';
   }
 
@@ -319,7 +319,7 @@ export class ContractService {
     const ownerProfile = await this.prismaService.ownerProfile.findUnique({
       where: { accountId }
     });
-    
+
     const tenantProfile = await this.prismaService.tenantProfile.findUnique({
       where: { accountId }
     });

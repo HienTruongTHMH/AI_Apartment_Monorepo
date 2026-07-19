@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Building2 } from 'lucide-react';
 import PropertyCard from '@/components/shared/PropertyCard';
 import { ListingItem } from '@/lib/api';
 
@@ -21,11 +21,29 @@ export default function FeaturedListings({ listings }: { listings: ListingItem[]
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {listings.map((item) => (
-          <PropertyCard key={item.id} listing={item} />
-        ))}
-      </div>
+      {listings.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {listings.map((item) => (
+            <PropertyCard key={item.id} listing={item} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-16 text-center space-y-4 rounded-2xl bg-[#F9F9F9] border border-[#E8E8E8] shadow-sm">
+          <Building2 className="w-10 h-10 text-[#E03C3D]/40 mx-auto" />
+          <h3 className="text-base font-bold text-[#2C2C2C]">
+            Hiện chưa có căn hộ nổi bật
+          </h3>
+          <p className="text-xs text-[#5A5A5A] max-w-sm mx-auto">
+            Tất cả căn hộ đang được thuê. Hãy quay lại sau hoặc tìm kiếm với bộ lọc chi tiết hơn.
+          </p>
+          <Link
+            href="/search"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#E03C3D] hover:bg-[#C92F30] text-white font-semibold text-xs transition-colors"
+          >
+            Tìm kiếm tất cả căn hộ <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

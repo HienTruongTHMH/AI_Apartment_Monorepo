@@ -16,7 +16,7 @@ export class AuthService {
     ) { }
 
     async register(dto: RegisterDto) {
-        if (dto.password !== dto.passwordTwo) {
+        if (dto.password !== dto.confirmPassword) {
             throw new BadRequestException("Mật khẩu không trùng nhau")
         }
 

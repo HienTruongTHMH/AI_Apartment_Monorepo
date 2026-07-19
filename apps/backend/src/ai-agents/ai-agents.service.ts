@@ -28,19 +28,19 @@ function isConnectionRefused(err: any): boolean {
 @Injectable()
 export class AiAgentsService {
   private readonly logger = new Logger(AiAgentsService.name);
-  private readonly aiBaseUrl = 'http://127.0.0.1:8000'; // Cổng chạy FastAPI
+  private readonly aiBaseUrl = process.env.AI_AGENT_URL || 'http://127.0.0.1:8000'; // Đọc từ biến môi trường
 
   constructor(
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
     private readonly redisService: RedisService,
-  ) {}
+  ) { }
 
   async verifyApartmentListing(dto: VerifyListingDto) {
 
     let dbApartment: (Apartment & { apartmentListing?: any }) | null = null;
 
-    if(dto.apartmentId && dto.apartmentId !== "NEW_DRAFT"){
+    if (dto.apartmentId && dto.apartmentId !== "NEW_DRAFT") {
       dbApartment = await this.prisma.apartment.findUnique({
         where: { id: dto.apartmentId },
         include: { apartmentListing: true }

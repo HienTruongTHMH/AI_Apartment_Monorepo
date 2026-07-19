@@ -42,7 +42,15 @@ export class ListingService {
 
   async search(searchDto: SearchListingDto) {
     const { keyword, minPrice, maxPrice } = searchDto;
-    const whereCondition: Prisma.ListingWhereInput = {};
+    // Chỉ trả về bài đăng Published + căn hộ Available cho trang công khai
+    // TODO: Sau này nếu muốn hiển thị căn hộ "Đã thuê" với badge trạng thái (kiểu Airbnb),
+    // cần mở rộng filter này và thêm UI badge trên PropertyCard.
+    const whereCondition: Prisma.ListingWhereInput = {
+      listingStatus: 'Published',
+      apartment: {
+        apartmentStatus: 'Available',
+      },
+    };
 
     if (keyword) {
       whereCondition.OR = [
