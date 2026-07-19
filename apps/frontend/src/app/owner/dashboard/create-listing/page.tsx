@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Sparkles, Upload, CheckCircle, AlertTriangle, Image as ImageIcon, Loader2, Trash2, HelpCircle, Send, FileText, Check } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { apiService } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface UploadedImage {
   image_id: string;
@@ -278,8 +279,8 @@ export default function CreateListingPage() {
       };
 
       await apiService.createListing(publishPayload);
-      alert('Đăng tin thành công! Đang chuyển hướng đến trang tìm kiếm căn hộ...');
-      router.push('/search');
+      toast.success('Đăng tin thành công!');
+      router.push('/owner/dashboard');
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi lưu tin đăng.');
@@ -338,8 +339,8 @@ export default function CreateListingPage() {
       };
 
       await apiService.createListing(publishPayload);
-      alert('Đăng tin trực tiếp thành công! Đang chuyển hướng đến trang tìm kiếm...');
-      router.push('/search');
+      toast.success('Đăng tin trực tiếp thành công!');
+      router.push('/owner/dashboard');
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng tin trực tiếp.');

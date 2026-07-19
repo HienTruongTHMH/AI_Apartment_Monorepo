@@ -16,7 +16,17 @@ export default function LandingPage() {
   useEffect(() => {
     let isMounted = true;
     apiService.getListings().then((data) => {
-      if (isMounted) setListings(data);
+      if (isMounted) {
+        // Guard phòng thủ: Chỉ hiển thị listing Published + apartment Available
+        // TODO: Sau này nếu muốn hiển thị căn hộ "Đã thuê" với badge trạng thái,
+        // bỏ filter này và thêm UI badge trên PropertyCard thay vì ẩn hoàn toàn.
+        const available = data.filter(
+          (item) =>
+            item.listingStatus === 'Published' &&
+            item.apartment.apartmentStatus === 'Available'
+        );
+        setListings(available);
+      }
     });
     return () => {
       isMounted = false;

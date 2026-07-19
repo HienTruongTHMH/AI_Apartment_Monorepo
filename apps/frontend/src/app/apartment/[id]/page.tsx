@@ -31,6 +31,7 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
   const [listing, setListing] = useState<ListingItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [showRentalModal, setShowRentalModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [isRequesting, setIsRequesting] = useState(false);
   const [ownerContact, setOwnerContact] = useState<{ name: string, phoneNumber: string, email: string } | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -65,10 +66,6 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
   const primaryImg = listing.images.find((i) => i.isPrimary)?.imageUrl || listing.images[0]?.imageUrl || 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&q=80';
 
   const handleRequestRent = async () => {
-    if (!isLoggedIn) {
-      router.push('/auth/login');
-      return;
-    }
     try {
       setIsRequesting(true);
       setErrorMsg('');
@@ -141,6 +138,10 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
           ) : (
             <button
               onClick={() => {
+                if (!isLoggedIn) {
+                  setShowAuthModal(true);
+                  return;
+                }
                 setOwnerContact(null);
                 setErrorMsg('');
                 setShowRentalModal(true);
@@ -356,6 +357,59 @@ export default function ApartmentDetailPage({ params }: { params: Promise<{ id: 
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* AUTH REQUIRED MODAL */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white border border-[#E8E8E8] rounded-3xl p-8 space-y-6 shadow-2xl relative text-center">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-5 right-5 text-[#5A5A5A] hover:text-[#2C2C2C]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Icon */}
+            <div className="w-16 h-16 bg-[#FFF5F5] rounded-full flex items-center justify-center mx-auto border border-[#FEE2E2]">
+              <User className="w-8 h-8 text-[#E03C3D]" />
+            </div>
+
+            {/* Message */}
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-[#2C2C2C]">
+                Yêu Cầu Đăng Nhập
+              </h3>
+              <p className="text-sm text-[#5A5A5A]">
+                Bạn cần đăng nhập hoặc đăng ký tài khoản để sử dụng tính năng
+                <span className="font-semibold text-[#2C2C2C]"> Yêu Cầu Thuê Ngay</span>.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3 pt-2">
+              <Link
+                href="/login"
+                className="w-full py-3.5 rounded-xl bg-[#E03C3D] hover:bg-[#C92F30] text-white font-bold text-sm shadow-md hover:scale-[1.02] transition-all text-center"
+              >
+                Đăng Nhập Ngay
+              </Link>
+              <Link
+                href="/register"
+                className="w-full py-3.5 rounded-xl bg-slate-50 border border-[#E8E8E8] text-[#2C2C2C] font-semibold text-sm hover:bg-slate-100 transition-colors text-center"
+              >
+                Tạo Tài Khoản Mới
+              </Link>
+            </div>
+
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="text-xs text-[#5A5A5A] hover:text-[#E03C3D] transition-colors"
+            >
+              Để sau, tôi chỉ muốn xem thông tin
+            </button>
           </div>
         </div>
       )}

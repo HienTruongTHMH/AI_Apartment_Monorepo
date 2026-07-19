@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -51,6 +51,24 @@ export class ContractService {
 
     if (!tenantProfile) {
       throw new NotFoundException(`Tài khoản ID: ${createDraftDto.tenantId} chưa được cấp quyền chủ hộ`);
+    }
+
+    // Phòng thủ: Kiểm tra đã tồn tại Draft/PendingTenantSignature cho cặp tenant + apartment này chưa
+    const existingDraft = await this.prismaService.contract.findFirst({
+      where: {
+        apartmentId: createDraftDto.apartmentId,
+        tenantId: tenantProfile.id,
+        ownerId: owner.id,
+        contractStatus: {
+          in: ['Draft', 'PendingTenantSignature'],
+        },
+      },
+    });
+
+    if (existingDraft) {
+      throw new ConflictException(
+        'Đã tồn tại hợp đồng nháp cho căn hộ và khách thuê này. Vui lòng kiểm tra lại trong Quản lý Hợp Đồng.'
+      );
     }
 
     await this.prismaService.contract.create({

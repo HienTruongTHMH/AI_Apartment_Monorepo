@@ -101,6 +101,15 @@ function SearchContent() {
 
       let results = data;
 
+      // Guard phòng thủ: Chỉ hiển thị listing Published + apartment Available
+      // TODO: Sau này nếu muốn hiển thị căn hộ "Đã thuê" với badge trạng thái,
+      // bỏ filter này và thêm UI badge trên PropertyCard thay vì ẩn hoàn toàn.
+      results = results.filter(
+        (item) =>
+          item.listingStatus === 'Published' &&
+          item.apartment.apartmentStatus === 'Available'
+      );
+
       // Filter by Property Type (Case-insensitive match on selected tree items)
       if (selectedTypes.length > 0) {
         results = results.filter((item) =>

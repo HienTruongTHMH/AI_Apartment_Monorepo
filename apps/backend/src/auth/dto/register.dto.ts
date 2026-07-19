@@ -19,7 +19,7 @@ export class RegisterDto {
 
     @IsString()
     @MinLength(6, { message: "Mật khẩu có tối thiểu 6 kí tự" })
-    passwordTwo!: string;
+    confirmPassword!: string;
 
     @IsString()
     phone!: string
