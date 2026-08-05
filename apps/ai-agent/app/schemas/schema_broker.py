@@ -25,8 +25,8 @@ class SearchQueryInput(BaseModel):
     tenant_id: str = Field(..., description="ID của khách thuê để quản lý phiên hội thoại")
     conversation_history: List[ChatMessage] = Field(
         default=[],
-        max_length=10,
-        description="Lịch sử tối đa 5-10 câu hội thoại gần nhất để giữ ngữ cảnh",
+        max_length=6,
+        description="Lịch sử tối đa 6 tin nhắn gần nhất để giữ ngữ cảnh",
     )
     audio_url: Optional[str] = Field(
         None,
@@ -35,7 +35,7 @@ class SearchQueryInput(BaseModel):
     )
     listings: Optional[List[dict]] = Field(
         None,
-        description="Danh sách căn hộ thực tế từ Supabase PostgreSQL truyền qua NestJS",
+        description="Không dùng nữa — agent tìm kiếm trực tiếp trên Qdrant",
     )
 
 
@@ -52,10 +52,15 @@ class QueryIntentConstraints(BaseModel):
         ...,
         description="Câu truy vấn ngữ nghĩa sạch để embed (loại bỏ số điện thoại, số cụ thể không liên quan)",
     )
+    min_price: Optional[float] = Field(
+        None,
+        gt=0,
+        description="Ngân sách tối thiểu của khách (VND). VD: '10-20 triệu' -> min_price=10000000",
+    )
     max_price: Optional[float] = Field(
         None,
         gt=0,
-        description="Ngân sách tối đa của khách (VND). VD: 8000000",
+        description="Ngân sách tối đa của khách (VND). VD: '10-20 triệu' -> max_price=20000000",
     )
     min_area: Optional[float] = Field(
         None,
@@ -73,6 +78,10 @@ class QueryIntentConstraints(BaseModel):
     preferred_district: Optional[str] = Field(
         None,
         description="Quận ưu tiên nếu khách đề cập (vd: 'Hải Châu', 'Sơn Trà')",
+    )
+    is_greeting: bool = Field(
+        default=False,
+        description="True nếu tin nhắn là chào hỏi, cảm ơn, trò chuyện xã giao (small talk), tạm biệt hoặc câu hỏi ngoài lề KHÔNG phải yêu cầu tìm kiếm căn hộ thực sự",
     )
     is_booking_request: bool = Field(
         default=False,

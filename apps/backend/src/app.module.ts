@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
@@ -11,15 +12,24 @@ import { AmenityModule } from './amenity/amenity.module';
 import { UserModule } from './user/user.module';
 import { AiAgentsModule } from './ai-agents/ai-agents.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisController } from './redis/redis.controller';
+import { RedisService } from './redis/redis.service';
+import { RedisModule } from './redis/redis.module';
+import { RentalRequestModule } from './rental-request/rental-request.module';
+import { PaymentModule } from './payment/payment.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true
-    }), PrismaModule, ListingModule, ApartmentModule,
-    ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule
+    }),
+    ScheduleModule.forRoot(),
+    PrismaModule, ListingModule, ApartmentModule,
+    ContractModule, AmenityModule, UserModule, AiAgentsModule, AuthModule, RedisModule, RentalRequestModule,
+    PaymentModule, MailModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, RedisController],
   providers: [AppService, PrismaService],
 })
 export class AppModule { }

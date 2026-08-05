@@ -55,6 +55,10 @@ class rawListingInput(BaseModel):
     rawText: str = Field(..., min_length=20, max_length=1000)
     images: list[rawListingImageInput] = Field(default_factory=list, max_length=12)
     owner_id: str
+    listing_id: Optional[str] = Field(
+        None,
+        description="UUID thật của Listing trong PostgreSQL. Gửi từ NestJS để đảm bảo Qdrant lưu đúng ID."
+    )
     db_apartment_data: Optional[dict] = None
 
 
@@ -79,6 +83,13 @@ class apartmentMetaOutput(BaseModel):
     floor: Optional[int] = Field(None, ge=1)
     roomNumber: Optional[str] = None
     note: Optional[str] = None
+    bedroom: Optional[int] = Field(1, ge=0)
+    bathroom: Optional[int] = Field(1, ge=0)
+    livingroom: Optional[int] = Field(1, ge=0)
+    kitchen: Optional[int] = Field(1, ge=0)
+    type: Optional[str] = Field("Normal", description="Studio, Officetel, Shophouse, Penthouse, Duplex, SkyVilla, Normal")
+    district: Optional[str] = None
+    fullAddress: Optional[str] = None
     amenities: list[amenityItem] = Field(default_factory=list)
 
 

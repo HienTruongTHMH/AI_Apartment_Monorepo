@@ -29,7 +29,10 @@ NHIỆM VỤ: Nhận mô tả thô và danh sách ảnh → trích xuất thông
 
 [1. TRÍCH XUẤT THÔNG TIN CĂN HỘ]
 Nhận dạng viết tắt: pn (phòng ngủ), wc (toilet), dt (diện tích).
-Chuẩn hoá quận: "hải châu", "cẩm lệ", "thanh khê", "sơn trà", "ngũ hành sơn". (nước ngoài → không xác định).
+Trích xuất chi tiết số lượng phòng ngủ (bedroom), phòng tắm (bathroom), phòng khách (livingroom) và phòng bếp (kitchen).
+Chuẩn hoá quận (district): "Hải Châu", "Cẩm Lệ", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Hòa Vang".
+Trích xuất địa chỉ đầy đủ (fullAddress) và loại căn hộ (type: Studio, Officetel, Shophouse, Penthouse, Duplex, SkyVilla, hoặc Normal).
+Trích xuất tầng (floor) và mã phòng (roomNumber) nếu có. Dung hoà thông tin thô với hình ảnh nếu hình ảnh cung cấp thêm ngữ cảnh địa chỉ hoặc phân loại căn hộ.
 
 [2. PHÂN LOẠI TIỆN NGHI]
 Mỗi tiện nghi phải có category:

@@ -16,7 +16,7 @@ export class AuthService {
     ) { }
 
     async register(dto: RegisterDto) {
-        if (dto.password !== dto.passwordTwo) {
+        if (dto.password !== dto.confirmPassword) {
             throw new BadRequestException("Mật khẩu không trùng nhau")
         }
 
@@ -105,10 +105,14 @@ export class AuthService {
             sub: account.id,
             email: account.email,
             fullName: account.fullName,
+            phone: account.phone,
+            identityCard: account.identityCard,
             isActive: account.isActive,
             hasTenantProfile: !!account.tenantProfile,
+            tenantProfileId: account.tenantProfile?.id || null,
             hasOwnerProfile: !!account.ownerProfile,
             ownerProfileId: account.ownerProfile?.id || null,
+            isTenancyActivated: account.tenantProfile?.isActive || false,
         }
 
         this.logger.log(`User ${account.email} đã đăng nhập thành công `);
@@ -117,6 +121,32 @@ export class AuthService {
             message: "Đăng nhập thành công!",
             accessToken: this.jwtService.sign(payload),
         }
+    }
+
+    async getFreshProfile(accountId: string) {
+        const account = await this.prisma.account.findUnique({
+            where: { id: accountId },
+            include: {
+                tenantProfile: true,
+                ownerProfile: true
+            }
+        });
+        if (!account) {
+            throw new UnauthorizedException("Tài khoản không tồn tại");
+        }
+        return {
+            accountId: account.id,
+            email: account.email,
+            fullName: account.fullName,
+            phone: account.phone,
+            identityCard: account.identityCard,
+            isActive: account.isActive,
+            hasTenantProfile: !!account.tenantProfile,
+            tenantProfileId: account.tenantProfile?.id || null,
+            hasOwnerProfile: !!account.ownerProfile,
+            ownerProfileId: account.ownerProfile?.id || null,
+            isTenancyActivated: account.tenantProfile?.isActive || false,
+        };
     }
 
     async createOwnerProfile(accountId: string) {

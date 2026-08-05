@@ -46,6 +46,8 @@ export interface ListingItem {
     apartmentStatus: 'Available' | 'Rented';
     apartmentAmenities?: { amenity: { id: string; name: string; category: string; icon: string } }[];
     owner?: { id: string; fullName: string; taxCode?: string };
+    ownerId?: string;
+    contracts?: ContractItem[];
   };
 }
 
@@ -277,6 +279,36 @@ export const apiService = {
     return res.data;
   },
 
+  async updateListing(id: string, payload: any) {
+    const res = await apiClient.patch(`/listing/${id}`, payload);
+    return res.data;
+  },
+
+  async getPresignedUrl(fileName: string) {
+    const res = await apiClient.post('/listing/upload/get-presigned-url', { fileName });
+    return res.data; // { token, path }
+  },
+
+  async uploadToSupabase(file: File, path: string, token: string, supabaseUrl: string) {
+    // Construct the direct storage API upload URL
+    const uploadUrl = `${supabaseUrl}/storage/v1/object/apartment-listings/${path}`;
+    const res = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': file.type || 'application/octet-stream',
+      },
+      body: file,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Upload failed: ${res.statusText}`);
+    }
+
+    // Construct public URL assuming standard Supabase storage format
+    return `${supabaseUrl}/storage/v1/object/public/apartment-listings/${path}`;
+  },
+
   async getMyApartments() {
     try {
       const res = await apiClient.get('/apartment/my-apartments');
@@ -308,7 +340,7 @@ export const apiService = {
     try {
       const res = await apiClient.post('/ai-agents/verify', payload);
       const data = res.data;
-      
+
       // Parse NestJS proxy output from FastAPI verifyListingResponse: { success: true, data: { listing, apartment_meta, validation, image_analyses, image_tags_suggested } }
       if (data && data.data) {
         const verifiedOutput = data.data;
@@ -317,6 +349,8 @@ export const apiService = {
           score: verifiedOutput.validation?.score || 90,
           standardizedTitle: verifiedOutput.listing?.title || `[Verified AI] ${payload.title}`,
           suggestedDescription: verifiedOutput.listing?.description || payload.description,
+          pricePerMonth: verifiedOutput.listing?.pricePerMonth,
+          apartmentMeta: verifiedOutput.apartment_meta,
           insights: [
             ...(verifiedOutput.validation?.issues || []),
             verifiedOutput.validation?.feedback_to_owner || 'Dữ liệu căn hộ đã vượt qua vòng kiểm tra tiêu chuẩn AI.'
@@ -385,7 +419,7 @@ export const apiService = {
       const responseData = res.data;
       // Handle NestJS proxy response wrapping FastAPI SearchBrokerResponse { success: true, data: { bot_response, recommendations } }
       const output = responseData?.data || responseData;
-      
+
       const replyText = output?.bot_response || output?.reply || 'Trợ lý AI Broker đã phân tích nhu cầu của bạn.';
       const rawRecs = output?.recommendations || output?.recommended_listings || [];
 
@@ -408,7 +442,7 @@ export const apiService = {
     } catch (err: any) {
       console.error('[AI Broker Integration Error]:', err);
       return {
-        reply: 'Hệ thống AI Broker không thể kết nối hoặc nhận phản hồi từ server backend.',
+        reply: 'Lỗi kết nối với Trợ lý Ảo. Vui lòng thử lại sau.',
         recommended_listings: []
       };
     }
@@ -424,15 +458,96 @@ export const apiService = {
     }
   },
 
-  // Offline Contract Physical Sign Confirmation -> Calls POST /contract/tenant-sgin
   async confirmOfflineRentalAndActivateAccount(contractId: string) {
     try {
-      // Endpoint contract.controller.ts: @Post('tenant-sgin') expecting { contractId }
-      await apiClient.post('/contract/tenant-sgin', { contractId });
-    } catch {
-      // Local fallback simulation
+      const res = await apiClient.post('/contract/tenant-sign', { contractId });
+      // Tải lại profile mới nhất để đồng bộ localStorage và AuthStore
+      await useAuthStore.getState().refreshUser();
+      return { success: true, message: 'Đã xác nhận ký hợp đồng bản cứng thành công. Hợp đồng của bạn hiện đã có hiệu lực!', data: res.data };
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi ký hợp đồng');
     }
-    useAuthStore.getState().setAccountActive(true);
-    return { success: true, message: 'Đã xác nhận ký hợp đồng bản cứng thành công. Tài khoản của bạn hiện đã được kích hoạt (isActive = true)!' };
+  },
+
+  async activateTenantAccount() {
+    try {
+      const res = await apiClient.post('/contract/activate-tenant');
+      await useAuthStore.getState().refreshUser();
+      return { success: true, message: 'Tài khoản của bạn đã được kích hoạt thành công!', data: res.data };
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi kích hoạt tài khoản');
+    }
+  },
+
+  async getTenantProfile() {
+    try {
+      const res = await apiClient.get('/user/tenant-profile');
+      return res.data;
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Có lỗi xảy ra khi lấy thông tin hồ sơ khách thuê');
+    }
+  },
+
+  async tenantRejectContract(contractId: string) {
+    const res = await apiClient.post('/contract/tenant-reject', { contractId });
+    return res.data;
+  },
+
+  async createDraftContract(data: any) {
+    const res = await apiClient.post('/contract/create-draft', data);
+    return res.data;
+  },
+
+  async sendContractToTenant(contractId: string) {
+    const res = await apiClient.post('/contract/send-to-tenant', { contractId });
+    return res.data;
+  },
+
+  // Rental Requests
+  async createRentalRequest(apartmentId: string, message?: string) {
+    const res = await apiClient.post('/rental-request', { apartmentId, message });
+    return res.data; // { message, ownerContact: { email, phoneNumber, name } }
+  },
+
+  async getMyRentalRequests() {
+    const res = await apiClient.get('/rental-request/my-requests');
+    return res.data;
+  },
+
+  async getOwnerRentalRequests() {
+    const res = await apiClient.get('/rental-request/owner-requests');
+    return res.data;
+  },
+
+  async acceptRentalRequest(id: string) {
+    const res = await apiClient.patch(`/rental-request/${id}/accept`);
+    return res.data;
+  },
+
+  async rejectRentalRequest(id: string) {
+    const res = await apiClient.patch(`/rental-request/${id}/reject`);
+    return res.data;
+  },
+
+  // User Profile
+  async updateProfile(payload: { fullName: string }) {
+    const res = await apiClient.patch('/user/profile', payload);
+    return res.data;
+  },
+
+  // Payments
+  async getPayments(contractId?: string) {
+    const res = await apiClient.get('/payments', { params: { contractId } });
+    return res.data;
+  },
+
+  async getPendingPayments() {
+    const res = await apiClient.get('/payments/pending');
+    return res.data;
+  },
+
+  async confirmPayment(paymentId: string) {
+    const res = await apiClient.patch(`/payments/${paymentId}/confirm`);
+    return res.data;
   }
 };

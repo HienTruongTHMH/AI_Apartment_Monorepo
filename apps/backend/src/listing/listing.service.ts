@@ -42,7 +42,15 @@ export class ListingService {
 
   async search(searchDto: SearchListingDto) {
     const { keyword, minPrice, maxPrice } = searchDto;
-    const whereCondition: Prisma.ListingWhereInput = {};
+    // Chỉ trả về bài đăng Published + căn hộ Available cho trang công khai
+    // TODO: Sau này nếu muốn hiển thị căn hộ "Đã thuê" với badge trạng thái (kiểu Airbnb),
+    // cần mở rộng filter này và thêm UI badge trên PropertyCard.
+    const whereCondition: Prisma.ListingWhereInput = {
+      listingStatus: 'Published',
+      apartment: {
+        apartmentStatus: 'Available',
+      },
+    };
 
     if (keyword) {
       whereCondition.OR = [
@@ -157,13 +165,23 @@ export class ListingService {
   // }
 
   async findOne(id: string) {
-    return this.prisma.listing.findUnique({
-      where: { id },
+    return this.prisma.listing.findFirst({
+      where: {
+        OR: [
+          { id },
+          { apartmentId: id }
+        ]
+      },
       include: {
         images: true,
         apartment: {
           include: {
             owner: true,
+            contracts: {
+              include: {
+                tenant: true
+              }
+            },
             apartmentAmenities: {
               include: {
                 amenity: true

@@ -19,12 +19,14 @@ export class RegisterDto {
 
     @IsString()
     @MinLength(6, { message: "Mật khẩu có tối thiểu 6 kí tự" })
-    passwordTwo!: string;
+    confirmPassword!: string;
 
     @IsString()
     phone!: string
 
-    @IsString({ message: "Không được bỏ trôgns tên" })
+    @IsString({ message: "Họ và tên phải là chuỗi ký tự" })
+    @IsNotEmpty({ message: "Không được bỏ trống họ và tên" })
+    @MinLength(2, { message: "Họ và tên phải có ít nhất 2 ký tự" })
     fullName!: string;
 
     @IsEnum(RegisterRoles)

@@ -13,8 +13,8 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 COLLECTION_NAME = "apartments"
-EMBEDDING_MODEL = "gemini-embedding-001"
-EMBEDDING_DIMENSION = 3072  # Dimension for gemini-embedding-001 (gemini-embedding-001 deprecated Jan 2026)
+EMBEDDING_MODEL = "text-embedding-004"
+EMBEDDING_DIMENSION = 768  # Correct dimension for Google text-embedding-004 / gemini-embedding-001
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Qdrant Client Initialization
@@ -227,6 +227,7 @@ def _build_search_text(listing_data: dict) -> str:
 
 def search_apartments(
     vector: list[float],
+    min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     min_area: Optional[float] = None,
     top_k: int = 3,
@@ -236,6 +237,7 @@ def search_apartments(
 
     Args:
         vector: Query embedding vector.
+        min_price: Ngân sách tối thiểu (VND). None = không lọc.
         max_price: Ngân sách tối đa (VND). None = không lọc giá.
         min_area: Diện tích tối thiểu (m²). None = không lọc diện tích.
         top_k: Số lượng kết quả tối đa.
@@ -249,6 +251,14 @@ def search_apartments(
 
     # Xây dựng filter conditions
     must_conditions = []
+
+    if min_price is not None:
+        must_conditions.append(
+            models.FieldCondition(
+                key="pricePerMonth",
+                range=models.Range(gte=min_price),
+            )
+        )
 
     if max_price is not None:
         must_conditions.append(

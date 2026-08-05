@@ -11,10 +11,7 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: '20mb', extended: true }));
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:8081',
-    ],
+    origin: true, // Cho phép tất cả các domain (kể cả Railway Frontend) gọi API
     methods: [
       'GET',
       'HEAD',

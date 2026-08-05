@@ -1,31 +1,85 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { CreateListingDto } from './create-listing.dto';
-
 import { ListingStatus } from "@prisma/client";
-import { IsString, IsNumber, IsEnum, IsNotEmpty, IsUUID, IsArray, IsOptional } from "class-validator";
+import { IsString, IsNumber, IsEnum, IsOptional, IsArray, ValidateNested } from "class-validator";
+import { Type } from 'class-transformer';
 
-export class UpdateListingDto extends PartialType(CreateListingDto) {
-    @IsString()
-    @IsNotEmpty()
-    title!: string;
+import { ApartmentDto } from './create-listing.dto';
 
-    @IsString()
-    @IsNotEmpty()
-    description!: string;
-
-    @IsNumber()
-    @IsNotEmpty()
-    pricePerMonth!: number;
-
-    @IsEnum(ListingStatus)
-    listingStatus!: ListingStatus;
-
-    @IsArray()
+export class UpdateApartmentDto {
     @IsOptional()
+    @IsString()
+    type?: any;
+
+    @IsOptional()
+    @IsNumber()
+    floor?: number;
+
+    @IsOptional()
+    @IsNumber()
+    area?: number;
+
+    @IsOptional()
+    @IsNumber()
+    bedroom?: number;
+
+    @IsOptional()
+    @IsNumber()
+    bathroom?: number;
+
+    @IsOptional()
+    @IsNumber()
+    livingroom?: number;
+
+    @IsOptional()
+    @IsNumber()
+    kitchen?: number;
+
+    @IsOptional()
+    @IsNumber()
+    room_number?: number;
+
+    @IsOptional()
+    @IsString()
+    fullAddress?: string;
+
+    @IsOptional()
+    @IsString()
+    district?: string;
+
+    @IsOptional()
+    @IsString()
+    ownerId?: string;
+}
+
+export class UpdateListingDto extends PartialType(OmitType(CreateListingDto, ['apartment'] as const)) {
+    @IsOptional()
+    @IsString()
+    title?: string;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
+
+    @IsOptional()
+    @IsNumber()
+    pricePerMonth?: number;
+
+    @IsOptional()
+    @IsEnum(ListingStatus)
+    listingStatus?: ListingStatus;
+
+    @IsOptional()
+    @IsArray()
     @IsString({ each: true })
     imageUrls?: string[];
 
-    @IsUUID()
-    @IsNotEmpty()
-    apartmentId!: string;
+    @IsOptional()
+    @IsString()
+    apartmentId?: string;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => UpdateApartmentDto)
+    apartment?: UpdateApartmentDto;
 }

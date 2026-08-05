@@ -27,10 +27,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
             accountId: payload.sub,
             email: payload.email,
             fullName: payload.fullName,
+            phone: payload.phone,
+            identityCard: payload.identityCard,
             isActive: payload.isActive,
             hasTenantProfile: payload.hasTenantProfile,
+            tenantProfileId: payload.tenantProfileId || null,
             hasOwnerProfile: payload.hasOwnerProfile,
             ownerProfileId: payload.ownerProfileId || null,
+            isTenancyActivated: payload.isTenancyActivated || false,
         }
     }
 }
